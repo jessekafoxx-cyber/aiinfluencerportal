@@ -5,24 +5,639 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AdminAnnouncementListResponse,
+  AdminAnnouncementResponse,
+  AdminAnnouncementWriteBody,
+  AdminImpersonationStartResponse,
+  AdminImpersonationStatusResponse,
+  AdminInfluencerGenerationDetail,
+  AdminInfluencerGenerationStats,
+  AdminInfluencerGenerationsList,
+  AdminInfluencerManualDeliverRequest,
+  AdminInfluencerManualDeliverResponse,
+  AdminInfluencerMarkFailedResponse,
+  AdminInfluencerRetryResponse,
+  AdminRoadmapLeadListResponse,
+  AnnouncementUploadRequestBody,
+  AnnouncementUploadResponse,
+  ApiError,
+  AuthErrorEnvelope,
+  AuthUserEnvelope,
+  BeginBrowserLoginParams,
+  CaptureFunnelLeadBody,
+  CreateRoadmapLeadBody,
+  CreateRoadmapLeadEventBody,
+  CreateRoadmapLeadResponse,
+  FacebookCookiesDeleteResponse,
+  FacebookCookiesMetadataResponse,
+  FacebookCookiesSaveRequest,
+  FacebookCookiesSaveResponse,
+  FacebookCookiesTestRequest,
+  FacebookCookiesTestResponse,
+  GetAdminInfluencerGenerationStatsParams,
+  GetAdminQueueTrendsParams,
+  HandleBrowserLoginCallbackParams,
+  HealthStatus,
+  InstagramSessionCookieMetadata,
+  InstagramSessionCookieTestResponse,
+  InstagramSessionCookiesSaveRequest,
+  ListAdminInfluencerGenerationsParams,
+  ListAdminRoadmapLeadsParams,
+  LogoutBrowserSessionParams,
+  LogoutSuccess,
+  MobileTokenExchangeRequest,
+  MobileTokenExchangeSuccess,
+  OkResponse,
+  PlatinumCode,
+  PlatinumCodeRedeemRequest,
+  PlatinumCodeRedeemResponse,
+  PlatinumGregUsage,
+  PlatinumGregUsageRecordBody,
+  PlatinumMainProductList,
+  PortalAnnouncementListResponse,
+  PublicRoadmapLeadResponse,
+  QueueHealthResponse,
+  QueueTrendsResponse,
+  RequestUploadUrlBody,
+  RequestUploadUrlResponse,
+  RequeueAdResearchBoardAuthFailures200,
+  RequeueAdResearchBoardAuthFailuresBody,
+  RequeueFunnelsResearchBoardAuthFailures200,
+  RequeueFunnelsResearchBoardAuthFailuresBody,
+  StopAdminImpersonation200,
+  UploadBridgePageImage200,
+  UploadBridgePageImageBody,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * @summary Get the currently authenticated user
+ */
+export const getGetCurrentAuthUserUrl = () => {
+  return `/api/auth/user`;
+};
+
+export const getCurrentAuthUser = async (
+  options?: RequestInit,
+): Promise<AuthUserEnvelope> => {
+  return customFetch<AuthUserEnvelope>(getGetCurrentAuthUserUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCurrentAuthUserQueryKey = () => {
+  return [`/api/auth/user`] as const;
+};
+
+export const getGetCurrentAuthUserQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentAuthUser>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuthUser>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentAuthUserQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCurrentAuthUser>>
+  > = ({ signal }) => getCurrentAuthUser({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuthUser>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCurrentAuthUserQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentAuthUser>>
+>;
+export type GetCurrentAuthUserQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the currently authenticated user
+ */
+
+export function useGetCurrentAuthUser<
+  TData = Awaited<ReturnType<typeof getCurrentAuthUser>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuthUser>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCurrentAuthUserQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Start the browser OIDC login flow
+ */
+export const getBeginBrowserLoginUrl = (params?: BeginBrowserLoginParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/login?${stringifiedParams}`
+    : `/api/login`;
+};
+
+export const beginBrowserLogin = async (
+  params?: BeginBrowserLoginParams,
+  options?: RequestInit,
+): Promise<unknown> => {
+  return customFetch<unknown>(getBeginBrowserLoginUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getBeginBrowserLoginQueryKey = (
+  params?: BeginBrowserLoginParams,
+) => {
+  return [`/api/login`, ...(params ? [params] : [])] as const;
+};
+
+export const getBeginBrowserLoginQueryOptions = <
+  TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
+  TError = ErrorType<void>,
+>(
+  params?: BeginBrowserLoginParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof beginBrowserLogin>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getBeginBrowserLoginQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof beginBrowserLogin>>
+  > = ({ signal }) => beginBrowserLogin(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof beginBrowserLogin>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type BeginBrowserLoginQueryResult = NonNullable<
+  Awaited<ReturnType<typeof beginBrowserLogin>>
+>;
+export type BeginBrowserLoginQueryError = ErrorType<void>;
+
+/**
+ * @summary Start the browser OIDC login flow
+ */
+
+export function useBeginBrowserLogin<
+  TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
+  TError = ErrorType<void>,
+>(
+  params?: BeginBrowserLoginParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof beginBrowserLogin>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getBeginBrowserLoginQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Complete the browser OIDC login flow
+ */
+export const getHandleBrowserLoginCallbackUrl = (
+  params?: HandleBrowserLoginCallbackParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/callback?${stringifiedParams}`
+    : `/api/callback`;
+};
+
+export const handleBrowserLoginCallback = async (
+  params?: HandleBrowserLoginCallbackParams,
+  options?: RequestInit,
+): Promise<unknown> => {
+  return customFetch<unknown>(getHandleBrowserLoginCallbackUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getHandleBrowserLoginCallbackQueryKey = (
+  params?: HandleBrowserLoginCallbackParams,
+) => {
+  return [`/api/callback`, ...(params ? [params] : [])] as const;
+};
+
+export const getHandleBrowserLoginCallbackQueryOptions = <
+  TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
+  TError = ErrorType<void>,
+>(
+  params?: HandleBrowserLoginCallbackParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getHandleBrowserLoginCallbackQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof handleBrowserLoginCallback>>
+  > = ({ signal }) =>
+    handleBrowserLoginCallback(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type HandleBrowserLoginCallbackQueryResult = NonNullable<
+  Awaited<ReturnType<typeof handleBrowserLoginCallback>>
+>;
+export type HandleBrowserLoginCallbackQueryError = ErrorType<void>;
+
+/**
+ * @summary Complete the browser OIDC login flow
+ */
+
+export function useHandleBrowserLoginCallback<
+  TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
+  TError = ErrorType<void>,
+>(
+  params?: HandleBrowserLoginCallbackParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getHandleBrowserLoginCallbackQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Clear the session and begin OIDC logout
+ */
+export const getLogoutBrowserSessionUrl = (
+  params?: LogoutBrowserSessionParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/logout?${stringifiedParams}`
+    : `/api/logout`;
+};
+
+export const logoutBrowserSession = async (
+  params?: LogoutBrowserSessionParams,
+  options?: RequestInit,
+): Promise<unknown> => {
+  return customFetch<unknown>(getLogoutBrowserSessionUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getLogoutBrowserSessionQueryKey = (
+  params?: LogoutBrowserSessionParams,
+) => {
+  return [`/api/logout`, ...(params ? [params] : [])] as const;
+};
+
+export const getLogoutBrowserSessionQueryOptions = <
+  TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
+  TError = ErrorType<void>,
+>(
+  params?: LogoutBrowserSessionParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof logoutBrowserSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getLogoutBrowserSessionQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof logoutBrowserSession>>
+  > = ({ signal }) =>
+    logoutBrowserSession(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof logoutBrowserSession>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type LogoutBrowserSessionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof logoutBrowserSession>>
+>;
+export type LogoutBrowserSessionQueryError = ErrorType<void>;
+
+/**
+ * @summary Clear the session and begin OIDC logout
+ */
+
+export function useLogoutBrowserSession<
+  TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
+  TError = ErrorType<void>,
+>(
+  params?: LogoutBrowserSessionParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof logoutBrowserSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getLogoutBrowserSessionQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Exchange a mobile OIDC code for a session token
+ */
+export const getExchangeMobileAuthorizationCodeUrl = () => {
+  return `/api/mobile-auth/token-exchange`;
+};
+
+export const exchangeMobileAuthorizationCode = async (
+  mobileTokenExchangeRequest: MobileTokenExchangeRequest,
+  options?: RequestInit,
+): Promise<MobileTokenExchangeSuccess> => {
+  return customFetch<MobileTokenExchangeSuccess>(
+    getExchangeMobileAuthorizationCodeUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(mobileTokenExchangeRequest),
+    },
+  );
+};
+
+export const getExchangeMobileAuthorizationCodeMutationOptions = <
+  TError = ErrorType<AuthErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>,
+    TError,
+    { data: BodyType<MobileTokenExchangeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>,
+  TError,
+  { data: BodyType<MobileTokenExchangeRequest> },
+  TContext
+> => {
+  const mutationKey = ["exchangeMobileAuthorizationCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>,
+    { data: BodyType<MobileTokenExchangeRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return exchangeMobileAuthorizationCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExchangeMobileAuthorizationCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>
+>;
+export type ExchangeMobileAuthorizationCodeMutationBody =
+  BodyType<MobileTokenExchangeRequest>;
+export type ExchangeMobileAuthorizationCodeMutationError =
+  ErrorType<AuthErrorEnvelope>;
+
+/**
+ * @summary Exchange a mobile OIDC code for a session token
+ */
+export const useExchangeMobileAuthorizationCode = <
+  TError = ErrorType<AuthErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>,
+    TError,
+    { data: BodyType<MobileTokenExchangeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof exchangeMobileAuthorizationCode>>,
+  TError,
+  { data: BodyType<MobileTokenExchangeRequest> },
+  TContext
+> => {
+  return useMutation(
+    getExchangeMobileAuthorizationCodeMutationOptions(options),
+  );
+};
+
+/**
+ * @summary Delete a mobile session token
+ */
+export const getLogoutMobileSessionUrl = () => {
+  return `/api/mobile-auth/logout`;
+};
+
+export const logoutMobileSession = async (
+  options?: RequestInit,
+): Promise<LogoutSuccess> => {
+  return customFetch<LogoutSuccess>(getLogoutMobileSessionUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getLogoutMobileSessionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logoutMobileSession>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logoutMobileSession>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["logoutMobileSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logoutMobileSession>>,
+    void
+  > = () => {
+    return logoutMobileSession(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutMobileSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logoutMobileSession>>
+>;
+
+export type LogoutMobileSessionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a mobile session token
+ */
+export const useLogoutMobileSession = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logoutMobileSession>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof logoutMobileSession>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getLogoutMobileSessionMutationOptions(options));
+};
 
 /**
  * Returns server health status
@@ -92,6 +707,3929 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Request a presigned upload URL
+ */
+export const getRequestUploadUrlUrl = () => {
+  return `/api/storage/uploads/request-url`;
+};
+
+export const requestUploadUrl = async (
+  requestUploadUrlBody: RequestUploadUrlBody,
+  options?: RequestInit,
+): Promise<RequestUploadUrlResponse> => {
+  return customFetch<RequestUploadUrlResponse>(getRequestUploadUrlUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(requestUploadUrlBody),
+  });
+};
+
+export const getRequestUploadUrlMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<RequestUploadUrlBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<RequestUploadUrlBody> },
+  TContext
+> => {
+  const mutationKey = ["requestUploadUrl"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    { data: BodyType<RequestUploadUrlBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requestUploadUrl(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequestUploadUrlMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requestUploadUrl>>
+>;
+export type RequestUploadUrlMutationBody = BodyType<RequestUploadUrlBody>;
+export type RequestUploadUrlMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Request a presigned upload URL
+ */
+export const useRequestUploadUrl = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<RequestUploadUrlBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<RequestUploadUrlBody> },
+  TContext
+> => {
+  return useMutation(getRequestUploadUrlMutationOptions(options));
+};
+
+/**
+ * Task #745. Admin-only multipart upload for the laptop-mockup
+preview image on a Bridge Page row. Accepts a single JPEG / PNG /
+WebP file (cap matches the DFY template uploader at 30 MB),
+writes it to the same GCS bucket the rest of the portal serves
+from, and returns the canonical `/api/portal/images/<file>` path
+the admin form then stores on `bridge_pages.preview_image_url`.
+Requires Clerk session + admin role.
+
+ * @summary Upload a Bridge Page preview image (admin only)
+ */
+export const getUploadBridgePageImageUrl = () => {
+  return `/api/portal/dfy/bridge-pages/upload-image`;
+};
+
+export const uploadBridgePageImage = async (
+  uploadBridgePageImageBody: UploadBridgePageImageBody,
+  options?: RequestInit,
+): Promise<UploadBridgePageImage200> => {
+  const formData = new FormData();
+  formData.append(`image`, uploadBridgePageImageBody.image);
+
+  return customFetch<UploadBridgePageImage200>(getUploadBridgePageImageUrl(), {
+    ...options,
+    method: "POST",
+    body: formData,
+  });
+};
+
+export const getUploadBridgePageImageMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadBridgePageImage>>,
+    TError,
+    { data: BodyType<UploadBridgePageImageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadBridgePageImage>>,
+  TError,
+  { data: BodyType<UploadBridgePageImageBody> },
+  TContext
+> => {
+  const mutationKey = ["uploadBridgePageImage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadBridgePageImage>>,
+    { data: BodyType<UploadBridgePageImageBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return uploadBridgePageImage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadBridgePageImageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadBridgePageImage>>
+>;
+export type UploadBridgePageImageMutationBody =
+  BodyType<UploadBridgePageImageBody>;
+export type UploadBridgePageImageMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Upload a Bridge Page preview image (admin only)
+ */
+export const useUploadBridgePageImage = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadBridgePageImage>>,
+    TError,
+    { data: BodyType<UploadBridgePageImageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof uploadBridgePageImage>>,
+  TError,
+  { data: BodyType<UploadBridgePageImageBody> },
+  TContext
+> => {
+  return useMutation(getUploadBridgePageImageMutationOptions(options));
+};
+
+/**
+ * Creates a roadmap lead, synchronously generates the 3-tier offer ladder
+with an LLM, fires Resend email + Meta CAPI Lead in the background,
+and returns the lead with a public share token.
+
+ * @summary Submit the Personalized Apex Roadmap opt-in form
+ */
+export const getCreateRoadmapLeadUrl = () => {
+  return `/api/roadmap/leads`;
+};
+
+export const createRoadmapLead = async (
+  createRoadmapLeadBody: CreateRoadmapLeadBody,
+  options?: RequestInit,
+): Promise<CreateRoadmapLeadResponse> => {
+  return customFetch<CreateRoadmapLeadResponse>(getCreateRoadmapLeadUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createRoadmapLeadBody),
+  });
+};
+
+export const getCreateRoadmapLeadMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRoadmapLead>>,
+    TError,
+    { data: BodyType<CreateRoadmapLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createRoadmapLead>>,
+  TError,
+  { data: BodyType<CreateRoadmapLeadBody> },
+  TContext
+> => {
+  const mutationKey = ["createRoadmapLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createRoadmapLead>>,
+    { data: BodyType<CreateRoadmapLeadBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createRoadmapLead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateRoadmapLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createRoadmapLead>>
+>;
+export type CreateRoadmapLeadMutationBody = BodyType<CreateRoadmapLeadBody>;
+export type CreateRoadmapLeadMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Submit the Personalized Apex Roadmap opt-in form
+ */
+export const useCreateRoadmapLead = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRoadmapLead>>,
+    TError,
+    { data: BodyType<CreateRoadmapLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createRoadmapLead>>,
+  TError,
+  { data: BodyType<CreateRoadmapLeadBody> },
+  TContext
+> => {
+  return useMutation(getCreateRoadmapLeadMutationOptions(options));
+};
+
+/**
+ * Returns the offer ladder and minimum metadata needed to render the
+result page. Public, no auth, but never returns email, phone, IP,
+last name, or user-agent.
+
+ * @summary Fetch the public view of a roadmap lead by share token
+ */
+export const getGetRoadmapLeadByShareTokenUrl = (shareToken: string) => {
+  return `/api/roadmap/leads/by-token/${shareToken}`;
+};
+
+export const getRoadmapLeadByShareToken = async (
+  shareToken: string,
+  options?: RequestInit,
+): Promise<PublicRoadmapLeadResponse> => {
+  return customFetch<PublicRoadmapLeadResponse>(
+    getGetRoadmapLeadByShareTokenUrl(shareToken),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetRoadmapLeadByShareTokenQueryKey = (shareToken: string) => {
+  return [`/api/roadmap/leads/by-token/${shareToken}`] as const;
+};
+
+export const getGetRoadmapLeadByShareTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>,
+  TError = ErrorType<ApiError>,
+>(
+  shareToken: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRoadmapLeadByShareTokenQueryKey(shareToken);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>
+  > = ({ signal }) =>
+    getRoadmapLeadByShareToken(shareToken, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!shareToken,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRoadmapLeadByShareTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>
+>;
+export type GetRoadmapLeadByShareTokenQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Fetch the public view of a roadmap lead by share token
+ */
+
+export function useGetRoadmapLeadByShareToken<
+  TData = Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>,
+  TError = ErrorType<ApiError>,
+>(
+  shareToken: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRoadmapLeadByShareToken>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRoadmapLeadByShareTokenQueryOptions(
+    shareToken,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Whitelisted funnel events: form_started, step_completed,
+form_submitted, result_viewed, cta_clicked, pdf_downloaded.
+Always returns 200 even on best-effort writes.
+
+ * @summary Record a funnel event for the roadmap lead magnet
+ */
+export const getCreateRoadmapLeadEventUrl = () => {
+  return `/api/roadmap/events`;
+};
+
+export const createRoadmapLeadEvent = async (
+  createRoadmapLeadEventBody: CreateRoadmapLeadEventBody,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getCreateRoadmapLeadEventUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createRoadmapLeadEventBody),
+  });
+};
+
+export const getCreateRoadmapLeadEventMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRoadmapLeadEvent>>,
+    TError,
+    { data: BodyType<CreateRoadmapLeadEventBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createRoadmapLeadEvent>>,
+  TError,
+  { data: BodyType<CreateRoadmapLeadEventBody> },
+  TContext
+> => {
+  const mutationKey = ["createRoadmapLeadEvent"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createRoadmapLeadEvent>>,
+    { data: BodyType<CreateRoadmapLeadEventBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createRoadmapLeadEvent(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateRoadmapLeadEventMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createRoadmapLeadEvent>>
+>;
+export type CreateRoadmapLeadEventMutationBody =
+  BodyType<CreateRoadmapLeadEventBody>;
+export type CreateRoadmapLeadEventMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Record a funnel event for the roadmap lead magnet
+ */
+export const useCreateRoadmapLeadEvent = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRoadmapLeadEvent>>,
+    TError,
+    { data: BodyType<CreateRoadmapLeadEventBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createRoadmapLeadEvent>>,
+  TError,
+  { data: BodyType<CreateRoadmapLeadEventBody> },
+  TContext
+> => {
+  return useMutation(getCreateRoadmapLeadEventMutationOptions(options));
+};
+
+/**
+ * Renders the lead's 3-tier offer ladder as a branded PDF and
+streams it back as application/pdf. Public, no auth — keyed only
+by the high-entropy shareToken (UUID exposed only after submit).
+Used by the "Download PDF" CTA on /roadmap/result/{shareToken}.
+Server-side response is cached on a stable hash of the lead's
+generated offers so repeat downloads do not re-render Puppeteer.
+
+ * @summary Download the personalized roadmap PDF for a lead
+ */
+export const getGetRoadmapLeadPdfByShareTokenUrl = (shareToken: string) => {
+  return `/api/roadmap/leads/by-token/${shareToken}/pdf`;
+};
+
+export const getRoadmapLeadPdfByShareToken = async (
+  shareToken: string,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetRoadmapLeadPdfByShareTokenUrl(shareToken), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRoadmapLeadPdfByShareTokenQueryKey = (
+  shareToken: string,
+) => {
+  return [`/api/roadmap/leads/by-token/${shareToken}/pdf`] as const;
+};
+
+export const getGetRoadmapLeadPdfByShareTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>,
+  TError = ErrorType<ApiError>,
+>(
+  shareToken: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetRoadmapLeadPdfByShareTokenQueryKey(shareToken);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>
+  > = ({ signal }) =>
+    getRoadmapLeadPdfByShareToken(shareToken, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!shareToken,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRoadmapLeadPdfByShareTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>
+>;
+export type GetRoadmapLeadPdfByShareTokenQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Download the personalized roadmap PDF for a lead
+ */
+
+export function useGetRoadmapLeadPdfByShareToken<
+  TData = Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>,
+  TError = ErrorType<ApiError>,
+>(
+  shareToken: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRoadmapLeadPdfByShareToken>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRoadmapLeadPdfByShareTokenQueryOptions(
+    shareToken,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Persists the email + phone (plus country, affiliate code, source
+page, referrer) typed into the HeroLeadForm on the low-ticket
+sales pages, BEFORE the visitor is redirected to /checkout. Email
+is the natural key (lowercased + unique) - re-submits update the
+existing row's phone / country / affiliate / source / last_seen_at
+in place. IP and user-agent are captured server-side. Always
+responds 200 (best-effort) so a slow capture never blocks the
+buyer's redirect to checkout.
+
+ * @summary Capture lead email + phone from the low-ticket form before checkout
+ */
+export const getCaptureFunnelLeadUrl = () => {
+  return `/api/funnel/lead`;
+};
+
+export const captureFunnelLead = async (
+  captureFunnelLeadBody: CaptureFunnelLeadBody,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getCaptureFunnelLeadUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(captureFunnelLeadBody),
+  });
+};
+
+export const getCaptureFunnelLeadMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof captureFunnelLead>>,
+    TError,
+    { data: BodyType<CaptureFunnelLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof captureFunnelLead>>,
+  TError,
+  { data: BodyType<CaptureFunnelLeadBody> },
+  TContext
+> => {
+  const mutationKey = ["captureFunnelLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof captureFunnelLead>>,
+    { data: BodyType<CaptureFunnelLeadBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return captureFunnelLead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CaptureFunnelLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof captureFunnelLead>>
+>;
+export type CaptureFunnelLeadMutationBody = BodyType<CaptureFunnelLeadBody>;
+export type CaptureFunnelLeadMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Capture lead email + phone from the low-ticket form before checkout
+ */
+export const useCaptureFunnelLead = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof captureFunnelLead>>,
+    TError,
+    { data: BodyType<CaptureFunnelLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof captureFunnelLead>>,
+  TError,
+  { data: BodyType<CaptureFunnelLeadBody> },
+  TContext
+> => {
+  return useMutation(getCaptureFunnelLeadMutationOptions(options));
+};
+
+/**
+ * Returns the snapshot rendered by the admin Queue Health
+dashboard: legacy queue mechanics (`status`), real outcomes
+(`outcomes` - success rate, terminal vs retrying, operational
+bucket counts), recent failures with platform / bucket /
+terminal flags, error-class histogram, attempts histogram,
+processing-time percentiles, throughput, and active leases.
+
+ * @summary Real-outcome queue health snapshot
+ */
+export const getGetAdminQueueHealthUrl = () => {
+  return `/api/portal/admin/ad-research-board/queue-health`;
+};
+
+export const getAdminQueueHealth = async (
+  options?: RequestInit,
+): Promise<QueueHealthResponse> => {
+  return customFetch<QueueHealthResponse>(getGetAdminQueueHealthUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAdminQueueHealthQueryKey = () => {
+  return [`/api/portal/admin/ad-research-board/queue-health`] as const;
+};
+
+export const getGetAdminQueueHealthQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminQueueHealth>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminQueueHealth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAdminQueueHealthQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminQueueHealth>>
+  > = ({ signal }) => getAdminQueueHealth({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminQueueHealth>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminQueueHealthQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminQueueHealth>>
+>;
+export type GetAdminQueueHealthQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Real-outcome queue health snapshot
+ */
+
+export function useGetAdminQueueHealth<
+  TData = Awaited<ReturnType<typeof getAdminQueueHealth>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminQueueHealth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminQueueHealthQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns the per-snapshot trend points written by
+`recordQueueMetricsSnapshot`. Powers the dashboard sparklines
+(queue depth, throughput, failures, p95, success rate, auth /
+rate-limit / provider failures, retry volume).
+
+ * @summary Historical queue-health trend snapshots
+ */
+export const getGetAdminQueueTrendsUrl = (
+  params?: GetAdminQueueTrendsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/portal/admin/ad-research-board/queue-trends?${stringifiedParams}`
+    : `/api/portal/admin/ad-research-board/queue-trends`;
+};
+
+export const getAdminQueueTrends = async (
+  params?: GetAdminQueueTrendsParams,
+  options?: RequestInit,
+): Promise<QueueTrendsResponse> => {
+  return customFetch<QueueTrendsResponse>(getGetAdminQueueTrendsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAdminQueueTrendsQueryKey = (
+  params?: GetAdminQueueTrendsParams,
+) => {
+  return [
+    `/api/portal/admin/ad-research-board/queue-trends`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetAdminQueueTrendsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminQueueTrends>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: GetAdminQueueTrendsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminQueueTrends>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAdminQueueTrendsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminQueueTrends>>
+  > = ({ signal }) =>
+    getAdminQueueTrends(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminQueueTrends>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminQueueTrendsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminQueueTrends>>
+>;
+export type GetAdminQueueTrendsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Historical queue-health trend snapshots
+ */
+
+export function useGetAdminQueueTrends<
+  TData = Awaited<ReturnType<typeof getAdminQueueTrends>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: GetAdminQueueTrendsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminQueueTrends>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminQueueTrendsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Task #187. After an admin uploads a fresh IG/FB cookie jar, this
+endpoint reopens dismissed ad-research-board queue rows whose
+last media error was auth-class (`ig-login-required`,
+`fb-auth-wall`, `cookie-expired`,
+`auth-wall-escalated-failed`) within the configurable lookback
+window. Rows are flipped back to `mediaStatus=pending`,
+`dismissed=false`, `attempts=0`, the lease columns
+(`media_lease_owner`, `media_lease_until`) are cleared, the
+`media_reopened_at_t187` marker is stamped (drives the
+cohort-based `authFailureRecoveryRate` metric), and the
+worker's `processPendingMediaInBackground` is kicked.
+
+ * @summary Reopen dismissed ad-research-board rows that failed on auth walls
+ */
+export const getRequeueAdResearchBoardAuthFailuresUrl = () => {
+  return `/api/portal/admin/ad-research-board/requeue-auth-failures`;
+};
+
+export const requeueAdResearchBoardAuthFailures = async (
+  requeueAdResearchBoardAuthFailuresBody?: RequeueAdResearchBoardAuthFailuresBody,
+  options?: RequestInit,
+): Promise<RequeueAdResearchBoardAuthFailures200> => {
+  return customFetch<RequeueAdResearchBoardAuthFailures200>(
+    getRequeueAdResearchBoardAuthFailuresUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(requeueAdResearchBoardAuthFailuresBody),
+    },
+  );
+};
+
+export const getRequeueAdResearchBoardAuthFailuresMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>,
+    TError,
+    { data: BodyType<RequeueAdResearchBoardAuthFailuresBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>,
+  TError,
+  { data: BodyType<RequeueAdResearchBoardAuthFailuresBody> },
+  TContext
+> => {
+  const mutationKey = ["requeueAdResearchBoardAuthFailures"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>,
+    { data: BodyType<RequeueAdResearchBoardAuthFailuresBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requeueAdResearchBoardAuthFailures(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequeueAdResearchBoardAuthFailuresMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>
+>;
+export type RequeueAdResearchBoardAuthFailuresMutationBody =
+  BodyType<RequeueAdResearchBoardAuthFailuresBody>;
+export type RequeueAdResearchBoardAuthFailuresMutationError =
+  ErrorType<ApiError>;
+
+/**
+ * @summary Reopen dismissed ad-research-board rows that failed on auth walls
+ */
+export const useRequeueAdResearchBoardAuthFailures = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>,
+    TError,
+    { data: BodyType<RequeueAdResearchBoardAuthFailuresBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requeueAdResearchBoardAuthFailures>>,
+  TError,
+  { data: BodyType<RequeueAdResearchBoardAuthFailuresBody> },
+  TContext
+> => {
+  return useMutation(
+    getRequeueAdResearchBoardAuthFailuresMutationOptions(options),
+  );
+};
+
+/**
+ * Task #187. Resets `previewStatus` and `previewError` to NULL on
+funnels-research-board rows whose last preview attempt failed
+with an auth-shaped error (matches login / auth / cookie / 401
+/ 403 in `previewError`) within the configurable lookback
+window (default 7 days). Lets the existing preview worker
+pick them back up after a fresh cookie jar is uploaded.
+
+ * @summary Reopen funnels-research-board rows whose preview failed on auth walls
+ */
+export const getRequeueFunnelsResearchBoardAuthFailuresUrl = () => {
+  return `/api/portal/admin/funnels-research-board/requeue-auth-failures`;
+};
+
+export const requeueFunnelsResearchBoardAuthFailures = async (
+  requeueFunnelsResearchBoardAuthFailuresBody?: RequeueFunnelsResearchBoardAuthFailuresBody,
+  options?: RequestInit,
+): Promise<RequeueFunnelsResearchBoardAuthFailures200> => {
+  return customFetch<RequeueFunnelsResearchBoardAuthFailures200>(
+    getRequeueFunnelsResearchBoardAuthFailuresUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(requeueFunnelsResearchBoardAuthFailuresBody),
+    },
+  );
+};
+
+export const getRequeueFunnelsResearchBoardAuthFailuresMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>,
+    TError,
+    { data: BodyType<RequeueFunnelsResearchBoardAuthFailuresBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>,
+  TError,
+  { data: BodyType<RequeueFunnelsResearchBoardAuthFailuresBody> },
+  TContext
+> => {
+  const mutationKey = ["requeueFunnelsResearchBoardAuthFailures"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>,
+    { data: BodyType<RequeueFunnelsResearchBoardAuthFailuresBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requeueFunnelsResearchBoardAuthFailures(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequeueFunnelsResearchBoardAuthFailuresMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>
+>;
+export type RequeueFunnelsResearchBoardAuthFailuresMutationBody =
+  BodyType<RequeueFunnelsResearchBoardAuthFailuresBody>;
+export type RequeueFunnelsResearchBoardAuthFailuresMutationError =
+  ErrorType<ApiError>;
+
+/**
+ * @summary Reopen funnels-research-board rows whose preview failed on auth walls
+ */
+export const useRequeueFunnelsResearchBoardAuthFailures = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>,
+    TError,
+    { data: BodyType<RequeueFunnelsResearchBoardAuthFailuresBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requeueFunnelsResearchBoardAuthFailures>>,
+  TError,
+  { data: BodyType<RequeueFunnelsResearchBoardAuthFailuresBody> },
+  TContext
+> => {
+  return useMutation(
+    getRequeueFunnelsResearchBoardAuthFailuresMutationOptions(options),
+  );
+};
+
+/**
+ * Returns a paginated, sortable, search-filterable list of roadmap
+leads with full PII (email, phone, IP, last name) and the raw
+generation payload — intended for the admin UI at
+`/portal/admin/roadmap-leads`.
+
+**Auth:** Clerk bearer token + ADMIN_EMAILS allow-list. Non-admin
+callers receive 401/403.
+
+ * @summary List roadmap leads for the admin dashboard
+ */
+export const getListAdminRoadmapLeadsUrl = (
+  params?: ListAdminRoadmapLeadsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/portal/admin/roadmap/leads?${stringifiedParams}`
+    : `/api/portal/admin/roadmap/leads`;
+};
+
+export const listAdminRoadmapLeads = async (
+  params?: ListAdminRoadmapLeadsParams,
+  options?: RequestInit,
+): Promise<AdminRoadmapLeadListResponse> => {
+  return customFetch<AdminRoadmapLeadListResponse>(
+    getListAdminRoadmapLeadsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListAdminRoadmapLeadsQueryKey = (
+  params?: ListAdminRoadmapLeadsParams,
+) => {
+  return [
+    `/api/portal/admin/roadmap/leads`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListAdminRoadmapLeadsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listAdminRoadmapLeads>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: ListAdminRoadmapLeadsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listAdminRoadmapLeads>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListAdminRoadmapLeadsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listAdminRoadmapLeads>>
+  > = ({ signal }) =>
+    listAdminRoadmapLeads(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAdminRoadmapLeads>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListAdminRoadmapLeadsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAdminRoadmapLeads>>
+>;
+export type ListAdminRoadmapLeadsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary List roadmap leads for the admin dashboard
+ */
+
+export function useListAdminRoadmapLeads<
+  TData = Awaited<ReturnType<typeof listAdminRoadmapLeads>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: ListAdminRoadmapLeadsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listAdminRoadmapLeads>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListAdminRoadmapLeadsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns metadata about the saved Instagram session cookies blob
+(status, cookie count, sessionid preview, inferred expiry, last
+error, required-cookie presence). Never returns plaintext cookie
+values.
+
+ * @summary Read Instagram session cookie metadata
+ */
+export const getGetInstagramSessionCookiesUrl = () => {
+  return `/api/portal/admin/instagram-cookies`;
+};
+
+export const getInstagramSessionCookies = async (
+  options?: RequestInit,
+): Promise<InstagramSessionCookieMetadata> => {
+  return customFetch<InstagramSessionCookieMetadata>(
+    getGetInstagramSessionCookiesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetInstagramSessionCookiesQueryKey = () => {
+  return [`/api/portal/admin/instagram-cookies`] as const;
+};
+
+export const getGetInstagramSessionCookiesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getInstagramSessionCookies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getInstagramSessionCookies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetInstagramSessionCookiesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getInstagramSessionCookies>>
+  > = ({ signal }) => getInstagramSessionCookies({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getInstagramSessionCookies>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetInstagramSessionCookiesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getInstagramSessionCookies>>
+>;
+export type GetInstagramSessionCookiesQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Read Instagram session cookie metadata
+ */
+
+export function useGetInstagramSessionCookies<
+  TData = Awaited<ReturnType<typeof getInstagramSessionCookies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getInstagramSessionCookies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetInstagramSessionCookiesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Accepts a Cookie-Editor / EditThisCookie JSON export from a
+logged-in Instagram session. Validates required cookies
+(sessionid, ds_user_id, csrftoken), AES-256-GCM encrypts the
+blob, and stores it in `provider_configs` under
+(`instagram`, `session_cookies`). Returns the resulting metadata.
+
+ * @summary Save a fresh Instagram session cookies blob
+ */
+export const getSaveInstagramSessionCookiesUrl = () => {
+  return `/api/portal/admin/instagram-cookies`;
+};
+
+export const saveInstagramSessionCookies = async (
+  instagramSessionCookiesSaveRequest: InstagramSessionCookiesSaveRequest,
+  options?: RequestInit,
+): Promise<InstagramSessionCookieMetadata> => {
+  return customFetch<InstagramSessionCookieMetadata>(
+    getSaveInstagramSessionCookiesUrl(),
+    {
+      ...options,
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(instagramSessionCookiesSaveRequest),
+    },
+  );
+};
+
+export const getSaveInstagramSessionCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveInstagramSessionCookies>>,
+    TError,
+    { data: BodyType<InstagramSessionCookiesSaveRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof saveInstagramSessionCookies>>,
+  TError,
+  { data: BodyType<InstagramSessionCookiesSaveRequest> },
+  TContext
+> => {
+  const mutationKey = ["saveInstagramSessionCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof saveInstagramSessionCookies>>,
+    { data: BodyType<InstagramSessionCookiesSaveRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return saveInstagramSessionCookies(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SaveInstagramSessionCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof saveInstagramSessionCookies>>
+>;
+export type SaveInstagramSessionCookiesMutationBody =
+  BodyType<InstagramSessionCookiesSaveRequest>;
+export type SaveInstagramSessionCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Save a fresh Instagram session cookies blob
+ */
+export const useSaveInstagramSessionCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveInstagramSessionCookies>>,
+    TError,
+    { data: BodyType<InstagramSessionCookiesSaveRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof saveInstagramSessionCookies>>,
+  TError,
+  { data: BodyType<InstagramSessionCookiesSaveRequest> },
+  TContext
+> => {
+  return useMutation(getSaveInstagramSessionCookiesMutationOptions(options));
+};
+
+/**
+ * @summary Delete the saved Instagram session cookies blob
+ */
+export const getDeleteInstagramSessionCookiesUrl = () => {
+  return `/api/portal/admin/instagram-cookies`;
+};
+
+export const deleteInstagramSessionCookies = async (
+  options?: RequestInit,
+): Promise<InstagramSessionCookieMetadata> => {
+  return customFetch<InstagramSessionCookieMetadata>(
+    getDeleteInstagramSessionCookiesUrl(),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteInstagramSessionCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteInstagramSessionCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteInstagramSessionCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["deleteInstagramSessionCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteInstagramSessionCookies>>,
+    void
+  > = () => {
+    return deleteInstagramSessionCookies(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteInstagramSessionCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteInstagramSessionCookies>>
+>;
+
+export type DeleteInstagramSessionCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Delete the saved Instagram session cookies blob
+ */
+export const useDeleteInstagramSessionCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteInstagramSessionCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteInstagramSessionCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getDeleteInstagramSessionCookiesMutationOptions(options));
+};
+
+/**
+ * Returns metadata about the saved Facebook cookies.txt jar
+(uploaded at, uploaded by, status, age, last validated) and the
+latest auth_health row for the `fb` platform. Never returns
+cookie bytes.
+
+ * @summary Read Facebook cookies.txt jar metadata
+ */
+export const getGetFacebookCookiesUrl = () => {
+  return `/api/portal/admin/fb-cookies`;
+};
+
+export const getFacebookCookies = async (
+  options?: RequestInit,
+): Promise<FacebookCookiesMetadataResponse> => {
+  return customFetch<FacebookCookiesMetadataResponse>(
+    getGetFacebookCookiesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetFacebookCookiesQueryKey = () => {
+  return [`/api/portal/admin/fb-cookies`] as const;
+};
+
+export const getGetFacebookCookiesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getFacebookCookies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getFacebookCookies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetFacebookCookiesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getFacebookCookies>>
+  > = ({ signal }) => getFacebookCookies({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getFacebookCookies>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetFacebookCookiesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getFacebookCookies>>
+>;
+export type GetFacebookCookiesQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Read Facebook cookies.txt jar metadata
+ */
+
+export function useGetFacebookCookies<
+  TData = Awaited<ReturnType<typeof getFacebookCookies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getFacebookCookies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetFacebookCookiesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Accepts a Netscape cookies.txt export from a logged-in
+facebook.com session. Validates the file as Netscape format,
+soft-deletes any prior active jar, persists the new jar, and
+returns the resulting jar metadata.
+
+ * @summary Save a fresh Facebook cookies.txt jar
+ */
+export const getSaveFacebookCookiesUrl = () => {
+  return `/api/portal/admin/fb-cookies`;
+};
+
+export const saveFacebookCookies = async (
+  facebookCookiesSaveRequest: FacebookCookiesSaveRequest,
+  options?: RequestInit,
+): Promise<FacebookCookiesSaveResponse> => {
+  return customFetch<FacebookCookiesSaveResponse>(getSaveFacebookCookiesUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(facebookCookiesSaveRequest),
+  });
+};
+
+export const getSaveFacebookCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveFacebookCookies>>,
+    TError,
+    { data: BodyType<FacebookCookiesSaveRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof saveFacebookCookies>>,
+  TError,
+  { data: BodyType<FacebookCookiesSaveRequest> },
+  TContext
+> => {
+  const mutationKey = ["saveFacebookCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof saveFacebookCookies>>,
+    { data: BodyType<FacebookCookiesSaveRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return saveFacebookCookies(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SaveFacebookCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof saveFacebookCookies>>
+>;
+export type SaveFacebookCookiesMutationBody =
+  BodyType<FacebookCookiesSaveRequest>;
+export type SaveFacebookCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Save a fresh Facebook cookies.txt jar
+ */
+export const useSaveFacebookCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveFacebookCookies>>,
+    TError,
+    { data: BodyType<FacebookCookiesSaveRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof saveFacebookCookies>>,
+  TError,
+  { data: BodyType<FacebookCookiesSaveRequest> },
+  TContext
+> => {
+  return useMutation(getSaveFacebookCookiesMutationOptions(options));
+};
+
+/**
+ * @summary Soft-delete the active Facebook cookies.txt jar
+ */
+export const getDeleteFacebookCookiesUrl = () => {
+  return `/api/portal/admin/fb-cookies`;
+};
+
+export const deleteFacebookCookies = async (
+  options?: RequestInit,
+): Promise<FacebookCookiesDeleteResponse> => {
+  return customFetch<FacebookCookiesDeleteResponse>(
+    getDeleteFacebookCookiesUrl(),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteFacebookCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteFacebookCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteFacebookCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["deleteFacebookCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteFacebookCookies>>,
+    void
+  > = () => {
+    return deleteFacebookCookies(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteFacebookCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteFacebookCookies>>
+>;
+
+export type DeleteFacebookCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Soft-delete the active Facebook cookies.txt jar
+ */
+export const useDeleteFacebookCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteFacebookCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteFacebookCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getDeleteFacebookCookiesMutationOptions(options));
+};
+
+/**
+ * Runs the existing extraction-diagnose probe against a known
+public Facebook URL (or one provided in the body) with platform
+forced to `fb`. Read-only - does not write `auth_health`.
+
+ * @summary Probe the saved FB jar via the extraction-diagnose runner
+ */
+export const getTestFacebookCookiesUrl = () => {
+  return `/api/portal/admin/fb-cookies/test`;
+};
+
+export const testFacebookCookies = async (
+  facebookCookiesTestRequest?: FacebookCookiesTestRequest,
+  options?: RequestInit,
+): Promise<FacebookCookiesTestResponse> => {
+  return customFetch<FacebookCookiesTestResponse>(getTestFacebookCookiesUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(facebookCookiesTestRequest),
+  });
+};
+
+export const getTestFacebookCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testFacebookCookies>>,
+    TError,
+    { data: BodyType<FacebookCookiesTestRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof testFacebookCookies>>,
+  TError,
+  { data: BodyType<FacebookCookiesTestRequest> },
+  TContext
+> => {
+  const mutationKey = ["testFacebookCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof testFacebookCookies>>,
+    { data: BodyType<FacebookCookiesTestRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return testFacebookCookies(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TestFacebookCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof testFacebookCookies>>
+>;
+export type TestFacebookCookiesMutationBody =
+  BodyType<FacebookCookiesTestRequest>;
+export type TestFacebookCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Probe the saved FB jar via the extraction-diagnose runner
+ */
+export const useTestFacebookCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testFacebookCookies>>,
+    TError,
+    { data: BodyType<FacebookCookiesTestRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof testFacebookCookies>>,
+  TError,
+  { data: BodyType<FacebookCookiesTestRequest> },
+  TContext
+> => {
+  return useMutation(getTestFacebookCookiesMutationOptions(options));
+};
+
+/**
+ * Runs `apify~instagram-profile-scraper` against a stable public
+profile (`natgeo`) using the saved session cookies (regardless
+of the cookies' current `status` flag, so an admin can re-test a
+previously expired-marked session without re-pasting). Reports
+back one of: ok, auth-blocked, rate-limited, no-cookies,
+no-token, actor-error, timeout, no-data. A successful probe
+clears the `expired` flag.
+
+ * @summary Probe the saved Instagram session cookies via a small Apify run
+ */
+export const getTestInstagramSessionCookiesUrl = () => {
+  return `/api/portal/admin/instagram-cookies/test`;
+};
+
+export const testInstagramSessionCookies = async (
+  options?: RequestInit,
+): Promise<InstagramSessionCookieTestResponse> => {
+  return customFetch<InstagramSessionCookieTestResponse>(
+    getTestInstagramSessionCookiesUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getTestInstagramSessionCookiesMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testInstagramSessionCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof testInstagramSessionCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["testInstagramSessionCookies"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof testInstagramSessionCookies>>,
+    void
+  > = () => {
+    return testInstagramSessionCookies(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TestInstagramSessionCookiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof testInstagramSessionCookies>>
+>;
+
+export type TestInstagramSessionCookiesMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Probe the saved Instagram session cookies via a small Apify run
+ */
+export const useTestInstagramSessionCookies = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testInstagramSessionCookies>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof testInstagramSessionCookies>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getTestInstagramSessionCookiesMutationOptions(options));
+};
+
+/**
+ * @summary List products a Platinum Founder Code can be redeemed against
+ */
+export const getListPlatinumCodeMainProductsUrl = () => {
+  return `/api/platinum-codes/main-products`;
+};
+
+export const listPlatinumCodeMainProducts = async (
+  options?: RequestInit,
+): Promise<PlatinumMainProductList> => {
+  return customFetch<PlatinumMainProductList>(
+    getListPlatinumCodeMainProductsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListPlatinumCodeMainProductsQueryKey = () => {
+  return [`/api/platinum-codes/main-products`] as const;
+};
+
+export const getListPlatinumCodeMainProductsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListPlatinumCodeMainProductsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>
+  > = ({ signal }) =>
+    listPlatinumCodeMainProducts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListPlatinumCodeMainProductsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>
+>;
+export type ListPlatinumCodeMainProductsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List products a Platinum Founder Code can be redeemed against
+ */
+
+export function useListPlatinumCodeMainProducts<
+  TData = Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPlatinumCodeMainProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListPlatinumCodeMainProductsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Read the signed-in buyer's own Platinum Founder Code
+ */
+export const getGetMyPlatinumCodeUrl = () => {
+  return `/api/platinum-codes/me`;
+};
+
+export const getMyPlatinumCode = async (
+  options?: RequestInit,
+): Promise<PlatinumCode> => {
+  return customFetch<PlatinumCode>(getGetMyPlatinumCodeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyPlatinumCodeQueryKey = () => {
+  return [`/api/platinum-codes/me`] as const;
+};
+
+export const getGetMyPlatinumCodeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyPlatinumCode>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPlatinumCode>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyPlatinumCodeQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMyPlatinumCode>>
+  > = ({ signal }) => getMyPlatinumCode({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPlatinumCode>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyPlatinumCodeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyPlatinumCode>>
+>;
+export type GetMyPlatinumCodeQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Read the signed-in buyer's own Platinum Founder Code
+ */
+
+export function useGetMyPlatinumCode<
+  TData = Awaited<ReturnType<typeof getMyPlatinumCode>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPlatinumCode>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyPlatinumCodeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Redeem the buyer's Platinum Founder Code against a main product
+ */
+export const getRedeemPlatinumCodeUrl = () => {
+  return `/api/platinum-codes/redeem`;
+};
+
+export const redeemPlatinumCode = async (
+  platinumCodeRedeemRequest: PlatinumCodeRedeemRequest,
+  options?: RequestInit,
+): Promise<PlatinumCodeRedeemResponse> => {
+  return customFetch<PlatinumCodeRedeemResponse>(getRedeemPlatinumCodeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(platinumCodeRedeemRequest),
+  });
+};
+
+export const getRedeemPlatinumCodeMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof redeemPlatinumCode>>,
+    TError,
+    { data: BodyType<PlatinumCodeRedeemRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof redeemPlatinumCode>>,
+  TError,
+  { data: BodyType<PlatinumCodeRedeemRequest> },
+  TContext
+> => {
+  const mutationKey = ["redeemPlatinumCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof redeemPlatinumCode>>,
+    { data: BodyType<PlatinumCodeRedeemRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return redeemPlatinumCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RedeemPlatinumCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof redeemPlatinumCode>>
+>;
+export type RedeemPlatinumCodeMutationBody =
+  BodyType<PlatinumCodeRedeemRequest>;
+export type RedeemPlatinumCodeMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Redeem the buyer's Platinum Founder Code against a main product
+ */
+export const useRedeemPlatinumCode = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof redeemPlatinumCode>>,
+    TError,
+    { data: BodyType<PlatinumCodeRedeemRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof redeemPlatinumCode>>,
+  TError,
+  { data: BodyType<PlatinumCodeRedeemRequest> },
+  TContext
+> => {
+  return useMutation(getRedeemPlatinumCodeMutationOptions(options));
+};
+
+/**
+ * Task #762. Sums voice + chat duration logged this calendar month
+against the hard 7200s (120 min) Platinum allowance. Gated on
+Platinum entitlement (`platinumPaid || upsell3Paid`). `resetsAt` is
+the start of next calendar month (UTC); `canStart` is false once the
+allowance is exhausted.
+
+ * @summary Read the caller's current-month Platinum Greg AI usage
+ */
+export const getGetPlatinumGregUsageUrl = () => {
+  return `/api/portal/greg-ai/platinum/usage`;
+};
+
+export const getPlatinumGregUsage = async (
+  options?: RequestInit,
+): Promise<PlatinumGregUsage> => {
+  return customFetch<PlatinumGregUsage>(getGetPlatinumGregUsageUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPlatinumGregUsageQueryKey = () => {
+  return [`/api/portal/greg-ai/platinum/usage`] as const;
+};
+
+export const getGetPlatinumGregUsageQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPlatinumGregUsage>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPlatinumGregUsage>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPlatinumGregUsageQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPlatinumGregUsage>>
+  > = ({ signal }) => getPlatinumGregUsage({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPlatinumGregUsage>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPlatinumGregUsageQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPlatinumGregUsage>>
+>;
+export type GetPlatinumGregUsageQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Read the caller's current-month Platinum Greg AI usage
+ */
+
+export function useGetPlatinumGregUsage<
+  TData = Awaited<ReturnType<typeof getPlatinumGregUsage>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPlatinumGregUsage>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPlatinumGregUsageQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Task #762. Records a finished voice/chat session's elapsed seconds
+against the monthly allowance. The recorded amount is capped at the
+caller's remaining time; rejected with 403 when no allowance is left.
+
+ * @summary Record a finished Platinum Greg AI session's duration
+ */
+export const getRecordPlatinumGregUsageUrl = () => {
+  return `/api/portal/greg-ai/platinum/usage`;
+};
+
+export const recordPlatinumGregUsage = async (
+  platinumGregUsageRecordBody: PlatinumGregUsageRecordBody,
+  options?: RequestInit,
+): Promise<PlatinumGregUsage> => {
+  return customFetch<PlatinumGregUsage>(getRecordPlatinumGregUsageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(platinumGregUsageRecordBody),
+  });
+};
+
+export const getRecordPlatinumGregUsageMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordPlatinumGregUsage>>,
+    TError,
+    { data: BodyType<PlatinumGregUsageRecordBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordPlatinumGregUsage>>,
+  TError,
+  { data: BodyType<PlatinumGregUsageRecordBody> },
+  TContext
+> => {
+  const mutationKey = ["recordPlatinumGregUsage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordPlatinumGregUsage>>,
+    { data: BodyType<PlatinumGregUsageRecordBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return recordPlatinumGregUsage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordPlatinumGregUsageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordPlatinumGregUsage>>
+>;
+export type RecordPlatinumGregUsageMutationBody =
+  BodyType<PlatinumGregUsageRecordBody>;
+export type RecordPlatinumGregUsageMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Record a finished Platinum Greg AI session's duration
+ */
+export const useRecordPlatinumGregUsage = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordPlatinumGregUsage>>,
+    TError,
+    { data: BodyType<PlatinumGregUsageRecordBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof recordPlatinumGregUsage>>,
+  TError,
+  { data: BodyType<PlatinumGregUsageRecordBody> },
+  TContext
+> => {
+  return useMutation(getRecordPlatinumGregUsageMutationOptions(options));
+};
+
+/**
+ * Returns published announcements visible to the current portal user
+(audience filter applies admin-vs-all) and excludes any the user
+has already dismissed. `mediaUrl` is a 1-hour signed GCS GET URL.
+
+ * @summary List active announcements for the signed-in portal user
+ */
+export const getListPortalAnnouncementsUrl = () => {
+  return `/api/portal/announcements`;
+};
+
+export const listPortalAnnouncements = async (
+  options?: RequestInit,
+): Promise<PortalAnnouncementListResponse> => {
+  return customFetch<PortalAnnouncementListResponse>(
+    getListPortalAnnouncementsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListPortalAnnouncementsQueryKey = () => {
+  return [`/api/portal/announcements`] as const;
+};
+
+export const getListPortalAnnouncementsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listPortalAnnouncements>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPortalAnnouncements>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListPortalAnnouncementsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listPortalAnnouncements>>
+  > = ({ signal }) => listPortalAnnouncements({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listPortalAnnouncements>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListPortalAnnouncementsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listPortalAnnouncements>>
+>;
+export type ListPortalAnnouncementsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary List active announcements for the signed-in portal user
+ */
+
+export function useListPortalAnnouncements<
+  TData = Awaited<ReturnType<typeof listPortalAnnouncements>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPortalAnnouncements>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListPortalAnnouncementsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Dismiss an announcement for the signed-in user
+ */
+export const getDismissPortalAnnouncementUrl = (id: number) => {
+  return `/api/portal/announcements/${id}/dismiss`;
+};
+
+export const dismissPortalAnnouncement = async (
+  id: number,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getDismissPortalAnnouncementUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getDismissPortalAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dismissPortalAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof dismissPortalAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["dismissPortalAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof dismissPortalAnnouncement>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return dismissPortalAnnouncement(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DismissPortalAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof dismissPortalAnnouncement>>
+>;
+
+export type DismissPortalAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Dismiss an announcement for the signed-in user
+ */
+export const useDismissPortalAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dismissPortalAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof dismissPortalAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDismissPortalAnnouncementMutationOptions(options));
+};
+
+/**
+ * @summary List every announcement with aggregate seen/dismissed counts
+ */
+export const getListAdminAnnouncementsUrl = () => {
+  return `/api/portal/admin/announcements`;
+};
+
+export const listAdminAnnouncements = async (
+  options?: RequestInit,
+): Promise<AdminAnnouncementListResponse> => {
+  return customFetch<AdminAnnouncementListResponse>(
+    getListAdminAnnouncementsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListAdminAnnouncementsQueryKey = () => {
+  return [`/api/portal/admin/announcements`] as const;
+};
+
+export const getListAdminAnnouncementsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listAdminAnnouncements>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAdminAnnouncements>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListAdminAnnouncementsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listAdminAnnouncements>>
+  > = ({ signal }) => listAdminAnnouncements({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAdminAnnouncements>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListAdminAnnouncementsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAdminAnnouncements>>
+>;
+export type ListAdminAnnouncementsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary List every announcement with aggregate seen/dismissed counts
+ */
+
+export function useListAdminAnnouncements<
+  TData = Awaited<ReturnType<typeof listAdminAnnouncements>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAdminAnnouncements>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListAdminAnnouncementsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a new announcement (draft or published)
+ */
+export const getCreateAdminAnnouncementUrl = () => {
+  return `/api/portal/admin/announcements`;
+};
+
+export const createAdminAnnouncement = async (
+  adminAnnouncementWriteBody: AdminAnnouncementWriteBody,
+  options?: RequestInit,
+): Promise<AdminAnnouncementResponse> => {
+  return customFetch<AdminAnnouncementResponse>(
+    getCreateAdminAnnouncementUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(adminAnnouncementWriteBody),
+    },
+  );
+};
+
+export const getCreateAdminAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createAdminAnnouncement>>,
+    TError,
+    { data: BodyType<AdminAnnouncementWriteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createAdminAnnouncement>>,
+  TError,
+  { data: BodyType<AdminAnnouncementWriteBody> },
+  TContext
+> => {
+  const mutationKey = ["createAdminAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createAdminAnnouncement>>,
+    { data: BodyType<AdminAnnouncementWriteBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createAdminAnnouncement(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateAdminAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createAdminAnnouncement>>
+>;
+export type CreateAdminAnnouncementMutationBody =
+  BodyType<AdminAnnouncementWriteBody>;
+export type CreateAdminAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Create a new announcement (draft or published)
+ */
+export const useCreateAdminAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createAdminAnnouncement>>,
+    TError,
+    { data: BodyType<AdminAnnouncementWriteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createAdminAnnouncement>>,
+  TError,
+  { data: BodyType<AdminAnnouncementWriteBody> },
+  TContext
+> => {
+  return useMutation(getCreateAdminAnnouncementMutationOptions(options));
+};
+
+/**
+ * @summary Update an existing announcement (any subset of fields)
+ */
+export const getUpdateAdminAnnouncementUrl = (id: number) => {
+  return `/api/portal/admin/announcements/${id}`;
+};
+
+export const updateAdminAnnouncement = async (
+  id: number,
+  adminAnnouncementWriteBody: AdminAnnouncementWriteBody,
+  options?: RequestInit,
+): Promise<AdminAnnouncementResponse> => {
+  return customFetch<AdminAnnouncementResponse>(
+    getUpdateAdminAnnouncementUrl(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(adminAnnouncementWriteBody),
+    },
+  );
+};
+
+export const getUpdateAdminAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAdminAnnouncement>>,
+    TError,
+    { id: number; data: BodyType<AdminAnnouncementWriteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateAdminAnnouncement>>,
+  TError,
+  { id: number; data: BodyType<AdminAnnouncementWriteBody> },
+  TContext
+> => {
+  const mutationKey = ["updateAdminAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateAdminAnnouncement>>,
+    { id: number; data: BodyType<AdminAnnouncementWriteBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateAdminAnnouncement(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateAdminAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateAdminAnnouncement>>
+>;
+export type UpdateAdminAnnouncementMutationBody =
+  BodyType<AdminAnnouncementWriteBody>;
+export type UpdateAdminAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Update an existing announcement (any subset of fields)
+ */
+export const useUpdateAdminAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAdminAnnouncement>>,
+    TError,
+    { id: number; data: BodyType<AdminAnnouncementWriteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateAdminAnnouncement>>,
+  TError,
+  { id: number; data: BodyType<AdminAnnouncementWriteBody> },
+  TContext
+> => {
+  return useMutation(getUpdateAdminAnnouncementMutationOptions(options));
+};
+
+/**
+ * @summary Delete an announcement (cascades dismissal rows)
+ */
+export const getDeleteAdminAnnouncementUrl = (id: number) => {
+  return `/api/portal/admin/announcements/${id}`;
+};
+
+export const deleteAdminAnnouncement = async (
+  id: number,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getDeleteAdminAnnouncementUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteAdminAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteAdminAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteAdminAnnouncement>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteAdminAnnouncement(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteAdminAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteAdminAnnouncement>>
+>;
+
+export type DeleteAdminAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Delete an announcement (cascades dismissal rows)
+ */
+export const useDeleteAdminAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteAdminAnnouncementMutationOptions(options));
+};
+
+/**
+ * @summary Publish (or republish from `unpublished`) an announcement
+ */
+export const getPublishAdminAnnouncementUrl = (id: number) => {
+  return `/api/portal/admin/announcements/${id}/publish`;
+};
+
+export const publishAdminAnnouncement = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AdminAnnouncementResponse> => {
+  return customFetch<AdminAnnouncementResponse>(
+    getPublishAdminAnnouncementUrl(id),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getPublishAdminAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["publishAdminAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishAdminAnnouncement>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return publishAdminAnnouncement(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishAdminAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishAdminAnnouncement>>
+>;
+
+export type PublishAdminAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Publish (or republish from `unpublished`) an announcement
+ */
+export const usePublishAdminAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof publishAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getPublishAdminAnnouncementMutationOptions(options));
+};
+
+/**
+ * @summary Transition a published announcement to `unpublished`
+ */
+export const getUnpublishAdminAnnouncementUrl = (id: number) => {
+  return `/api/portal/admin/announcements/${id}/unpublish`;
+};
+
+export const unpublishAdminAnnouncement = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AdminAnnouncementResponse> => {
+  return customFetch<AdminAnnouncementResponse>(
+    getUnpublishAdminAnnouncementUrl(id),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getUnpublishAdminAnnouncementMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof unpublishAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof unpublishAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["unpublishAdminAnnouncement"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof unpublishAdminAnnouncement>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return unpublishAdminAnnouncement(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UnpublishAdminAnnouncementMutationResult = NonNullable<
+  Awaited<ReturnType<typeof unpublishAdminAnnouncement>>
+>;
+
+export type UnpublishAdminAnnouncementMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Transition a published announcement to `unpublished`
+ */
+export const useUnpublishAdminAnnouncement = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof unpublishAdminAnnouncement>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof unpublishAdminAnnouncement>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getUnpublishAdminAnnouncementMutationOptions(options));
+};
+
+/**
+ * Stricter than `/storage/uploads/request-url`: rejects anything that
+is not PNG/JPEG/WebP/GIF or MP4/MOV/WebM, and caps size at 100 MB.
+
+ * @summary Request a presigned PUT URL for an announcement media upload
+ */
+export const getRequestAnnouncementUploadUrlUrl = () => {
+  return `/api/portal/admin/announcements/uploads/request-url`;
+};
+
+export const requestAnnouncementUploadUrl = async (
+  announcementUploadRequestBody: AnnouncementUploadRequestBody,
+  options?: RequestInit,
+): Promise<AnnouncementUploadResponse> => {
+  return customFetch<AnnouncementUploadResponse>(
+    getRequestAnnouncementUploadUrlUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(announcementUploadRequestBody),
+    },
+  );
+};
+
+export const getRequestAnnouncementUploadUrlMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>,
+    TError,
+    { data: BodyType<AnnouncementUploadRequestBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>,
+  TError,
+  { data: BodyType<AnnouncementUploadRequestBody> },
+  TContext
+> => {
+  const mutationKey = ["requestAnnouncementUploadUrl"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>,
+    { data: BodyType<AnnouncementUploadRequestBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requestAnnouncementUploadUrl(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequestAnnouncementUploadUrlMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>
+>;
+export type RequestAnnouncementUploadUrlMutationBody =
+  BodyType<AnnouncementUploadRequestBody>;
+export type RequestAnnouncementUploadUrlMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Request a presigned PUT URL for an announcement media upload
+ */
+export const useRequestAnnouncementUploadUrl = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>,
+    TError,
+    { data: BodyType<AnnouncementUploadRequestBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requestAnnouncementUploadUrl>>,
+  TError,
+  { data: BodyType<AnnouncementUploadRequestBody> },
+  TContext
+> => {
+  return useMutation(getRequestAnnouncementUploadUrlMutationOptions(options));
+};
+
+/**
+ * Task #696. Read-only listing of `ai_influencer_jobs` rows
+across every client, newest-first, with keyset pagination on
+the row id. Each row includes the buyer's resolved app-user +
+portal-user identity so support can grep by email without a
+DB round-trip.
+
+ * @summary List AI Influencer generation jobs across all users
+ */
+export const getListAdminInfluencerGenerationsUrl = (
+  params?: ListAdminInfluencerGenerationsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/portal/admin/influencer-generations?${stringifiedParams}`
+    : `/api/portal/admin/influencer-generations`;
+};
+
+export const listAdminInfluencerGenerations = async (
+  params?: ListAdminInfluencerGenerationsParams,
+  options?: RequestInit,
+): Promise<AdminInfluencerGenerationsList> => {
+  return customFetch<AdminInfluencerGenerationsList>(
+    getListAdminInfluencerGenerationsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListAdminInfluencerGenerationsQueryKey = (
+  params?: ListAdminInfluencerGenerationsParams,
+) => {
+  return [
+    `/api/portal/admin/influencer-generations`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListAdminInfluencerGenerationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listAdminInfluencerGenerations>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: ListAdminInfluencerGenerationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listAdminInfluencerGenerations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListAdminInfluencerGenerationsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listAdminInfluencerGenerations>>
+  > = ({ signal }) =>
+    listAdminInfluencerGenerations(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAdminInfluencerGenerations>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListAdminInfluencerGenerationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAdminInfluencerGenerations>>
+>;
+export type ListAdminInfluencerGenerationsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary List AI Influencer generation jobs across all users
+ */
+
+export function useListAdminInfluencerGenerations<
+  TData = Awaited<ReturnType<typeof listAdminInfluencerGenerations>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: ListAdminInfluencerGenerationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listAdminInfluencerGenerations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListAdminInfluencerGenerationsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Task #696. Aggregate counts over `ai_influencer_jobs`: total
+rows, per-status histogram (as a keyed object), free-tier vs
+paid-tier split, and a "stuck" count (non-terminal rows whose
+`updated_at` is older than the 1-hour threshold). Window
+defaults to the last 7 days; pass an explicit ISO timestamp
+in `since` to override.
+
+ * @summary Generation pipeline counts by status
+ */
+export const getGetAdminInfluencerGenerationStatsUrl = (
+  params?: GetAdminInfluencerGenerationStatsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/portal/admin/influencer-generations/stats?${stringifiedParams}`
+    : `/api/portal/admin/influencer-generations/stats`;
+};
+
+export const getAdminInfluencerGenerationStats = async (
+  params?: GetAdminInfluencerGenerationStatsParams,
+  options?: RequestInit,
+): Promise<AdminInfluencerGenerationStats> => {
+  return customFetch<AdminInfluencerGenerationStats>(
+    getGetAdminInfluencerGenerationStatsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAdminInfluencerGenerationStatsQueryKey = (
+  params?: GetAdminInfluencerGenerationStatsParams,
+) => {
+  return [
+    `/api/portal/admin/influencer-generations/stats`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetAdminInfluencerGenerationStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: GetAdminInfluencerGenerationStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetAdminInfluencerGenerationStatsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>
+  > = ({ signal }) =>
+    getAdminInfluencerGenerationStats(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminInfluencerGenerationStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>
+>;
+export type GetAdminInfluencerGenerationStatsQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Generation pipeline counts by status
+ */
+
+export function useGetAdminInfluencerGenerationStats<
+  TData = Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>,
+  TError = ErrorType<ApiError>,
+>(
+  params?: GetAdminInfluencerGenerationStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminInfluencerGenerationStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminInfluencerGenerationStatsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Task #696. Returns the full `ai_influencer_jobs` row plus the
+resolved owner identity (app-user + portal-user), the
+materialized `ai_influencers` row (if any), its angles +
+settings + setting images, and the child
+`ai_influencer_scene_jobs` rows.
+
+ * @summary Full detail for one generation job
+ */
+export const getGetAdminInfluencerGenerationUrl = (id: number) => {
+  return `/api/portal/admin/influencer-generations/${id}`;
+};
+
+export const getAdminInfluencerGeneration = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AdminInfluencerGenerationDetail> => {
+  return customFetch<AdminInfluencerGenerationDetail>(
+    getGetAdminInfluencerGenerationUrl(id),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAdminInfluencerGenerationQueryKey = (id: number) => {
+  return [`/api/portal/admin/influencer-generations/${id}`] as const;
+};
+
+export const getGetAdminInfluencerGenerationQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminInfluencerGeneration>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminInfluencerGeneration>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAdminInfluencerGenerationQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminInfluencerGeneration>>
+  > = ({ signal }) =>
+    getAdminInfluencerGeneration(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminInfluencerGeneration>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminInfluencerGenerationQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminInfluencerGeneration>>
+>;
+export type GetAdminInfluencerGenerationQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Full detail for one generation job
+ */
+
+export function useGetAdminInfluencerGeneration<
+  TData = Awaited<ReturnType<typeof getAdminInfluencerGeneration>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminInfluencerGeneration>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminInfluencerGenerationQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Queue a fresh job, reusing the existing influencer row
+ */
+export const getRetryAdminInfluencerGenerationUrl = (id: number) => {
+  return `/api/portal/admin/influencer-generations/${id}/retry`;
+};
+
+export const retryAdminInfluencerGeneration = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AdminInfluencerRetryResponse> => {
+  return customFetch<AdminInfluencerRetryResponse>(
+    getRetryAdminInfluencerGenerationUrl(id),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getRetryAdminInfluencerGenerationMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["retryAdminInfluencerGeneration"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return retryAdminInfluencerGeneration(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RetryAdminInfluencerGenerationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>
+>;
+
+export type RetryAdminInfluencerGenerationMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Queue a fresh job, reusing the existing influencer row
+ */
+export const useRetryAdminInfluencerGeneration = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof retryAdminInfluencerGeneration>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getRetryAdminInfluencerGenerationMutationOptions(options));
+};
+
+/**
+ * @summary Flip to failed, refund slot, email buyer
+ */
+export const getMarkFailedAdminInfluencerGenerationUrl = (id: number) => {
+  return `/api/portal/admin/influencer-generations/${id}/mark-failed`;
+};
+
+export const markFailedAdminInfluencerGeneration = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AdminInfluencerMarkFailedResponse> => {
+  return customFetch<AdminInfluencerMarkFailedResponse>(
+    getMarkFailedAdminInfluencerGenerationUrl(id),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getMarkFailedAdminInfluencerGenerationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["markFailedAdminInfluencerGeneration"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return markFailedAdminInfluencerGeneration(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MarkFailedAdminInfluencerGenerationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>
+>;
+
+export type MarkFailedAdminInfluencerGenerationMutationError =
+  ErrorType<unknown>;
+
+/**
+ * @summary Flip to failed, refund slot, email buyer
+ */
+export const useMarkFailedAdminInfluencerGeneration = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof markFailedAdminInfluencerGeneration>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(
+    getMarkFailedAdminInfluencerGenerationMutationOptions(options),
+  );
+};
+
+/**
+ * @summary Force-finalise with admin-supplied cover + scene URLs
+ */
+export const getManualDeliverAdminInfluencerGenerationUrl = (id: number) => {
+  return `/api/portal/admin/influencer-generations/${id}/manual-deliver`;
+};
+
+export const manualDeliverAdminInfluencerGeneration = async (
+  id: number,
+  adminInfluencerManualDeliverRequest: AdminInfluencerManualDeliverRequest,
+  options?: RequestInit,
+): Promise<AdminInfluencerManualDeliverResponse> => {
+  return customFetch<AdminInfluencerManualDeliverResponse>(
+    getManualDeliverAdminInfluencerGenerationUrl(id),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(adminInfluencerManualDeliverRequest),
+    },
+  );
+};
+
+export const getManualDeliverAdminInfluencerGenerationMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>,
+    TError,
+    { id: number; data: BodyType<AdminInfluencerManualDeliverRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>,
+  TError,
+  { id: number; data: BodyType<AdminInfluencerManualDeliverRequest> },
+  TContext
+> => {
+  const mutationKey = ["manualDeliverAdminInfluencerGeneration"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>,
+    { id: number; data: BodyType<AdminInfluencerManualDeliverRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return manualDeliverAdminInfluencerGeneration(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ManualDeliverAdminInfluencerGenerationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>
+>;
+export type ManualDeliverAdminInfluencerGenerationMutationBody =
+  BodyType<AdminInfluencerManualDeliverRequest>;
+export type ManualDeliverAdminInfluencerGenerationMutationError =
+  ErrorType<ApiError>;
+
+/**
+ * @summary Force-finalise with admin-supplied cover + scene URLs
+ */
+export const useManualDeliverAdminInfluencerGeneration = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>,
+    TError,
+    { id: number; data: BodyType<AdminInfluencerManualDeliverRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof manualDeliverAdminInfluencerGeneration>>,
+  TError,
+  { id: number; data: BodyType<AdminInfluencerManualDeliverRequest> },
+  TContext
+> => {
+  return useMutation(
+    getManualDeliverAdminInfluencerGenerationMutationOptions(options),
+  );
+};
+
+/**
+ * @summary Start a "view as user" impersonation session
+ */
+export const getStartAdminImpersonationUrl = (userId: number) => {
+  return `/api/portal/admin/impersonate/${userId}`;
+};
+
+export const startAdminImpersonation = async (
+  userId: number,
+  options?: RequestInit,
+): Promise<AdminImpersonationStartResponse> => {
+  return customFetch<AdminImpersonationStartResponse>(
+    getStartAdminImpersonationUrl(userId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getStartAdminImpersonationMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof startAdminImpersonation>>,
+    TError,
+    { userId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof startAdminImpersonation>>,
+  TError,
+  { userId: number },
+  TContext
+> => {
+  const mutationKey = ["startAdminImpersonation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof startAdminImpersonation>>,
+    { userId: number }
+  > = (props) => {
+    const { userId } = props ?? {};
+
+    return startAdminImpersonation(userId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type StartAdminImpersonationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof startAdminImpersonation>>
+>;
+
+export type StartAdminImpersonationMutationError = ErrorType<void>;
+
+/**
+ * @summary Start a "view as user" impersonation session
+ */
+export const useStartAdminImpersonation = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof startAdminImpersonation>>,
+    TError,
+    { userId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof startAdminImpersonation>>,
+  TError,
+  { userId: number },
+  TContext
+> => {
+  return useMutation(getStartAdminImpersonationMutationOptions(options));
+};
+
+/**
+ * The only mutating endpoint that remains callable while impersonating
+(whitelisted in shouldBlockImpersonatedWrite) so the portal's Exit
+button always succeeds.
+
+ * @summary End the current impersonation session
+ */
+export const getStopAdminImpersonationUrl = () => {
+  return `/api/portal/admin/impersonate/stop`;
+};
+
+export const stopAdminImpersonation = async (
+  options?: RequestInit,
+): Promise<StopAdminImpersonation200> => {
+  return customFetch<StopAdminImpersonation200>(
+    getStopAdminImpersonationUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getStopAdminImpersonationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof stopAdminImpersonation>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof stopAdminImpersonation>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["stopAdminImpersonation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof stopAdminImpersonation>>,
+    void
+  > = () => {
+    return stopAdminImpersonation(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type StopAdminImpersonationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof stopAdminImpersonation>>
+>;
+
+export type StopAdminImpersonationMutationError = ErrorType<unknown>;
+
+/**
+ * @summary End the current impersonation session
+ */
+export const useStopAdminImpersonation = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof stopAdminImpersonation>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof stopAdminImpersonation>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getStopAdminImpersonationMutationOptions(options));
+};
+
+/**
+ * @summary Check whether the current request carries an active impersonation session
+ */
+export const getGetAdminImpersonationStatusUrl = () => {
+  return `/api/portal/admin/impersonate/status`;
+};
+
+export const getAdminImpersonationStatus = async (
+  options?: RequestInit,
+): Promise<AdminImpersonationStatusResponse> => {
+  return customFetch<AdminImpersonationStatusResponse>(
+    getGetAdminImpersonationStatusUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAdminImpersonationStatusQueryKey = () => {
+  return [`/api/portal/admin/impersonate/status`] as const;
+};
+
+export const getGetAdminImpersonationStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminImpersonationStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminImpersonationStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAdminImpersonationStatusQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminImpersonationStatus>>
+  > = ({ signal }) =>
+    getAdminImpersonationStatus({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminImpersonationStatus>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminImpersonationStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminImpersonationStatus>>
+>;
+export type GetAdminImpersonationStatusQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Check whether the current request carries an active impersonation session
+ */
+
+export function useGetAdminImpersonationStatus<
+  TData = Awaited<ReturnType<typeof getAdminImpersonationStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminImpersonationStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminImpersonationStatusQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

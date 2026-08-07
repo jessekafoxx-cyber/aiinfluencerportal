@@ -3,6 +3,7 @@
   "compileOnSave": false,
   "files": [],
   "references": [
+    { "path": "lib/replit-auth-web" },
     {
       "path": "./lib/db"
     },
@@ -11,6 +12,33 @@
     },
     {
       "path": "./lib/api-zod"
+    },
+    {
+      "path": "./lib/automation-core"
+    },
+    {
+      "path": "./lib/billing-engine"
+    },
+    {
+      "path": "./lib/job-queue"
+    },
+    {
+      "path": "./lib/provider-adapters"
+    },
+    {
+      "path": "./lib/vsl-masterclass-content"
+    },
+    {
+      "path": "./lib/integrations-openai-ai-server"
+    },
+    {
+      "path": "./lib/integrations-gemini-ai"
+    },
+    {
+      "path": "./lib/sep2026-config"
+    },
+    {
+      "path": "./lib/prebuilt-brains-seed"
     }
   ]
 }

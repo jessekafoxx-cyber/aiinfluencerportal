@@ -1,19 +1,42 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "noImplicitReturns": true
   },
   "include": ["src"],
+  "exclude": ["src/**/*.test.ts"],
   "references": [
     {
       "path": "../../lib/db"
     },
     {
       "path": "../../lib/api-zod"
+    },
+    {
+      "path": "../../lib/integrations-openai-ai-server"
+    },
+    {
+      "path": "../../lib/integrations-gemini-ai"
+    },
+    {
+      "path": "../../lib/vsl-masterclass-content"
+    },
+    {
+      "path": "../../lib/automation-core"
+    },
+    {
+      "path": "../../lib/billing-engine"
+    },
+    {
+      "path": "../../lib/job-queue"
+    },
+    {
+      "path": "../../lib/provider-adapters"
     }
   ]
 }

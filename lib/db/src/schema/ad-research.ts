@@ -1,0 +1,40 @@
+import { pgTable, serial, text, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
+
+export const adResearchBrands = pgTable("ad_research_brands", {
+  id: serial("id").primaryKey(),
+  pageId: text("page_id").notNull().unique(),
+  pageName: text("page_name").notNull(),
+  pageUrl: text("page_url"),
+  category: text("category"),
+  notes: text("notes"),
+  lastScrapedAt: timestamp("last_scraped_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const adResearchAds = pgTable("ad_research_ads", {
+  id: serial("id").primaryKey(),
+  brandId: integer("brand_id").notNull(),
+  fbAdId: text("fb_ad_id").notNull().unique(),
+  pageId: text("page_id").notNull(),
+  pageName: text("page_name"),
+  adBody: text("ad_body"),
+  adTitle: text("ad_title"),
+  adDescription: text("ad_description"),
+  adLinkCaption: text("ad_link_caption"),
+  ctaType: text("cta_type"),
+  startDate: timestamp("start_date", { withTimezone: true }),
+  endDate: timestamp("end_date", { withTimezone: true }),
+  platforms: jsonb("platforms"),
+  displayFormat: text("display_format"),
+  snapshotUrl: text("snapshot_url"),
+  imageUrl: text("image_url"),
+  videoUrl: text("video_url"),
+  landingPageUrl: text("landing_page_url"),
+  isActive: boolean("is_active").default(true).notNull(),
+  board: text("board"),
+  tags: jsonb("tags"),
+  aiAnalysis: text("ai_analysis"),
+  savedAt: timestamp("saved_at", { withTimezone: true }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

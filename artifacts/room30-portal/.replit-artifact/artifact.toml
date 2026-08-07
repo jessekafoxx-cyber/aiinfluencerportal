@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/members/"
+title = "Room30 Portal"
+version = "1.0.0"
+id = "artifacts/room30-portal"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/members/" ]
+localPort = 21021
+
+[services.development]
+run = "pnpm --filter @workspace/room30-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/room30-portal", "run", "build" ]
+publicDir = "artifacts/room30-portal/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21021"
+BASE_PATH = "/members/"

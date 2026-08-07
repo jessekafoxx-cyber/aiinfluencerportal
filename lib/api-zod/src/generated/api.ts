@@ -8,9 +8,2209 @@
 import * as zod from "zod";
 
 /**
+ * @summary Get the currently authenticated user
+ */
+export const GetCurrentAuthUserHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token - `Bearer <sid>`."),
+});
+
+export const GetCurrentAuthUserResponse = zod.object({
+  user: zod.union([
+    zod.object({
+      id: zod.string(),
+      email: zod.string().email().nullable(),
+      firstName: zod.string().nullable(),
+      lastName: zod.string().nullable(),
+      profileImageUrl: zod.string().nullable(),
+    }),
+    zod.null(),
+  ]),
+});
+
+/**
+ * @summary Start the browser OIDC login flow
+ */
+export const BeginBrowserLoginQueryParams = zod.object({
+  returnTo: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Relative path to redirect to after login (must start with `\/`). Defaults to `\/`.",
+    ),
+});
+
+/**
+ * @summary Complete the browser OIDC login flow
+ */
+export const HandleBrowserLoginCallbackQueryParams = zod.object({
+  code: zod.coerce.string().optional(),
+  state: zod.coerce.string().optional(),
+  iss: zod.coerce.string().url().optional(),
+});
+
+/**
+ * @summary Clear the session and begin OIDC logout
+ */
+export const logoutBrowserSessionQueryReturnToDefault = `/`;
+
+export const LogoutBrowserSessionQueryParams = zod.object({
+  returnTo: zod.coerce
+    .string()
+    .default(logoutBrowserSessionQueryReturnToDefault),
+});
+
+export const LogoutBrowserSessionHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token - `Bearer <sid>`."),
+});
+
+/**
+ * @summary Exchange a mobile OIDC code for a session token
+ */
+
+export const ExchangeMobileAuthorizationCodeBody = zod.object({
+  code: zod.string().min(1),
+  code_verifier: zod.string().min(1),
+  redirect_uri: zod.string().url().min(1),
+  state: zod.string().min(1),
+  nonce: zod.string().min(1).optional(),
+});
+
+export const ExchangeMobileAuthorizationCodeResponse = zod.object({
+  token: zod.string(),
+});
+
+/**
+ * @summary Delete a mobile session token
+ */
+export const LogoutMobileSessionHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token - `Bearer <sid>`."),
+});
+
+export const LogoutMobileSessionResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
  * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+  buildSha: zod
+    .string()
+    .optional()
+    .describe(
+      'Task #200: build-time git commit SHA (or REPLIT_GIT_COMMIT\nfallback) injected via esbuild\'s `define`. \"unknown\" when\nbuilt outside the canonical build flow.\n',
+    ),
+  builtAt: zod
+    .string()
+    .nullish()
+    .describe("ISO timestamp captured at build time."),
+  runtime: zod.string().optional().describe("api | worker"),
 });
+
+/**
+ * @summary Request a presigned upload URL
+ */
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string(),
+  size: zod.number(),
+  contentType: zod.string(),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string(),
+  objectPath: zod.string(),
+  metadata: zod.object({
+    name: zod.string(),
+    size: zod.number(),
+    contentType: zod.string(),
+  }),
+});
+
+/**
+ * Task #745. Admin-only multipart upload for the laptop-mockup
+preview image on a Bridge Page row. Accepts a single JPEG / PNG /
+WebP file (cap matches the DFY template uploader at 30 MB),
+writes it to the same GCS bucket the rest of the portal serves
+from, and returns the canonical `/api/portal/images/<file>` path
+the admin form then stores on `bridge_pages.preview_image_url`.
+Requires Clerk session + admin role.
+
+ * @summary Upload a Bridge Page preview image (admin only)
+ */
+export const UploadBridgePageImageBody = zod.object({
+  image: zod.instanceof(File).describe("JPEG, PNG, or WebP image (max 30 MB)."),
+});
+
+export const UploadBridgePageImageResponse = zod.object({
+  url: zod
+    .string()
+    .describe(
+      "Public path served by the portal (`\/api\/portal\/images\/<file>`).",
+    ),
+});
+
+/**
+ * Creates a roadmap lead, synchronously generates the 3-tier offer ladder
+with an LLM, fires Resend email + Meta CAPI Lead in the background,
+and returns the lead with a public share token.
+
+ * @summary Submit the Personalized Apex Roadmap opt-in form
+ */
+export const createRoadmapLeadBodyFirstNameMax = 80;
+
+export const createRoadmapLeadBodyLastNameMax = 80;
+
+export const createRoadmapLeadBodyEmailMin = 5;
+export const createRoadmapLeadBodyEmailMax = 200;
+
+export const createRoadmapLeadBodyPhoneMin = 6;
+export const createRoadmapLeadBodyPhoneMax = 32;
+
+export const createRoadmapLeadBodyCountryMin = 2;
+export const createRoadmapLeadBodyCountryMax = 2;
+
+export const createRoadmapLeadBodyNicheMin = 3;
+export const createRoadmapLeadBodyNicheMax = 200;
+
+export const createRoadmapLeadBodyCurrentOfferMin = 3;
+export const createRoadmapLeadBodyCurrentOfferMax = 1000;
+
+export const CreateRoadmapLeadBody = zod.object({
+  firstName: zod.string().min(1).max(createRoadmapLeadBodyFirstNameMax),
+  lastName: zod.string().max(createRoadmapLeadBodyLastNameMax).nullish(),
+  email: zod
+    .string()
+    .email()
+    .min(createRoadmapLeadBodyEmailMin)
+    .max(createRoadmapLeadBodyEmailMax),
+  phone: zod
+    .string()
+    .min(createRoadmapLeadBodyPhoneMin)
+    .max(createRoadmapLeadBodyPhoneMax)
+    .describe("E.164 phone number including dial code."),
+  country: zod
+    .string()
+    .min(createRoadmapLeadBodyCountryMin)
+    .max(createRoadmapLeadBodyCountryMax)
+    .describe("ISO-3166 alpha-2 country code."),
+  niche: zod
+    .string()
+    .min(createRoadmapLeadBodyNicheMin)
+    .max(createRoadmapLeadBodyNicheMax),
+  revenueBand: zod.enum([
+    "Just starting (no revenue yet)",
+    "Under $5k/mo",
+    "$5k - $15k/mo",
+    "$15k - $50k/mo",
+    "$50k - $100k/mo",
+    "$100k+/mo (over $1M/yr)",
+  ]),
+  audienceSize: zod.enum([
+    "Under 1,000",
+    "1,000 - 10,000",
+    "10,000 - 50,000",
+    "50,000 - 250,000",
+    "250,000+",
+  ]),
+  currentOffer: zod
+    .string()
+    .min(createRoadmapLeadBodyCurrentOfferMin)
+    .max(createRoadmapLeadBodyCurrentOfferMax),
+  bottleneck: zod.enum([
+    "Can't scale past $10k/mo",
+    "Can't scale past $50k/mo",
+    "Can't scale past $100k/mo",
+    "Can't break $1M/yr ceiling",
+    "Not enough qualified leads coming in",
+    "Leads come in but don't convert to sales",
+    "Selling but average order value is too low",
+    "No premium backend, leaving money on table",
+    "Doing everything myself, can't get leverage",
+    "Burned out delivering 1-1, can't scale delivery",
+    "Revenue is random, no predictable system",
+    "Other / not sure",
+  ]),
+});
+
+export const createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketOrderBumpsMin = 2;
+export const createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketOrderBumpsMax = 2;
+
+export const createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketUpsellsMin = 3;
+export const createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketUpsellsMax = 3;
+
+export const CreateRoadmapLeadResponse = zod.object({
+  lead: zod.object({
+    id: zod.number().min(1),
+    shareToken: zod.string(),
+    firstName: zod.string(),
+    niche: zod.string(),
+    revenueBand: zod.enum([
+      "Just starting (no revenue yet)",
+      "Under $5k/mo",
+      "$5k - $15k/mo",
+      "$15k - $50k/mo",
+      "$50k - $100k/mo",
+      "$100k+/mo (over $1M/yr)",
+    ]),
+    audienceSize: zod
+      .enum([
+        "Under 1,000",
+        "1,000 - 10,000",
+        "10,000 - 50,000",
+        "50,000 - 250,000",
+        "250,000+",
+      ])
+      .optional(),
+    currentOffer: zod.string().nullish(),
+    bottleneck: zod.string().nullish(),
+    generationStatus: zod.enum(["pending", "processing", "ready", "failed"]),
+    generationError: zod.string().nullish(),
+    generatedOffers: zod.union([
+      zod.object({
+        intro: zod.string(),
+        lowTicket: zod.object({
+          format: zod.enum([
+            "Live 5-Day Challenge Funnel",
+            "Course + AI Operating System",
+            "Done-For-You Templates",
+          ]),
+          formatRationale: zod.string(),
+          why: zod.string(),
+          economics: zod.string(),
+          mainOffer: zod.object({
+            name: zod.string(),
+            promise: zod.string(),
+            price: zod
+              .number()
+              .describe("Whole-dollar price as a number, e.g. 27."),
+            priceLabel: zod
+              .string()
+              .describe(
+                "Human label including frequency, e.g. '$27 one-time'.",
+              ),
+            whatsInside: zod.array(zod.string()),
+            priceRationale: zod.string(),
+          }),
+          orderBumps: zod
+            .array(
+              zod.object({
+                name: zod.string(),
+                promise: zod.string(),
+                price: zod
+                  .number()
+                  .describe("Whole-dollar price as a number, e.g. 27."),
+                priceLabel: zod
+                  .string()
+                  .describe(
+                    "Human label including frequency, e.g. '$27 one-time'.",
+                  ),
+                whatsInside: zod.array(zod.string()),
+                priceRationale: zod.string(),
+              }),
+            )
+            .min(
+              createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketOrderBumpsMin,
+            )
+            .max(
+              createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketOrderBumpsMax,
+            ),
+          upsells: zod
+            .array(
+              zod.object({
+                name: zod.string(),
+                promise: zod.string(),
+                price: zod
+                  .number()
+                  .describe("Whole-dollar price as a number, e.g. 27."),
+                priceLabel: zod
+                  .string()
+                  .describe(
+                    "Human label including frequency, e.g. '$27 one-time'.",
+                  ),
+                whatsInside: zod.array(zod.string()),
+                priceRationale: zod.string(),
+              }),
+            )
+            .min(
+              createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketUpsellsMin,
+            )
+            .max(
+              createRoadmapLeadResponseLeadGeneratedOffersOneLowTicketUpsellsMax,
+            ),
+        }),
+        premium: zod.object({
+          why: zod.string(),
+          offerName: zod.string(),
+          promise: zod.string(),
+          format: zod.string(),
+          deliverables: zod.array(zod.string()),
+          experienceLayer: zod.string(),
+          idealClient: zod.string(),
+          price: zod.number(),
+          priceLabel: zod.string(),
+          priceRationale: zod.string(),
+          objectionHandling: zod.array(zod.string()),
+          salesConversation: zod.array(zod.string()),
+        }),
+        hundredK: zod.object({
+          why: zod.string(),
+          mindsetShift: zod.string(),
+          offerName: zod.string(),
+          coreConcept: zod.string(),
+          deliverables: zod.array(zod.string()),
+          experienceLayer: zod.string(),
+          transformation: zod.string(),
+          price: zod.number(),
+          priceLabel: zod.string(),
+          profitMargin: zod.string(),
+          deliveryPlan: zod.string(),
+          idealClient: zod.string(),
+          scarcity: zod.string(),
+        }),
+      }),
+      zod.null(),
+    ]),
+    createdAt: zod.coerce.date(),
+    isMillionPlus: zod.boolean(),
+  }),
+  resultUrl: zod
+    .string()
+    .describe(
+      "Relative URL to the public result page (\/roadmap\/result\/{shareToken}).",
+    ),
+});
+
+/**
+ * Returns the offer ladder and minimum metadata needed to render the
+result page. Public, no auth, but never returns email, phone, IP,
+last name, or user-agent.
+
+ * @summary Fetch the public view of a roadmap lead by share token
+ */
+export const getRoadmapLeadByShareTokenPathShareTokenMin = 16;
+export const getRoadmapLeadByShareTokenPathShareTokenMax = 80;
+
+export const GetRoadmapLeadByShareTokenParams = zod.object({
+  shareToken: zod.coerce
+    .string()
+    .min(getRoadmapLeadByShareTokenPathShareTokenMin)
+    .max(getRoadmapLeadByShareTokenPathShareTokenMax),
+});
+
+export const getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketOrderBumpsMin = 2;
+export const getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketOrderBumpsMax = 2;
+
+export const getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketUpsellsMin = 3;
+export const getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketUpsellsMax = 3;
+
+export const GetRoadmapLeadByShareTokenResponse = zod.object({
+  lead: zod.object({
+    id: zod.number().min(1),
+    shareToken: zod.string(),
+    firstName: zod.string(),
+    niche: zod.string(),
+    revenueBand: zod.enum([
+      "Just starting (no revenue yet)",
+      "Under $5k/mo",
+      "$5k - $15k/mo",
+      "$15k - $50k/mo",
+      "$50k - $100k/mo",
+      "$100k+/mo (over $1M/yr)",
+    ]),
+    audienceSize: zod
+      .enum([
+        "Under 1,000",
+        "1,000 - 10,000",
+        "10,000 - 50,000",
+        "50,000 - 250,000",
+        "250,000+",
+      ])
+      .optional(),
+    currentOffer: zod.string().nullish(),
+    bottleneck: zod.string().nullish(),
+    generationStatus: zod.enum(["pending", "processing", "ready", "failed"]),
+    generationError: zod.string().nullish(),
+    generatedOffers: zod.union([
+      zod.object({
+        intro: zod.string(),
+        lowTicket: zod.object({
+          format: zod.enum([
+            "Live 5-Day Challenge Funnel",
+            "Course + AI Operating System",
+            "Done-For-You Templates",
+          ]),
+          formatRationale: zod.string(),
+          why: zod.string(),
+          economics: zod.string(),
+          mainOffer: zod.object({
+            name: zod.string(),
+            promise: zod.string(),
+            price: zod
+              .number()
+              .describe("Whole-dollar price as a number, e.g. 27."),
+            priceLabel: zod
+              .string()
+              .describe(
+                "Human label including frequency, e.g. '$27 one-time'.",
+              ),
+            whatsInside: zod.array(zod.string()),
+            priceRationale: zod.string(),
+          }),
+          orderBumps: zod
+            .array(
+              zod.object({
+                name: zod.string(),
+                promise: zod.string(),
+                price: zod
+                  .number()
+                  .describe("Whole-dollar price as a number, e.g. 27."),
+                priceLabel: zod
+                  .string()
+                  .describe(
+                    "Human label including frequency, e.g. '$27 one-time'.",
+                  ),
+                whatsInside: zod.array(zod.string()),
+                priceRationale: zod.string(),
+              }),
+            )
+            .min(
+              getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketOrderBumpsMin,
+            )
+            .max(
+              getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketOrderBumpsMax,
+            ),
+          upsells: zod
+            .array(
+              zod.object({
+                name: zod.string(),
+                promise: zod.string(),
+                price: zod
+                  .number()
+                  .describe("Whole-dollar price as a number, e.g. 27."),
+                priceLabel: zod
+                  .string()
+                  .describe(
+                    "Human label including frequency, e.g. '$27 one-time'.",
+                  ),
+                whatsInside: zod.array(zod.string()),
+                priceRationale: zod.string(),
+              }),
+            )
+            .min(
+              getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketUpsellsMin,
+            )
+            .max(
+              getRoadmapLeadByShareTokenResponseLeadGeneratedOffersOneLowTicketUpsellsMax,
+            ),
+        }),
+        premium: zod.object({
+          why: zod.string(),
+          offerName: zod.string(),
+          promise: zod.string(),
+          format: zod.string(),
+          deliverables: zod.array(zod.string()),
+          experienceLayer: zod.string(),
+          idealClient: zod.string(),
+          price: zod.number(),
+          priceLabel: zod.string(),
+          priceRationale: zod.string(),
+          objectionHandling: zod.array(zod.string()),
+          salesConversation: zod.array(zod.string()),
+        }),
+        hundredK: zod.object({
+          why: zod.string(),
+          mindsetShift: zod.string(),
+          offerName: zod.string(),
+          coreConcept: zod.string(),
+          deliverables: zod.array(zod.string()),
+          experienceLayer: zod.string(),
+          transformation: zod.string(),
+          price: zod.number(),
+          priceLabel: zod.string(),
+          profitMargin: zod.string(),
+          deliveryPlan: zod.string(),
+          idealClient: zod.string(),
+          scarcity: zod.string(),
+        }),
+      }),
+      zod.null(),
+    ]),
+    createdAt: zod.coerce.date(),
+    isMillionPlus: zod.boolean(),
+  }),
+});
+
+/**
+ * Whitelisted funnel events: form_started, step_completed,
+form_submitted, result_viewed, cta_clicked, pdf_downloaded.
+Always returns 200 even on best-effort writes.
+
+ * @summary Record a funnel event for the roadmap lead magnet
+ */
+export const createRoadmapLeadEventBodyShareTokenMax = 80;
+
+export const createRoadmapLeadEventBodyStepMax = 80;
+
+export const createRoadmapLeadEventBodyCtaMax = 80;
+
+export const CreateRoadmapLeadEventBody = zod.object({
+  eventName: zod.enum([
+    "form_started",
+    "step_completed",
+    "form_submitted",
+    "result_viewed",
+    "cta_clicked",
+    "pdf_downloaded",
+  ]),
+  shareToken: zod
+    .string()
+    .max(createRoadmapLeadEventBodyShareTokenMax)
+    .nullish(),
+  step: zod.string().max(createRoadmapLeadEventBodyStepMax).nullish(),
+  cta: zod.string().max(createRoadmapLeadEventBodyCtaMax).nullish(),
+  context: zod.record(zod.string(), zod.unknown()).nullish(),
+});
+
+export const CreateRoadmapLeadEventResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * Renders the lead's 3-tier offer ladder as a branded PDF and
+streams it back as application/pdf. Public, no auth — keyed only
+by the high-entropy shareToken (UUID exposed only after submit).
+Used by the "Download PDF" CTA on /roadmap/result/{shareToken}.
+Server-side response is cached on a stable hash of the lead's
+generated offers so repeat downloads do not re-render Puppeteer.
+
+ * @summary Download the personalized roadmap PDF for a lead
+ */
+export const getRoadmapLeadPdfByShareTokenPathShareTokenMin = 16;
+export const getRoadmapLeadPdfByShareTokenPathShareTokenMax = 80;
+
+export const GetRoadmapLeadPdfByShareTokenParams = zod.object({
+  shareToken: zod.coerce
+    .string()
+    .min(getRoadmapLeadPdfByShareTokenPathShareTokenMin)
+    .max(getRoadmapLeadPdfByShareTokenPathShareTokenMax),
+});
+
+/**
+ * Persists the email + phone (plus country, affiliate code, source
+page, referrer) typed into the HeroLeadForm on the low-ticket
+sales pages, BEFORE the visitor is redirected to /checkout. Email
+is the natural key (lowercased + unique) - re-submits update the
+existing row's phone / country / affiliate / source / last_seen_at
+in place. IP and user-agent are captured server-side. Always
+responds 200 (best-effort) so a slow capture never blocks the
+buyer's redirect to checkout.
+
+ * @summary Capture lead email + phone from the low-ticket form before checkout
+ */
+export const captureFunnelLeadBodyEmailMin = 3;
+export const captureFunnelLeadBodyEmailMax = 254;
+
+export const captureFunnelLeadBodyPhoneMax = 40;
+
+export const captureFunnelLeadBodyFirstNameMax = 80;
+
+export const captureFunnelLeadBodyCountryMax = 8;
+
+export const captureFunnelLeadBodyAffiliateCodeMax = 80;
+
+export const captureFunnelLeadBodyFirstpromoterReferralIdMax = 128;
+
+export const captureFunnelLeadBodySourcePageMax = 200;
+
+export const captureFunnelLeadBodyReferrerMax = 500;
+
+export const CaptureFunnelLeadBody = zod.object({
+  email: zod
+    .string()
+    .email()
+    .min(captureFunnelLeadBodyEmailMin)
+    .max(captureFunnelLeadBodyEmailMax),
+  phone: zod.string().max(captureFunnelLeadBodyPhoneMax).optional(),
+  firstName: zod
+    .string()
+    .max(captureFunnelLeadBodyFirstNameMax)
+    .nullish()
+    .describe(
+      "Optional first name typed into the lead form. Persisted on the funnel_leads row and forwarded to KIT\/WATI\/CRM as a custom field (Task",
+    ),
+  country: zod.string().max(captureFunnelLeadBodyCountryMax).nullish(),
+  affiliateCode: zod
+    .string()
+    .max(captureFunnelLeadBodyAffiliateCodeMax)
+    .nullish(),
+  firstpromoterReferralId: zod
+    .string()
+    .max(captureFunnelLeadBodyFirstpromoterReferralIdMax)
+    .nullish()
+    .describe(
+      "FirstPromoter `_fprom_tid` cookie value, forwarded so the server can stamp the lead row with the referral id (Task",
+    ),
+  sourcePage: zod.string().max(captureFunnelLeadBodySourcePageMax).nullish(),
+  referrer: zod.string().max(captureFunnelLeadBodyReferrerMax).nullish(),
+});
+
+export const CaptureFunnelLeadResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * Returns the snapshot rendered by the admin Queue Health
+dashboard: legacy queue mechanics (`status`), real outcomes
+(`outcomes` - success rate, terminal vs retrying, operational
+bucket counts), recent failures with platform / bucket /
+terminal flags, error-class histogram, attempts histogram,
+processing-time percentiles, throughput, and active leases.
+
+ * @summary Real-outcome queue health snapshot
+ */
+export const GetAdminQueueHealthResponse = zod.object({
+  ok: zod.boolean(),
+  workerId: zod.string(),
+  status: zod.object({
+    ok: zod.number(),
+    failed: zod.number(),
+    pending: zod.number(),
+    downloading: zod.number(),
+    partial: zod.number(),
+    stuck: zod.number(),
+  }),
+  outcomes: zod.object({
+    totalProcessed: zod.number(),
+    usableMedia: zod.number(),
+    successRateBp: zod.number().describe("0-10000 basis points"),
+    terminalFailures: zod.number(),
+    dismissedTotal: zod.number(),
+    retrying: zod.number(),
+    authBlocked: zod.number(),
+    rateLimited: zod.number(),
+    providerFailures: zod.number(),
+    buckets: zod.object({
+      auth: zod.number(),
+      "rate-limit": zod.number(),
+      quota: zod.number(),
+      unavailable: zod.number(),
+      dead: zod.number(),
+      retryable: zod.number(),
+    }),
+  }),
+  active: zod.object({
+    rows: zod.number(),
+    workers: zod.array(
+      zod.object({
+        owner: zod.string(),
+        rows: zod.number(),
+        oldestLeaseSecLeft: zod.number().nullable(),
+      }),
+    ),
+  }),
+  sourceSync: zod
+    .object({
+      sessionId: zod.number(),
+      startedAt: zod.coerce.date(),
+      completedAt: zod.coerce.date().nullable(),
+      status: zod.string(),
+      rowsFetched: zod.number(),
+      rowsProcessed: zod.number(),
+      rowsSkipped: zod.number(),
+    })
+    .nullish()
+    .describe(
+      "Task #366: latest sync session for the ad-research board.\nSurfaces source-row drop counts (`rowsSkipped`) so admins\non the queue-health dashboard can see how many sheet rows\nwere silently dropped before they ever became board items.\n",
+    ),
+  recentFailures: zod.array(
+    zod.object({
+      rowKey: zod.string(),
+      adLink: zod.string(),
+      mediaError: zod.string().nullable(),
+      mediaErrorClass: zod.string().nullable(),
+      attempts: zod.number(),
+      updatedAt: zod.coerce.date(),
+      platform: zod.enum(["ig", "fb", "yt", "other"]),
+      bucket: zod.enum([
+        "auth",
+        "rate-limit",
+        "quota",
+        "unavailable",
+        "dead",
+        "retryable",
+      ]),
+      terminal: zod.boolean(),
+      dismissed: zod.boolean(),
+    }),
+  ),
+  errorClasses: zod.record(zod.string(), zod.number()),
+  attemptsHistogram: zod.record(zod.string(), zod.number()),
+  processingMs: zod.object({
+    count: zod.number(),
+    avg: zod.number().nullable(),
+    p50: zod.number().nullable(),
+    p95: zod.number().nullable(),
+    max: zod.number().nullable(),
+  }),
+  throughput: zod.object({
+    last1h: zod.number(),
+    last24h: zod.number(),
+  }),
+  providers: zod
+    .object({
+      apifySuccess: zod.number(),
+      ytdlpSuccess: zod.number(),
+      escalationCount: zod.number(),
+      escalationRecovered: zod.number(),
+      escalationRecoveryRate: zod.number(),
+      ytdlpAuthRecoveries: zod.number(),
+      ytDlpAuthenticatedRecoveries: zod.number(),
+      apifyEscalationRecoveries: zod.number(),
+      authFailureRecoveryRate: zod.number(),
+      windowHours: zod.number(),
+      invalidUrlsBlocked: zod.number(),
+      deadContentDismissed: zod.number(),
+      delayedRetriesScheduled: zod.number(),
+      temporaryRecoveries: zod.number(),
+      authRecoveries: zod.number(),
+      extractorRecoveries: zod.number(),
+      avgRecoveryLatencyMs: zod.number().nullish(),
+      perActorSuccess: zod.array(
+        zod.object({
+          actor: zod.string(),
+          successes: zod.number(),
+          share: zod.number(),
+        }),
+      ),
+    })
+    .describe(
+      "Task #187: per-provider observability rolled up over the\nlast 24h from queue_metrics snapshots. apifySuccess \/\nytdlpSuccess \/ escalationCount \/ escalationRecovered are\nthe existing T158 counters. ytdlpAuthRecoveries is the\nraw count of yt-dlp successes that consumed an\nauthenticated cookie jar; ytDlpAuthenticatedRecoveries is\nthe same value re-exposed under the dashboard-friendly\nname. apifyEscalationRecoveries is a clearer alias for\nescalationRecovered. authFailureRecoveryRate compares\n(escalation + ytdlp authenticated recoveries) against the\nuniverse of auth-class events that triggered them.\n",
+    ),
+  verificationBenchmark: zod
+    .object({
+      stage: zod.enum(["before", "completed"]),
+      startedAt: zod.coerce.date(),
+      completedAt: zod.coerce.date().nullable(),
+      reopened: zod.number(),
+      before: zod.record(zod.string(), zod.number()),
+      after: zod.record(zod.string(), zod.number()).nullable(),
+    })
+    .nullish()
+    .describe(
+      'Task #197: persisted verification benchmark snapshot. Null\nuntil an admin POSTs the verification-benchmark route. The\nstage discriminator is \"before\" while the worker is still\ndraining and \"completed\" once a follow-up POST captured\nthe after snapshot.\n',
+    ),
+  generatedAt: zod.coerce.date(),
+});
+
+/**
+ * Returns the per-snapshot trend points written by
+`recordQueueMetricsSnapshot`. Powers the dashboard sparklines
+(queue depth, throughput, failures, p95, success rate, auth /
+rate-limit / provider failures, retry volume).
+
+ * @summary Historical queue-health trend snapshots
+ */
+export const getAdminQueueTrendsQueryHoursDefault = 24;
+export const getAdminQueueTrendsQueryHoursMax = 168;
+
+export const GetAdminQueueTrendsQueryParams = zod.object({
+  hours: zod.coerce
+    .number()
+    .min(1)
+    .max(getAdminQueueTrendsQueryHoursMax)
+    .default(getAdminQueueTrendsQueryHoursDefault),
+});
+
+export const GetAdminQueueTrendsResponse = zod.object({
+  ok: zod.boolean(),
+  windowHours: zod.number(),
+  points: zod.array(
+    zod.object({
+      capturedAt: zod.coerce.date(),
+      statusPending: zod.number(),
+      statusDownloading: zod.number(),
+      statusOk: zod.number(),
+      statusFailed: zod.number(),
+      statusPartial: zod.number(),
+      stuck: zod.number(),
+      activeLeases: zod.number(),
+      throughput1h: zod.number(),
+      throughput24h: zod.number(),
+      failures1h: zod.number(),
+      avgProcessingMs: zod.number().nullable(),
+      p95ProcessingMs: zod.number().nullable(),
+      totalRows: zod.number(),
+      usableMedia: zod.number(),
+      successRateBp: zod.number(),
+      terminalFailures: zod.number(),
+      dismissedTotal: zod.number(),
+      authFailures24h: zod.number(),
+      rateLimits24h: zod.number(),
+      providerFailures24h: zod.number(),
+      retryVolume24h: zod.number(),
+      apifySuccess: zod.number(),
+      ytdlpSuccess: zod.number(),
+      escalationCount: zod.number(),
+      escalationRecovered: zod.number(),
+      ytdlpAuthRecoveries: zod.number(),
+    }),
+  ),
+});
+
+/**
+ * Task #187. After an admin uploads a fresh IG/FB cookie jar, this
+endpoint reopens dismissed ad-research-board queue rows whose
+last media error was auth-class (`ig-login-required`,
+`fb-auth-wall`, `cookie-expired`,
+`auth-wall-escalated-failed`) within the configurable lookback
+window. Rows are flipped back to `mediaStatus=pending`,
+`dismissed=false`, `attempts=0`, the lease columns
+(`media_lease_owner`, `media_lease_until`) are cleared, the
+`media_reopened_at_t187` marker is stamped (drives the
+cohort-based `authFailureRecoveryRate` metric), and the
+worker's `processPendingMediaInBackground` is kicked.
+
+ * @summary Reopen dismissed ad-research-board rows that failed on auth walls
+ */
+export const requeueAdResearchBoardAuthFailuresBodyLookbackDaysDefault = 7;
+export const requeueAdResearchBoardAuthFailuresBodyLookbackDaysMax = 90;
+
+export const RequeueAdResearchBoardAuthFailuresBody = zod.object({
+  lookbackDays: zod
+    .number()
+    .min(1)
+    .max(requeueAdResearchBoardAuthFailuresBodyLookbackDaysMax)
+    .default(requeueAdResearchBoardAuthFailuresBodyLookbackDaysDefault)
+    .describe("How many days back to consider auth failures (default 7)."),
+});
+
+export const RequeueAdResearchBoardAuthFailuresResponse = zod.object({
+  ok: zod.boolean(),
+  reopened: zod.number(),
+  lookbackDays: zod.number(),
+});
+
+/**
+ * Task #187. Resets `previewStatus` and `previewError` to NULL on
+funnels-research-board rows whose last preview attempt failed
+with an auth-shaped error (matches login / auth / cookie / 401
+/ 403 in `previewError`) within the configurable lookback
+window (default 7 days). Lets the existing preview worker
+pick them back up after a fresh cookie jar is uploaded.
+
+ * @summary Reopen funnels-research-board rows whose preview failed on auth walls
+ */
+export const requeueFunnelsResearchBoardAuthFailuresBodyLookbackDaysDefault = 7;
+export const requeueFunnelsResearchBoardAuthFailuresBodyLookbackDaysMax = 90;
+
+export const RequeueFunnelsResearchBoardAuthFailuresBody = zod.object({
+  lookbackDays: zod
+    .number()
+    .min(1)
+    .max(requeueFunnelsResearchBoardAuthFailuresBodyLookbackDaysMax)
+    .default(requeueFunnelsResearchBoardAuthFailuresBodyLookbackDaysDefault)
+    .describe("How many days back to consider auth failures (default 7)."),
+});
+
+export const RequeueFunnelsResearchBoardAuthFailuresResponse = zod.object({
+  ok: zod.boolean(),
+  reopened: zod.number(),
+  lookbackDays: zod.number(),
+});
+
+/**
+ * Returns a paginated, sortable, search-filterable list of roadmap
+leads with full PII (email, phone, IP, last name) and the raw
+generation payload — intended for the admin UI at
+`/portal/admin/roadmap-leads`.
+
+**Auth:** Clerk bearer token + ADMIN_EMAILS allow-list. Non-admin
+callers receive 401/403.
+
+ * @summary List roadmap leads for the admin dashboard
+ */
+export const listAdminRoadmapLeadsQueryLimitDefault = 50;
+export const listAdminRoadmapLeadsQueryLimitMax = 200;
+
+export const listAdminRoadmapLeadsQueryOffsetDefault = 0;
+export const listAdminRoadmapLeadsQueryOffsetMin = 0;
+
+export const listAdminRoadmapLeadsQuerySortDefault = `createdAt_desc`;
+
+export const ListAdminRoadmapLeadsQueryParams = zod.object({
+  limit: zod.coerce
+    .number()
+    .min(1)
+    .max(listAdminRoadmapLeadsQueryLimitMax)
+    .default(listAdminRoadmapLeadsQueryLimitDefault),
+  offset: zod.coerce
+    .number()
+    .min(listAdminRoadmapLeadsQueryOffsetMin)
+    .default(listAdminRoadmapLeadsQueryOffsetDefault),
+  sort: zod.coerce
+    .string()
+    .default(listAdminRoadmapLeadsQuerySortDefault)
+    .describe(
+      "`<field>_<direction>` where field is one of createdAt,\nfirstName, email, revenueBand, generationStatus and direction\nis asc or desc. Defaults to `createdAt_desc`.\n",
+    ),
+  search: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Case-insensitive substring match on email, firstName, or niche.",
+    ),
+});
+
+export const listAdminRoadmapLeadsResponseTotalMin = 0;
+
+export const listAdminRoadmapLeadsResponseOffsetMin = 0;
+
+export const listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketOrderBumpsMin = 2;
+export const listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketOrderBumpsMax = 2;
+
+export const listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketUpsellsMin = 3;
+export const listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketUpsellsMax = 3;
+
+export const ListAdminRoadmapLeadsResponse = zod.object({
+  total: zod.number().min(listAdminRoadmapLeadsResponseTotalMin),
+  limit: zod.number().min(1),
+  offset: zod.number().min(listAdminRoadmapLeadsResponseOffsetMin),
+  sort: zod.string(),
+  leads: zod.array(
+    zod
+      .object({
+        id: zod.number().min(1),
+        shareToken: zod.string(),
+        firstName: zod.string(),
+        lastName: zod.string().nullish(),
+        email: zod.string().email(),
+        phone: zod.string().nullish(),
+        country: zod.string().nullish(),
+        niche: zod.string(),
+        revenueBand: zod.enum([
+          "Just starting (no revenue yet)",
+          "Under $5k/mo",
+          "$5k - $15k/mo",
+          "$15k - $50k/mo",
+          "$50k - $100k/mo",
+          "$100k+/mo (over $1M/yr)",
+        ]),
+        audienceSize: zod.string().nullish(),
+        currentOffer: zod.string().nullish(),
+        bottleneck: zod.string().nullish(),
+        generationStatus: zod.enum([
+          "pending",
+          "processing",
+          "ready",
+          "failed",
+        ]),
+        generationError: zod.string().nullish(),
+        hasOffers: zod.boolean(),
+        generatedOffers: zod
+          .union([
+            zod.object({
+              intro: zod.string(),
+              lowTicket: zod.object({
+                format: zod.enum([
+                  "Live 5-Day Challenge Funnel",
+                  "Course + AI Operating System",
+                  "Done-For-You Templates",
+                ]),
+                formatRationale: zod.string(),
+                why: zod.string(),
+                economics: zod.string(),
+                mainOffer: zod.object({
+                  name: zod.string(),
+                  promise: zod.string(),
+                  price: zod
+                    .number()
+                    .describe("Whole-dollar price as a number, e.g. 27."),
+                  priceLabel: zod
+                    .string()
+                    .describe(
+                      "Human label including frequency, e.g. '$27 one-time'.",
+                    ),
+                  whatsInside: zod.array(zod.string()),
+                  priceRationale: zod.string(),
+                }),
+                orderBumps: zod
+                  .array(
+                    zod.object({
+                      name: zod.string(),
+                      promise: zod.string(),
+                      price: zod
+                        .number()
+                        .describe("Whole-dollar price as a number, e.g. 27."),
+                      priceLabel: zod
+                        .string()
+                        .describe(
+                          "Human label including frequency, e.g. '$27 one-time'.",
+                        ),
+                      whatsInside: zod.array(zod.string()),
+                      priceRationale: zod.string(),
+                    }),
+                  )
+                  .min(
+                    listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketOrderBumpsMin,
+                  )
+                  .max(
+                    listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketOrderBumpsMax,
+                  ),
+                upsells: zod
+                  .array(
+                    zod.object({
+                      name: zod.string(),
+                      promise: zod.string(),
+                      price: zod
+                        .number()
+                        .describe("Whole-dollar price as a number, e.g. 27."),
+                      priceLabel: zod
+                        .string()
+                        .describe(
+                          "Human label including frequency, e.g. '$27 one-time'.",
+                        ),
+                      whatsInside: zod.array(zod.string()),
+                      priceRationale: zod.string(),
+                    }),
+                  )
+                  .min(
+                    listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketUpsellsMin,
+                  )
+                  .max(
+                    listAdminRoadmapLeadsResponseLeadsItemGeneratedOffersOneLowTicketUpsellsMax,
+                  ),
+              }),
+              premium: zod.object({
+                why: zod.string(),
+                offerName: zod.string(),
+                promise: zod.string(),
+                format: zod.string(),
+                deliverables: zod.array(zod.string()),
+                experienceLayer: zod.string(),
+                idealClient: zod.string(),
+                price: zod.number(),
+                priceLabel: zod.string(),
+                priceRationale: zod.string(),
+                objectionHandling: zod.array(zod.string()),
+                salesConversation: zod.array(zod.string()),
+              }),
+              hundredK: zod.object({
+                why: zod.string(),
+                mindsetShift: zod.string(),
+                offerName: zod.string(),
+                coreConcept: zod.string(),
+                deliverables: zod.array(zod.string()),
+                experienceLayer: zod.string(),
+                transformation: zod.string(),
+                price: zod.number(),
+                priceLabel: zod.string(),
+                profitMargin: zod.string(),
+                deliveryPlan: zod.string(),
+                idealClient: zod.string(),
+                scarcity: zod.string(),
+              }),
+            }),
+            zod.null(),
+          ])
+          .optional(),
+        emailSentAt: zod.coerce.date().nullish(),
+        emailMessageId: zod.string().nullish(),
+        createdAt: zod.coerce.date(),
+        isMillionPlus: zod.boolean(),
+      })
+      .describe(
+        "Admin-only view of a roadmap lead. Includes PII fields (email,\nphone, last name) that are deliberately stripped from\nPublicRoadmapLeadView. Never expose this shape on a public route.\n",
+      ),
+  ),
+});
+
+/**
+ * Returns metadata about the saved Instagram session cookies blob
+(status, cookie count, sessionid preview, inferred expiry, last
+error, required-cookie presence). Never returns plaintext cookie
+values.
+
+ * @summary Read Instagram session cookie metadata
+ */
+export const GetInstagramSessionCookiesResponse = zod
+  .object({
+    present: zod.boolean(),
+    status: zod.enum(["missing", "active", "expired"]),
+    savedAt: zod.coerce.date().nullable(),
+    savedBy: zod.string().nullable(),
+    cookieCount: zod.number(),
+    cookieNames: zod.array(zod.string()),
+    sessionidPreview: zod.string().nullable(),
+    inferredExpiresAt: zod.coerce.date().nullable(),
+    hasRequiredCookies: zod.boolean(),
+    missingRequired: zod.array(zod.string()),
+    lastError: zod.string().nullable(),
+    configured: zod
+      .boolean()
+      .describe("Whether INSTAGRAM_COOKIES_SECRET env var is set"),
+  })
+  .describe(
+    "Non-sensitive metadata about the saved Instagram session cookies\nblob. Plaintext cookie values are never returned by the API.\n",
+  );
+
+/**
+ * Accepts a Cookie-Editor / EditThisCookie JSON export from a
+logged-in Instagram session. Validates required cookies
+(sessionid, ds_user_id, csrftoken), AES-256-GCM encrypts the
+blob, and stores it in `provider_configs` under
+(`instagram`, `session_cookies`). Returns the resulting metadata.
+
+ * @summary Save a fresh Instagram session cookies blob
+ */
+
+export const SaveInstagramSessionCookiesBody = zod
+  .object({
+    cookiesJson: zod.string().min(1),
+  })
+  .describe(
+    "Cookie-Editor \/ EditThisCookie JSON export. Either a JSON array\nof cookie objects or `{ cookies: [...] }`.\n",
+  );
+
+export const SaveInstagramSessionCookiesResponse = zod
+  .object({
+    present: zod.boolean(),
+    status: zod.enum(["missing", "active", "expired"]),
+    savedAt: zod.coerce.date().nullable(),
+    savedBy: zod.string().nullable(),
+    cookieCount: zod.number(),
+    cookieNames: zod.array(zod.string()),
+    sessionidPreview: zod.string().nullable(),
+    inferredExpiresAt: zod.coerce.date().nullable(),
+    hasRequiredCookies: zod.boolean(),
+    missingRequired: zod.array(zod.string()),
+    lastError: zod.string().nullable(),
+    configured: zod
+      .boolean()
+      .describe("Whether INSTAGRAM_COOKIES_SECRET env var is set"),
+  })
+  .describe(
+    "Non-sensitive metadata about the saved Instagram session cookies\nblob. Plaintext cookie values are never returned by the API.\n",
+  );
+
+/**
+ * @summary Delete the saved Instagram session cookies blob
+ */
+export const DeleteInstagramSessionCookiesResponse = zod
+  .object({
+    present: zod.boolean(),
+    status: zod.enum(["missing", "active", "expired"]),
+    savedAt: zod.coerce.date().nullable(),
+    savedBy: zod.string().nullable(),
+    cookieCount: zod.number(),
+    cookieNames: zod.array(zod.string()),
+    sessionidPreview: zod.string().nullable(),
+    inferredExpiresAt: zod.coerce.date().nullable(),
+    hasRequiredCookies: zod.boolean(),
+    missingRequired: zod.array(zod.string()),
+    lastError: zod.string().nullable(),
+    configured: zod
+      .boolean()
+      .describe("Whether INSTAGRAM_COOKIES_SECRET env var is set"),
+  })
+  .describe(
+    "Non-sensitive metadata about the saved Instagram session cookies\nblob. Plaintext cookie values are never returned by the API.\n",
+  );
+
+/**
+ * Returns metadata about the saved Facebook cookies.txt jar
+(uploaded at, uploaded by, status, age, last validated) and the
+latest auth_health row for the `fb` platform. Never returns
+cookie bytes.
+
+ * @summary Read Facebook cookies.txt jar metadata
+ */
+export const GetFacebookCookiesResponse = zod.object({
+  ok: zod.boolean(),
+  configured: zod
+    .boolean()
+    .optional()
+    .describe("Whether FACEBOOK_COOKIES_SECRET env var is set"),
+  jar: zod
+    .object({
+      id: zod.number(),
+      platform: zod.enum(["fb"]),
+      uploadedBy: zod.string().nullable(),
+      uploadedAt: zod.coerce.date(),
+      lastValidatedAt: zod.coerce.date().nullable(),
+      status: zod.string(),
+      notes: zod.string().nullable(),
+      ageHours: zod.number(),
+      cookieCount: zod
+        .number()
+        .nullish()
+        .describe(
+          "Number of cookie rows parsed from the stored jar (display only).",
+        ),
+      inferredExpiresAt: zod.coerce
+        .date()
+        .nullish()
+        .describe(
+          "Latest expires-at across all cookie rows in the jar (display only).",
+        ),
+    })
+    .describe(
+      "Non-sensitive metadata about the saved Facebook cookies.txt jar.\nCookie bytes never leave the server.\n",
+    )
+    .nullable(),
+  health: zod
+    .object({
+      platform: zod.enum(["fb"]),
+      status: zod.string(),
+      lastSuccessAt: zod.coerce.date().nullable(),
+      lastFailureAt: zod.coerce.date().nullable(),
+      lastError: zod.string().nullable(),
+      lastErrorClass: zod.string().nullable(),
+      lastProbeAt: zod.coerce.date().nullable(),
+      probeUrl: zod.string().nullable(),
+    })
+    .nullable(),
+});
+
+/**
+ * Accepts a Netscape cookies.txt export from a logged-in
+facebook.com session. Validates the file as Netscape format,
+soft-deletes any prior active jar, persists the new jar, and
+returns the resulting jar metadata.
+
+ * @summary Save a fresh Facebook cookies.txt jar
+ */
+
+export const SaveFacebookCookiesBody = zod
+  .object({
+    cookiesText: zod
+      .string()
+      .min(1)
+      .describe("Netscape cookies.txt OR JSON cookie export."),
+    cookiesJson: zod
+      .string()
+      .min(1)
+      .nullish()
+      .describe("Optional alias for cookiesText accepting a JSON export."),
+    notes: zod.string().nullish(),
+  })
+  .describe(
+    "Cookie payload exported from facebook.com. Accepts either a\nNetscape `cookies.txt` string or a Cookie-Editor \/ EditThisCookie\nJSON export (array of cookie objects, or `{ cookies: [...] }`).\nThe server auto-detects the format and normalizes JSON to\nNetscape before encrypting under FACEBOOK_COOKIES_SECRET.\n",
+  );
+
+export const SaveFacebookCookiesResponse = zod.object({
+  ok: zod.boolean(),
+  jar: zod
+    .object({
+      id: zod.number(),
+      platform: zod.enum(["fb"]),
+      uploadedBy: zod.string().nullable(),
+      uploadedAt: zod.coerce.date(),
+      lastValidatedAt: zod.coerce.date().nullable(),
+      status: zod.string(),
+      notes: zod.string().nullable(),
+      ageHours: zod.number(),
+      cookieCount: zod
+        .number()
+        .nullish()
+        .describe(
+          "Number of cookie rows parsed from the stored jar (display only).",
+        ),
+      inferredExpiresAt: zod.coerce
+        .date()
+        .nullish()
+        .describe(
+          "Latest expires-at across all cookie rows in the jar (display only).",
+        ),
+    })
+    .describe(
+      "Non-sensitive metadata about the saved Facebook cookies.txt jar.\nCookie bytes never leave the server.\n",
+    ),
+  rows: zod.number(),
+  format: zod
+    .enum(["netscape", "json"])
+    .optional()
+    .describe("Detected format of the submitted cookie payload."),
+});
+
+/**
+ * @summary Soft-delete the active Facebook cookies.txt jar
+ */
+export const DeleteFacebookCookiesResponse = zod.object({
+  ok: zod.boolean(),
+  jar: zod.object({}).passthrough().nullable(),
+});
+
+/**
+ * Runs the existing extraction-diagnose probe against a known
+public Facebook URL (or one provided in the body) with platform
+forced to `fb`. Read-only - does not write `auth_health`.
+
+ * @summary Probe the saved FB jar via the extraction-diagnose runner
+ */
+export const TestFacebookCookiesBody = zod.object({
+  url: zod
+    .string()
+    .nullish()
+    .describe(
+      "Optional FB URL override; defaults to a known public watch link.",
+    ),
+});
+
+export const TestFacebookCookiesResponse = zod.object({
+  ok: zod.boolean(),
+  result: zod.object({
+    ok: zod.boolean(),
+    url: zod.string(),
+    platform: zod.enum(["fb"]).nullable(),
+    jarId: zod.number().nullable(),
+    slideCount: zod.number(),
+    errorClass: zod.string().nullable(),
+    error: zod.string().nullable(),
+    durationMs: zod.number(),
+    stages: zod.object({
+      reachability: zod.object({
+        ok: zod.boolean(),
+        errorClass: zod.string().nullable(),
+        error: zod.string().nullable(),
+        durationMs: zod.number(),
+      }),
+      extraction: zod.object({
+        ok: zod.boolean(),
+        errorClass: zod.string().nullable(),
+        error: zod.string().nullable(),
+        durationMs: zod.number(),
+      }),
+      escalation: zod.object({
+        ok: zod.boolean(),
+        errorClass: zod.string().nullable(),
+        error: zod.string().nullable(),
+        durationMs: zod.number(),
+      }),
+    }),
+  }),
+});
+
+/**
+ * Runs `apify~instagram-profile-scraper` against a stable public
+profile (`natgeo`) using the saved session cookies (regardless
+of the cookies' current `status` flag, so an admin can re-test a
+previously expired-marked session without re-pasting). Reports
+back one of: ok, auth-blocked, rate-limited, no-cookies,
+no-token, actor-error, timeout, no-data. A successful probe
+clears the `expired` flag.
+
+ * @summary Probe the saved Instagram session cookies via a small Apify run
+ */
+export const TestInstagramSessionCookiesResponse = zod.object({
+  ok: zod.boolean(),
+  result: zod.object({
+    ok: zod.boolean(),
+    status: zod.enum([
+      "ok",
+      "auth-blocked",
+      "rate-limited",
+      "no-cookies",
+      "no-token",
+      "actor-error",
+      "timeout",
+      "no-data",
+    ]),
+    error: zod.string().nullable(),
+    sample: zod
+      .object({
+        username: zod.string(),
+        postCount: zod.number(),
+      })
+      .nullable(),
+  }),
+  metadata: zod
+    .object({
+      present: zod.boolean(),
+      status: zod.enum(["missing", "active", "expired"]),
+      savedAt: zod.coerce.date().nullable(),
+      savedBy: zod.string().nullable(),
+      cookieCount: zod.number(),
+      cookieNames: zod.array(zod.string()),
+      sessionidPreview: zod.string().nullable(),
+      inferredExpiresAt: zod.coerce.date().nullable(),
+      hasRequiredCookies: zod.boolean(),
+      missingRequired: zod.array(zod.string()),
+      lastError: zod.string().nullable(),
+      configured: zod
+        .boolean()
+        .describe("Whether INSTAGRAM_COOKIES_SECRET env var is set"),
+    })
+    .describe(
+      "Non-sensitive metadata about the saved Instagram session cookies\nblob. Plaintext cookie values are never returned by the API.\n",
+    ),
+});
+
+/**
+ * @summary List products a Platinum Founder Code can be redeemed against
+ */
+export const ListPlatinumCodeMainProductsResponse = zod.object({
+  products: zod.array(
+    zod.object({
+      slug: zod.string(),
+      label: zod.string(),
+      priceCents: zod.number(),
+    }),
+  ),
+});
+
+/**
+ * @summary Read the signed-in buyer's own Platinum Founder Code
+ */
+export const GetMyPlatinumCodeResponse = zod.object({
+  code: zod.string(),
+  status: zod.enum(["unredeemed", "redeemed", "revoked"]),
+  ownerEmail: zod.string(),
+  redeemedForProductSlug: zod.string().nullish(),
+  redeemedForOrderId: zod.string().nullish(),
+  redeemedAt: zod.coerce.date().nullish(),
+  revokedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date().optional(),
+});
+
+/**
+ * @summary Redeem the buyer's Platinum Founder Code against a main product
+ */
+export const RedeemPlatinumCodeBody = zod.object({
+  code: zod.string(),
+  productSlug: zod.string(),
+});
+
+export const RedeemPlatinumCodeResponse = zod.object({
+  success: zod.boolean(),
+  code: zod.string(),
+  productSlug: zod.string(),
+  orderId: zod.string(),
+  redeemedAt: zod.coerce.date(),
+});
+
+/**
+ * Task #762. Sums voice + chat duration logged this calendar month
+against the hard 7200s (120 min) Platinum allowance. Gated on
+Platinum entitlement (`platinumPaid || upsell3Paid`). `resetsAt` is
+the start of next calendar month (UTC); `canStart` is false once the
+allowance is exhausted.
+
+ * @summary Read the caller's current-month Platinum Greg AI usage
+ */
+export const GetPlatinumGregUsageResponse = zod
+  .object({
+    usedSeconds: zod.number(),
+    limitSeconds: zod.number(),
+    remainingSeconds: zod.number(),
+    canStart: zod.boolean(),
+    resetsAt: zod.coerce
+      .date()
+      .describe(
+        "Start of next calendar month (UTC) when the allowance resets.",
+      ),
+  })
+  .describe(
+    "Task #762. Current-calendar-month Platinum Greg AI usage snapshot.\nAll durations are in seconds. `limitSeconds` is the hard monthly\nallowance (7200s = 120 min).\n",
+  );
+
+/**
+ * Task #762. Records a finished voice/chat session's elapsed seconds
+against the monthly allowance. The recorded amount is capped at the
+caller's remaining time; rejected with 403 when no allowance is left.
+
+ * @summary Record a finished Platinum Greg AI session's duration
+ */
+export const recordPlatinumGregUsageBodyDurationSecondsMin = 0;
+
+export const RecordPlatinumGregUsageBody = zod.object({
+  channel: zod.enum(["voice", "chat"]),
+  durationSeconds: zod
+    .number()
+    .min(recordPlatinumGregUsageBodyDurationSecondsMin)
+    .describe(
+      "Elapsed seconds of the finished session (capped server-side at remaining allowance).",
+    ),
+});
+
+export const RecordPlatinumGregUsageResponse = zod
+  .object({
+    usedSeconds: zod.number(),
+    limitSeconds: zod.number(),
+    remainingSeconds: zod.number(),
+    canStart: zod.boolean(),
+    resetsAt: zod.coerce
+      .date()
+      .describe(
+        "Start of next calendar month (UTC) when the allowance resets.",
+      ),
+  })
+  .describe(
+    "Task #762. Current-calendar-month Platinum Greg AI usage snapshot.\nAll durations are in seconds. `limitSeconds` is the hard monthly\nallowance (7200s = 120 min).\n",
+  );
+
+/**
+ * Returns published announcements visible to the current portal user
+(audience filter applies admin-vs-all) and excludes any the user
+has already dismissed. `mediaUrl` is a 1-hour signed GCS GET URL.
+
+ * @summary List active announcements for the signed-in portal user
+ */
+export const ListPortalAnnouncementsResponse = zod.object({
+  announcements: zod.array(
+    zod.object({
+      id: zod.number(),
+      title: zod.string(),
+      bodyHtml: zod.string(),
+      mediaUrl: zod
+        .string()
+        .nullable()
+        .describe(
+          "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+        ),
+      mediaKind: zod
+        .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+        .nullish(),
+      ctaLabel: zod.string().nullish(),
+      ctaHref: zod.string().nullish(),
+      ctaNewTab: zod.boolean(),
+      audience: zod.enum(["all", "admins"]),
+      publishedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Dismiss an announcement for the signed-in user
+ */
+export const DismissPortalAnnouncementParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DismissPortalAnnouncementResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary List every announcement with aggregate seen/dismissed counts
+ */
+export const ListAdminAnnouncementsResponse = zod.object({
+  announcements: zod.array(
+    zod
+      .object({
+        id: zod.number(),
+        title: zod.string(),
+        bodyHtml: zod.string(),
+        mediaUrl: zod
+          .string()
+          .nullable()
+          .describe(
+            "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+          ),
+        mediaKind: zod
+          .union([
+            zod.literal("image"),
+            zod.literal("video"),
+            zod.literal(null),
+          ])
+          .nullish(),
+        ctaLabel: zod.string().nullish(),
+        ctaHref: zod.string().nullish(),
+        ctaNewTab: zod.boolean(),
+        audience: zod.enum(["all", "admins"]),
+        publishedAt: zod.string().nullish(),
+        createdAt: zod.string(),
+      })
+      .and(
+        zod.object({
+          mediaPath: zod.string().nullish(),
+          status: zod.enum(["draft", "published", "unpublished"]),
+          updatedAt: zod.string(),
+          seenCount: zod
+            .number()
+            .describe(
+              'Floor approximation of \"users who have seen this.\" Without\na separate impressions table the only ack signal is a\ndismiss, so this equals `dismissedCount` for published\nrows and 0 for draft\/unpublished rows. Treat as a lower\nbound, not a true impression count.\n',
+            ),
+          dismissedCount: zod
+            .number()
+            .describe(
+              "Total number of users who have explicitly dismissed the announcement.",
+            ),
+        }),
+      ),
+  ),
+});
+
+/**
+ * @summary Create a new announcement (draft or published)
+ */
+export const CreateAdminAnnouncementBody = zod.object({
+  title: zod.string().optional(),
+  bodyHtml: zod.string().optional(),
+  mediaPath: zod.string().nullish(),
+  mediaKind: zod
+    .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+    .nullish(),
+  ctaLabel: zod.string().nullish(),
+  ctaHref: zod.string().nullish(),
+  ctaNewTab: zod.boolean().optional(),
+  audience: zod.enum(["all", "admins"]).optional(),
+  status: zod.enum(["draft", "published", "unpublished"]).optional(),
+});
+
+export const CreateAdminAnnouncementResponse = zod.object({
+  announcement: zod
+    .object({
+      id: zod.number(),
+      title: zod.string(),
+      bodyHtml: zod.string(),
+      mediaUrl: zod
+        .string()
+        .nullable()
+        .describe(
+          "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+        ),
+      mediaKind: zod
+        .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+        .nullish(),
+      ctaLabel: zod.string().nullish(),
+      ctaHref: zod.string().nullish(),
+      ctaNewTab: zod.boolean(),
+      audience: zod.enum(["all", "admins"]),
+      publishedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+    })
+    .and(
+      zod.object({
+        mediaPath: zod.string().nullish(),
+        status: zod.enum(["draft", "published", "unpublished"]),
+        updatedAt: zod.string(),
+        seenCount: zod
+          .number()
+          .describe(
+            'Floor approximation of \"users who have seen this.\" Without\na separate impressions table the only ack signal is a\ndismiss, so this equals `dismissedCount` for published\nrows and 0 for draft\/unpublished rows. Treat as a lower\nbound, not a true impression count.\n',
+          ),
+        dismissedCount: zod
+          .number()
+          .describe(
+            "Total number of users who have explicitly dismissed the announcement.",
+          ),
+      }),
+    ),
+});
+
+/**
+ * @summary Update an existing announcement (any subset of fields)
+ */
+export const UpdateAdminAnnouncementParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateAdminAnnouncementBody = zod.object({
+  title: zod.string().optional(),
+  bodyHtml: zod.string().optional(),
+  mediaPath: zod.string().nullish(),
+  mediaKind: zod
+    .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+    .nullish(),
+  ctaLabel: zod.string().nullish(),
+  ctaHref: zod.string().nullish(),
+  ctaNewTab: zod.boolean().optional(),
+  audience: zod.enum(["all", "admins"]).optional(),
+  status: zod.enum(["draft", "published", "unpublished"]).optional(),
+});
+
+export const UpdateAdminAnnouncementResponse = zod.object({
+  announcement: zod
+    .object({
+      id: zod.number(),
+      title: zod.string(),
+      bodyHtml: zod.string(),
+      mediaUrl: zod
+        .string()
+        .nullable()
+        .describe(
+          "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+        ),
+      mediaKind: zod
+        .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+        .nullish(),
+      ctaLabel: zod.string().nullish(),
+      ctaHref: zod.string().nullish(),
+      ctaNewTab: zod.boolean(),
+      audience: zod.enum(["all", "admins"]),
+      publishedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+    })
+    .and(
+      zod.object({
+        mediaPath: zod.string().nullish(),
+        status: zod.enum(["draft", "published", "unpublished"]),
+        updatedAt: zod.string(),
+        seenCount: zod
+          .number()
+          .describe(
+            'Floor approximation of \"users who have seen this.\" Without\na separate impressions table the only ack signal is a\ndismiss, so this equals `dismissedCount` for published\nrows and 0 for draft\/unpublished rows. Treat as a lower\nbound, not a true impression count.\n',
+          ),
+        dismissedCount: zod
+          .number()
+          .describe(
+            "Total number of users who have explicitly dismissed the announcement.",
+          ),
+      }),
+    ),
+});
+
+/**
+ * @summary Delete an announcement (cascades dismissal rows)
+ */
+export const DeleteAdminAnnouncementParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteAdminAnnouncementResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary Publish (or republish from `unpublished`) an announcement
+ */
+export const PublishAdminAnnouncementParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const PublishAdminAnnouncementResponse = zod.object({
+  announcement: zod
+    .object({
+      id: zod.number(),
+      title: zod.string(),
+      bodyHtml: zod.string(),
+      mediaUrl: zod
+        .string()
+        .nullable()
+        .describe(
+          "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+        ),
+      mediaKind: zod
+        .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+        .nullish(),
+      ctaLabel: zod.string().nullish(),
+      ctaHref: zod.string().nullish(),
+      ctaNewTab: zod.boolean(),
+      audience: zod.enum(["all", "admins"]),
+      publishedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+    })
+    .and(
+      zod.object({
+        mediaPath: zod.string().nullish(),
+        status: zod.enum(["draft", "published", "unpublished"]),
+        updatedAt: zod.string(),
+        seenCount: zod
+          .number()
+          .describe(
+            'Floor approximation of \"users who have seen this.\" Without\na separate impressions table the only ack signal is a\ndismiss, so this equals `dismissedCount` for published\nrows and 0 for draft\/unpublished rows. Treat as a lower\nbound, not a true impression count.\n',
+          ),
+        dismissedCount: zod
+          .number()
+          .describe(
+            "Total number of users who have explicitly dismissed the announcement.",
+          ),
+      }),
+    ),
+});
+
+/**
+ * @summary Transition a published announcement to `unpublished`
+ */
+export const UnpublishAdminAnnouncementParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UnpublishAdminAnnouncementResponse = zod.object({
+  announcement: zod
+    .object({
+      id: zod.number(),
+      title: zod.string(),
+      bodyHtml: zod.string(),
+      mediaUrl: zod
+        .string()
+        .nullable()
+        .describe(
+          "Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.",
+        ),
+      mediaKind: zod
+        .union([zod.literal("image"), zod.literal("video"), zod.literal(null)])
+        .nullish(),
+      ctaLabel: zod.string().nullish(),
+      ctaHref: zod.string().nullish(),
+      ctaNewTab: zod.boolean(),
+      audience: zod.enum(["all", "admins"]),
+      publishedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+    })
+    .and(
+      zod.object({
+        mediaPath: zod.string().nullish(),
+        status: zod.enum(["draft", "published", "unpublished"]),
+        updatedAt: zod.string(),
+        seenCount: zod
+          .number()
+          .describe(
+            'Floor approximation of \"users who have seen this.\" Without\na separate impressions table the only ack signal is a\ndismiss, so this equals `dismissedCount` for published\nrows and 0 for draft\/unpublished rows. Treat as a lower\nbound, not a true impression count.\n',
+          ),
+        dismissedCount: zod
+          .number()
+          .describe(
+            "Total number of users who have explicitly dismissed the announcement.",
+          ),
+      }),
+    ),
+});
+
+/**
+ * Stricter than `/storage/uploads/request-url`: rejects anything that
+is not PNG/JPEG/WebP/GIF or MP4/MOV/WebM, and caps size at 100 MB.
+
+ * @summary Request a presigned PUT URL for an announcement media upload
+ */
+export const RequestAnnouncementUploadUrlBody = zod.object({
+  contentType: zod
+    .string()
+    .describe("PNG\/JPEG\/WebP\/GIF image or MP4\/MOV\/WebM video MIME."),
+  size: zod.number().describe("Upload size in bytes; max 100 MB."),
+  name: zod.string().optional(),
+});
+
+export const RequestAnnouncementUploadUrlResponse = zod.object({
+  uploadURL: zod.string(),
+  objectPath: zod.string(),
+  mediaKind: zod.enum(["image", "video"]),
+});
+
+/**
+ * Task #696. Read-only listing of `ai_influencer_jobs` rows
+across every client, newest-first, with keyset pagination on
+the row id. Each row includes the buyer's resolved app-user +
+portal-user identity so support can grep by email without a
+DB round-trip.
+
+ * @summary List AI Influencer generation jobs across all users
+ */
+export const listAdminInfluencerGenerationsQueryLimitDefault = 50;
+export const listAdminInfluencerGenerationsQueryLimitMax = 200;
+
+export const ListAdminInfluencerGenerationsQueryParams = zod.object({
+  status: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Filter by job lifecycle status (queued, generating_base, enhancing, swapping_scenes, ready, ready_degraded, failed).",
+    ),
+  email: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Case-insensitive substring match against app-user email or portal-user email.",
+    ),
+  isFreeTier: zod
+    .enum(["true", "false"])
+    .optional()
+    .describe("Filter to free-tier (`true`) or paid (`false`) generations."),
+  hasInfluencer: zod
+    .enum(["true", "false"])
+    .optional()
+    .describe(
+      "When `true`, only return rows that have already materialized an `ai_influencers` row.",
+    ),
+  createdAfter: zod.coerce
+    .date()
+    .optional()
+    .describe("Only include rows with `created_at >= this`."),
+  createdBefore: zod.coerce
+    .date()
+    .optional()
+    .describe("Only include rows with `created_at < this`."),
+  limit: zod.coerce
+    .number()
+    .min(1)
+    .max(listAdminInfluencerGenerationsQueryLimitMax)
+    .default(listAdminInfluencerGenerationsQueryLimitDefault),
+  cursor: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Opaque keyset cursor encoded as `<iso8601_created_at>_<id>`. Pass\nthe `nextCursor` value from the previous page response to fetch\nthe next page in the descending (createdAt, id) ordering.\n",
+    ),
+});
+
+export const ListAdminInfluencerGenerationsResponse = zod.object({
+  jobs: zod.array(
+    zod.object({
+      id: zod.number(),
+      clientId: zod.number(),
+      influencerId: zod.number().nullish(),
+      status: zod.string(),
+      progress: zod.number(),
+      isFreeTier: zod.boolean(),
+      etaAt: zod.coerce.date(),
+      createdAt: zod.coerce.date(),
+      updatedAt: zod.coerce.date(),
+      stageStartedAt: zod.coerce.date().nullish(),
+      heartbeatAt: zod.coerce.date().nullish(),
+      completedAt: zod.coerce.date().nullish(),
+      finalizeAttempts: zod.number(),
+      failureReason: zod.string().nullish(),
+      lastErrorCode: zod.string().nullish(),
+      prefs: zod.object({
+        gender: zod.string().nullish(),
+        ageRange: zod.string().nullish(),
+        ethnicity: zod.string().nullish(),
+        vibe: zod.string().nullish(),
+        notes: zod.string().nullish(),
+        facialHair: zod.string().nullish(),
+        hairstyle: zod.string().nullish(),
+      }),
+      owner: zod
+        .object({
+          appUserId: zod.number(),
+          appUserEmail: zod.string().nullish(),
+          appUserName: zod.string().nullish(),
+          isSuperAdmin: zod.boolean(),
+          portalUserId: zod.number().nullish(),
+          clerkId: zod.string().nullish(),
+          email: zod.string().nullish(),
+          firstName: zod.string().nullish(),
+          lastName: zod.string().nullish(),
+          name: zod.string().nullish(),
+          isActive: zod.boolean().nullish(),
+          isAList: zod.boolean().nullish(),
+          portalKey: zod.string().nullish(),
+          portalCreatedAt: zod.coerce.date().nullish(),
+        })
+        .describe(
+          "Buyer behind a generation job. `appUserId` is always set\n(the FK on `ai_influencer_jobs.client_id`); the rest are\nsourced from the joined `portal_users` row when one exists.\n",
+        ),
+      influencer: zod
+        .object({
+          id: zod.number(),
+          name: zod.string(),
+          status: zod.string(),
+          avatarUrl: zod.string().nullish(),
+          updatedAt: zod.coerce.date(),
+        })
+        .optional(),
+    }),
+  ),
+  nextCursor: zod.string().nullable(),
+  hasMore: zod.boolean(),
+});
+
+/**
+ * Task #696. Aggregate counts over `ai_influencer_jobs`: total
+rows, per-status histogram (as a keyed object), free-tier vs
+paid-tier split, and a "stuck" count (non-terminal rows whose
+`updated_at` is older than the 1-hour threshold). Window
+defaults to the last 7 days; pass an explicit ISO timestamp
+in `since` to override.
+
+ * @summary Generation pipeline counts by status
+ */
+export const GetAdminInfluencerGenerationStatsQueryParams = zod.object({
+  since: zod.coerce
+    .date()
+    .optional()
+    .describe(
+      "ISO timestamp lower bound on `created_at`. Defaults to 7 days ago when omitted.",
+    ),
+});
+
+export const GetAdminInfluencerGenerationStatsResponse = zod
+  .object({
+    total: zod.number(),
+    stuck: zod.number(),
+    stuckThresholdMs: zod.number(),
+    freeTier: zod.number(),
+    paidTier: zod.number(),
+    since: zod.coerce.date(),
+    byStatus: zod.object({
+      queued: zod.number(),
+      generating_base: zod.number(),
+      enhancing: zod.number(),
+      swapping_scenes: zod.number(),
+      ready: zod.number(),
+      ready_degraded: zod.number(),
+      failed: zod.number(),
+    }),
+    generatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "`byStatus` is a keyed object: every known lifecycle status is\npresent as a numeric value (0 when no rows match). `stuck`\ncounts non-terminal rows whose `updated_at` is older than\n`stuckThresholdMs`. `freeTier` + `paidTier` sum to `total`.\n",
+  );
+
+/**
+ * Task #696. Returns the full `ai_influencer_jobs` row plus the
+resolved owner identity (app-user + portal-user), the
+materialized `ai_influencers` row (if any), its angles +
+settings + setting images, and the child
+`ai_influencer_scene_jobs` rows.
+
+ * @summary Full detail for one generation job
+ */
+export const GetAdminInfluencerGenerationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetAdminInfluencerGenerationResponse = zod
+  .object({
+    job: zod.record(zod.string(), zod.unknown()),
+    owner: zod.record(zod.string(), zod.unknown()).nullish(),
+    influencer: zod.record(zod.string(), zod.unknown()).nullish(),
+    angles: zod.array(zod.record(zod.string(), zod.unknown())),
+    settings: zod.array(zod.record(zod.string(), zod.unknown())),
+    sceneJobs: zod.array(zod.record(zod.string(), zod.unknown())),
+  })
+  .describe(
+    "Full detail bundle for one generation job. Most of the nested\npayloads (`scenes`, `webhookEvents`, `prefs`, `influencer`,\n`angles`, `settings`, `sceneJobs`) are large free-form\nobjects sourced from jsonb columns and joined tables, so they\nare exposed here as opaque objects\/arrays rather than strict\nsub-schemas.\n",
+  );
+
+/**
+ * @summary Queue a fresh job, reusing the existing influencer row
+ */
+export const RetryAdminInfluencerGenerationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Flip to failed, refund slot, email buyer
+ */
+export const MarkFailedAdminInfluencerGenerationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const MarkFailedAdminInfluencerGenerationResponse = zod.object({
+  ok: zod.boolean(),
+  jobId: zod.number().optional(),
+  status: zod.string().optional(),
+  alreadyTerminal: zod.boolean().optional(),
+  notified: zod.boolean().optional(),
+  emailStatus: zod
+    .enum(["sent", "failed", "skipped-already-sent", "skipped-no-email"])
+    .optional(),
+});
+
+/**
+ * @summary Force-finalise with admin-supplied cover + scene URLs
+ */
+export const ManualDeliverAdminInfluencerGenerationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const manualDeliverAdminInfluencerGenerationBodyScenesItemLabelMax = 120;
+
+export const manualDeliverAdminInfluencerGenerationBodyScenesMax = 10;
+
+export const ManualDeliverAdminInfluencerGenerationBody = zod.object({
+  coverImageUrl: zod.string().url(),
+  scenes: zod
+    .array(
+      zod.object({
+        url: zod.string().url(),
+        label: zod
+          .string()
+          .max(manualDeliverAdminInfluencerGenerationBodyScenesItemLabelMax)
+          .optional(),
+      }),
+    )
+    .max(manualDeliverAdminInfluencerGenerationBodyScenesMax)
+    .optional(),
+});
+
+export const ManualDeliverAdminInfluencerGenerationResponse = zod.object({
+  ok: zod.boolean(),
+  jobId: zod.number().optional(),
+  status: zod.string().optional(),
+  influencerId: zod.number().nullish(),
+  sceneCount: zod.number().optional(),
+  notified: zod.boolean().optional(),
+  emailStatus: zod
+    .enum(["sent", "failed", "skipped-already-sent", "skipped-no-email"])
+    .optional(),
+  alreadyDelivered: zod.boolean().optional(),
+});
+
+/**
+ * @summary Start a "view as user" impersonation session
+ */
+export const StartAdminImpersonationParams = zod.object({
+  userId: zod.coerce.number(),
+});
+
+export const StartAdminImpersonationResponse = zod.object({
+  sessionId: zod.number(),
+  token: zod
+    .string()
+    .describe(
+      "HMAC-signed session token; send back as X-Impersonate-Session header",
+    ),
+  expiresAt: zod.coerce.date(),
+  target: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    firstName: zod.string().nullish(),
+    lastName: zod.string().nullish(),
+    role: zod.string(),
+  }),
+  admin: zod.object({
+    clerkId: zod.string(),
+    email: zod.string().nullish(),
+  }),
+});
+
+/**
+ * The only mutating endpoint that remains callable while impersonating
+(whitelisted in shouldBlockImpersonatedWrite) so the portal's Exit
+button always succeeds.
+
+ * @summary End the current impersonation session
+ */
+export const StopAdminImpersonationResponse = zod.object({
+  ok: zod.boolean(),
+  closed: zod.number(),
+});
+
+/**
+ * @summary Check whether the current request carries an active impersonation session
+ */
+export const GetAdminImpersonationStatusResponse = zod.union([
+  zod.object({
+    active: zod.literal(false),
+  }),
+  zod.object({
+    active: zod.literal(true),
+    sessionId: zod.number(),
+    admin: zod.object({
+      clerkId: zod.string(),
+      email: zod.string().nullish(),
+    }),
+    target: zod
+      .object({
+        id: zod.number(),
+        email: zod.string(),
+        firstName: zod.string().nullish(),
+        lastName: zod.string().nullish(),
+      })
+      .nullish(),
+  }),
+]);

@@ -8,9 +8,212 @@ servers:
   - url: /api
     description: Base API path
 tags:
+  - name: Auth
+    description: Browser and mobile authentication endpoints.
   - name: health
     description: Health operations
+  - name: storage
+    description: Object storage operations
+  - name: roadmap
+    description: Personalized Apex Roadmap lead-magnet operations (public)
+  - name: queue-health-admin
+    description: |
+      Admin-only Ad Research Board queue-health and queue-trends
+      operations mounted under `/api/admin/ad-research-board/*`.
+      These endpoints power the Queue Health dashboard panel for
+      operators (Clerk session + ADMIN_EMAILS allow-list). Both
+      portal artifacts currently consume them through manual
+      `api.ts` helpers (Awaited<ReturnType> typing); the spec
+      entries here are the source-of-truth contract.
+  - name: roadmap-admin
+    description: |
+      Admin-only Personalized Apex Roadmap operations. These endpoints
+      require an authenticated admin (Clerk session + ADMIN_EMAILS
+      allow-list) and are mounted under `/api/portal/admin/roadmap/*`. The
+      admin UI in the course-portal artifact is a deliberate exception to
+      the OpenAPI-first workflow today: it still uses the portal's Clerk
+      bearer-token `fetchApi` helper instead of the generated React Query
+      hooks. The route is included in this spec so the contract is the
+      single source of truth, even though only the response shape is
+      currently consumed by the UI.
+  - name: fb-cookies-admin
+    description: |
+      Admin-only management of the Facebook cookies.txt jar used by
+      yt-dlp for authenticated FB extraction. Mounted under
+      `/api/portal/admin/fb-cookies`. Requires Clerk session + admin
+      role. Cookie bytes never leave the server; only jar metadata is
+      ever returned by these endpoints.
+  - name: platinum-codes
+    description: |
+      Platinum Founder Code issuance and redemption (Task #227). Every
+      Platinum Club subscriber (orders.upsell3Paid=true) is issued exactly
+      one single-use code. Codes can be redeemed for any "main product"
+      in the AI Influencer Portfolio product line (isMainProduct flag on the Whop product
+      catalog). Buyer-facing endpoints live here; admin visibility +
+      revoke live under /portal/admin/users/:userId/platinum-code*.
+  - name: influencer-generations-admin
+    description: |
+      Super-admin "Influencer Generations" console (Task #695). Lists
+      every `ai_influencer_jobs` row with buyer + influencer state and
+      exposes retry / mark-failed / manual-deliver interventions for
+      wedged generations. Mounted under
+      `/api/portal/admin/influencer-generations`. Requires Clerk
+      session AND `app_users.is_super_admin=true`; portal-tenant
+      admins are deliberately not allowed (this surface mutates buyer-
+      owned state on the buyer's behalf). The portal page consumes
+      the contract via raw `fetch` to stay consistent with the rest
+      of `/portal/admin/*`.
+  - name: instagram-cookies-admin
+    description: |
+      Admin-only management of the encrypted Instagram session cookie
+      blob used by every Apify Instagram actor invocation. Mounted under
+      `/api/portal/admin/instagram-cookies`. Requires Clerk session +
+      admin role. The course-portal admin UI consumes these via the
+      portal's bearer-token `fetchApi` helper to stay consistent with the
+      rest of the Knowledge Base admin surface; the spec entries below
+      are the source-of-truth contract.
+  - name: admin-impersonation
+    description: |
+      Task #710. Super-admin "view as user" impersonation. Mounted under
+      `/api/portal/admin/impersonate`. Start mints a signed HMAC token
+      (8h TTL) the portal stores in sessionStorage and forwards on every
+      request via `X-Impersonate-Session`. While a session is active, the
+      backend swaps `req.portalUser` to the target and returns
+      `403 { error: "impersonation_read_only" }` on any non-GET except
+      `/admin/impersonate/stop`. Every session is audited in
+      `admin_impersonation_sessions`.
+  - name: influencer-generations-admin
+    description: |
+      Task #696. Admin-only read endpoints over the AI Influencer
+      generations pipeline. Mounted under
+      `/api/portal/admin/influencer-generations`. Requires Clerk
+      session AND (super-admin OR email in the `ADMIN_EMAILS`
+      allow-list) - same gate as the existing per-job diagnostics
+      route. No mutations, no UI - intended for support and
+      debugging across all users.
 paths:
+  /auth/user:
+    get:
+      tags: [Auth]
+      operationId: getCurrentAuthUser
+      summary: Get the currently authenticated user
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Auth status resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserEnvelope'
+  /login:
+    get:
+      tags: [Auth]
+      operationId: beginBrowserLogin
+      summary: Start the browser OIDC login flow
+      parameters:
+        - name: returnTo
+          in: query
+          required: false
+          description: Relative path to redirect to after login (must start with `/`). Defaults to `/`.
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the OIDC authorization endpoint.
+  /callback:
+    get:
+      tags: [Auth]
+      operationId: handleBrowserLoginCallback
+      summary: Complete the browser OIDC login flow
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iss
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect to the `returnTo` path on success (defaults to `/`) or `/api/login` on failure.
+  /logout:
+    get:
+      tags: [Auth]
+      operationId: logoutBrowserSession
+      summary: Clear the session and begin OIDC logout
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+        - name: returnTo
+          in: query
+          required: false
+          schema:
+            type: string
+            default: /
+      responses:
+        '302':
+          description: Redirect to the OIDC provider logout URL with a post-logout redirect back to the validated `returnTo` path.
+  /mobile-auth/token-exchange:
+    post:
+      tags: [Auth]
+      operationId: exchangeMobileAuthorizationCode
+      summary: Exchange a mobile OIDC code for a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileTokenExchangeRequest'
+      responses:
+        '200':
+          description: Session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileTokenExchangeSuccess'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthErrorEnvelope'
+        '401':
+          description: Token did not contain usable claims.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthErrorEnvelope'
+        '500':
+          description: Token exchange failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthErrorEnvelope'
+  /mobile-auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutMobileSession
+      summary: Delete a mobile session token
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+      responses:
+        '200':
+          description: Logout processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
   /healthz:
     get:
       operationId: healthCheck
@@ -24,13 +227,3178 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+  /portal/dfy/bridge-pages/upload-image:
+    post:
+      operationId: uploadBridgePageImage
+      tags: [storage]
+      summary: Upload a Bridge Page preview image (admin only)
+      description: |
+        Task #745. Admin-only multipart upload for the laptop-mockup
+        preview image on a Bridge Page row. Accepts a single JPEG / PNG /
+        WebP file (cap matches the DFY template uploader at 30 MB),
+        writes it to the same GCS bucket the rest of the portal serves
+        from, and returns the canonical `/api/portal/images/<file>` path
+        the admin form then stores on `bridge_pages.preview_image_url`.
+        Requires Clerk session + admin role.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG, or WebP image (max 30 MB).
+      responses:
+        "200":
+          description: Upload successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url:
+                    type: string
+                    description: Public path served by the portal (`/api/portal/images/<file>`).
+        "400":
+          description: Missing file or unsupported MIME
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /roadmap/leads:
+    post:
+      operationId: createRoadmapLead
+      tags: [roadmap]
+      summary: Submit the Personalized Apex Roadmap opt-in form
+      description: |
+        Creates a roadmap lead, synchronously generates the 3-tier offer ladder
+        with an LLM, fires Resend email + Meta CAPI Lead in the background,
+        and returns the lead with a public share token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoadmapLeadBody"
+      responses:
+        "200":
+          description: Lead created and offers generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRoadmapLeadResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /roadmap/leads/by-token/{shareToken}:
+    get:
+      operationId: getRoadmapLeadByShareToken
+      tags: [roadmap]
+      summary: Fetch the public view of a roadmap lead by share token
+      description: |
+        Returns the offer ladder and minimum metadata needed to render the
+        result page. Public, no auth, but never returns email, phone, IP,
+        last name, or user-agent.
+      parameters:
+        - in: path
+          name: shareToken
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 80
+      responses:
+        "200":
+          description: Lead found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicRoadmapLeadResponse"
+        "404":
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /roadmap/events:
+    post:
+      operationId: createRoadmapLeadEvent
+      tags: [roadmap]
+      summary: Record a funnel event for the roadmap lead magnet
+      description: |
+        Whitelisted funnel events: form_started, step_completed,
+        form_submitted, result_viewed, cta_clicked, pdf_downloaded.
+        Always returns 200 even on best-effort writes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoadmapLeadEventBody"
+      responses:
+        "200":
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          description: Unknown event name or invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /roadmap/leads/by-token/{shareToken}/pdf:
+    get:
+      operationId: getRoadmapLeadPdfByShareToken
+      tags: [roadmap]
+      summary: Download the personalized roadmap PDF for a lead
+      description: |
+        Renders the lead's 3-tier offer ladder as a branded PDF and
+        streams it back as application/pdf. Public, no auth — keyed only
+        by the high-entropy shareToken (UUID exposed only after submit).
+        Used by the "Download PDF" CTA on /roadmap/result/{shareToken}.
+        Server-side response is cached on a stable hash of the lead's
+        generated offers so repeat downloads do not re-render Puppeteer.
+      parameters:
+        - in: path
+          name: shareToken
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 80
+      responses:
+        "200":
+          description: PDF stream
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Lead not found, or generation has not produced offers yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /funnel/lead:
+    post:
+      operationId: captureFunnelLead
+      tags: [roadmap]
+      summary: Capture lead email + phone from the low-ticket form before checkout
+      description: |
+        Persists the email + phone (plus country, affiliate code, source
+        page, referrer) typed into the HeroLeadForm on the low-ticket
+        sales pages, BEFORE the visitor is redirected to /checkout. Email
+        is the natural key (lowercased + unique) - re-submits update the
+        existing row's phone / country / affiliate / source / last_seen_at
+        in place. IP and user-agent are captured server-side. Always
+        responds 200 (best-effort) so a slow capture never blocks the
+        buyer's redirect to checkout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaptureFunnelLeadBody"
+      responses:
+        "200":
+          description: |
+            Always returned. The endpoint is best-effort: malformed
+            payloads and server-side errors are logged and still ack
+            with `{ ok: true }` so a slow capture never blocks the
+            buyer's redirect to /checkout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+  /portal/admin/ad-research-board/queue-health:
+    get:
+      operationId: getAdminQueueHealth
+      tags: [queue-health-admin]
+      summary: Real-outcome queue health snapshot
+      description: |
+        Returns the snapshot rendered by the admin Queue Health
+        dashboard: legacy queue mechanics (`status`), real outcomes
+        (`outcomes` - success rate, terminal vs retrying, operational
+        bucket counts), recent failures with platform / bucket /
+        terminal flags, error-class histogram, attempts histogram,
+        processing-time percentiles, throughput, and active leases.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueHealthResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not on admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/ad-research-board/queue-trends:
+    get:
+      operationId: getAdminQueueTrends
+      tags: [queue-health-admin]
+      summary: Historical queue-health trend snapshots
+      description: |
+        Returns the per-snapshot trend points written by
+        `recordQueueMetricsSnapshot`. Powers the dashboard sparklines
+        (queue depth, throughput, failures, p95, success rate, auth /
+        rate-limit / provider failures, retry volume).
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: query
+          name: hours
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 168
+            default: 24
+      responses:
+        "200":
+          description: Trend points
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueTrendsResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not on admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/ad-research-board/requeue-auth-failures:
+    post:
+      operationId: requeueAdResearchBoardAuthFailures
+      tags: [queue-health-admin]
+      summary: Reopen dismissed ad-research-board rows that failed on auth walls
+      description: |
+        Task #187. After an admin uploads a fresh IG/FB cookie jar, this
+        endpoint reopens dismissed ad-research-board queue rows whose
+        last media error was auth-class (`ig-login-required`,
+        `fb-auth-wall`, `cookie-expired`,
+        `auth-wall-escalated-failed`) within the configurable lookback
+        window. Rows are flipped back to `mediaStatus=pending`,
+        `dismissed=false`, `attempts=0`, the lease columns
+        (`media_lease_owner`, `media_lease_until`) are cleared, the
+        `media_reopened_at_t187` marker is stamped (drives the
+        cohort-based `authFailureRecoveryRate` metric), and the
+        worker's `processPendingMediaInBackground` is kicked.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lookbackDays:
+                  type: integer
+                  minimum: 1
+                  maximum: 90
+                  default: 7
+                  description: How many days back to consider auth failures (default 7).
+      responses:
+        "200":
+          description: Reopen summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  reopened: { type: integer }
+                  lookbackDays: { type: integer }
+                required: [ok, reopened, lookbackDays]
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not on admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/funnels-research-board/requeue-auth-failures:
+    post:
+      operationId: requeueFunnelsResearchBoardAuthFailures
+      tags: [queue-health-admin]
+      summary: Reopen funnels-research-board rows whose preview failed on auth walls
+      description: |
+        Task #187. Resets `previewStatus` and `previewError` to NULL on
+        funnels-research-board rows whose last preview attempt failed
+        with an auth-shaped error (matches login / auth / cookie / 401
+        / 403 in `previewError`) within the configurable lookback
+        window (default 7 days). Lets the existing preview worker
+        pick them back up after a fresh cookie jar is uploaded.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lookbackDays:
+                  type: integer
+                  minimum: 1
+                  maximum: 90
+                  default: 7
+                  description: How many days back to consider auth failures (default 7).
+      responses:
+        "200":
+          description: Requeue summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  reopened: { type: integer }
+                  lookbackDays: { type: integer }
+                required: [ok, reopened, lookbackDays]
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not on admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/roadmap/leads:
+    get:
+      operationId: listAdminRoadmapLeads
+      tags: [roadmap-admin]
+      summary: List roadmap leads for the admin dashboard
+      description: |
+        Returns a paginated, sortable, search-filterable list of roadmap
+        leads with full PII (email, phone, IP, last name) and the raw
+        generation payload — intended for the admin UI at
+        `/portal/admin/roadmap-leads`.
+
+        **Auth:** Clerk bearer token + ADMIN_EMAILS allow-list. Non-admin
+        callers receive 401/403.
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: sort
+          description: |
+            `<field>_<direction>` where field is one of createdAt,
+            firstName, email, revenueBand, generationStatus and direction
+            is asc or desc. Defaults to `createdAt_desc`.
+          schema:
+            type: string
+            default: createdAt_desc
+        - in: query
+          name: search
+          description: Case-insensitive substring match on email, firstName, or niche.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated lead list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminRoadmapLeadListResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Authenticated but not on the admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/instagram-cookies:
+    get:
+      operationId: getInstagramSessionCookies
+      tags: [instagram-cookies-admin]
+      summary: Read Instagram session cookie metadata
+      description: |
+        Returns metadata about the saved Instagram session cookies blob
+        (status, cookie count, sessionid preview, inferred expiry, last
+        error, required-cookie presence). Never returns plaintext cookie
+        values.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstagramSessionCookieMetadata"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    put:
+      operationId: saveInstagramSessionCookies
+      tags: [instagram-cookies-admin]
+      summary: Save a fresh Instagram session cookies blob
+      description: |
+        Accepts a Cookie-Editor / EditThisCookie JSON export from a
+        logged-in Instagram session. Validates required cookies
+        (sessionid, ds_user_id, csrftoken), AES-256-GCM encrypts the
+        blob, and stores it in `provider_configs` under
+        (`instagram`, `session_cookies`). Returns the resulting metadata.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstagramSessionCookiesSaveRequest"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstagramSessionCookieMetadata"
+        "400":
+          description: Invalid or incomplete cookies blob
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteInstagramSessionCookies
+      tags: [instagram-cookies-admin]
+      summary: Delete the saved Instagram session cookies blob
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Deleted; returns post-delete metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstagramSessionCookieMetadata"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/fb-cookies:
+    get:
+      operationId: getFacebookCookies
+      tags: [fb-cookies-admin]
+      summary: Read Facebook cookies.txt jar metadata
+      description: |
+        Returns metadata about the saved Facebook cookies.txt jar
+        (uploaded at, uploaded by, status, age, last validated) and the
+        latest auth_health row for the `fb` platform. Never returns
+        cookie bytes.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacebookCookiesMetadataResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    put:
+      operationId: saveFacebookCookies
+      tags: [fb-cookies-admin]
+      summary: Save a fresh Facebook cookies.txt jar
+      description: |
+        Accepts a Netscape cookies.txt export from a logged-in
+        facebook.com session. Validates the file as Netscape format,
+        soft-deletes any prior active jar, persists the new jar, and
+        returns the resulting jar metadata.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FacebookCookiesSaveRequest"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacebookCookiesSaveResponse"
+        "400":
+          description: Invalid Netscape cookies.txt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteFacebookCookies
+      tags: [fb-cookies-admin]
+      summary: Soft-delete the active Facebook cookies.txt jar
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacebookCookiesDeleteResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/fb-cookies/test:
+    post:
+      operationId: testFacebookCookies
+      tags: [fb-cookies-admin]
+      summary: Probe the saved FB jar via the extraction-diagnose runner
+      description: |
+        Runs the existing extraction-diagnose probe against a known
+        public Facebook URL (or one provided in the body) with platform
+        forced to `fb`. Read-only - does not write `auth_health`.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FacebookCookiesTestRequest"
+      responses:
+        "200":
+          description: Diagnose result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacebookCookiesTestResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/instagram-cookies/test:
+    post:
+      operationId: testInstagramSessionCookies
+      tags: [instagram-cookies-admin]
+      summary: Probe the saved Instagram session cookies via a small Apify run
+      description: |
+        Runs `apify~instagram-profile-scraper` against a stable public
+        profile (`natgeo`) using the saved session cookies (regardless
+        of the cookies' current `status` flag, so an admin can re-test a
+        previously expired-marked session without re-pasting). Reports
+        back one of: ok, auth-blocked, rate-limited, no-cookies,
+        no-token, actor-error, timeout, no-data. A successful probe
+        clears the `expired` flag.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Probe result and refreshed metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstagramSessionCookieTestResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /platinum-codes/main-products:
+    get:
+      operationId: listPlatinumCodeMainProducts
+      tags: [platinum-codes]
+      summary: List products a Platinum Founder Code can be redeemed against
+      responses:
+        "200":
+          description: Catalog of redemption-eligible main products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatinumMainProductList"
+  /platinum-codes/me:
+    get:
+      operationId: getMyPlatinumCode
+      tags: [platinum-codes]
+      summary: Read the signed-in buyer's own Platinum Founder Code
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Code found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatinumCode"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: No code issued yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /platinum-codes/redeem:
+    post:
+      operationId: redeemPlatinumCode
+      tags: [platinum-codes]
+      summary: Redeem the buyer's Platinum Founder Code against a main product
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatinumCodeRedeemRequest"
+      responses:
+        "200":
+          description: Redeemed; main product entitlement granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatinumCodeRedeemResponse"
+        "400":
+          description: Bad request (missing fields or non-main product)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Code is not owned by the signed-in buyer or subscription inactive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Code not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Code already redeemed or revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/greg-ai/platinum/usage:
+    get:
+      operationId: getPlatinumGregUsage
+      tags: [greg-ai-platinum]
+      summary: Read the caller's current-month Platinum Greg AI usage
+      description: |
+        Task #762. Sums voice + chat duration logged this calendar month
+        against the hard 7200s (120 min) Platinum allowance. Gated on
+        Platinum entitlement (`platinumPaid || upsell3Paid`). `resetsAt` is
+        the start of next calendar month (UTC); `canStart` is false once the
+        allowance is exhausted.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Current-month usage snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatinumGregUsage"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not a Platinum member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    post:
+      operationId: recordPlatinumGregUsage
+      tags: [greg-ai-platinum]
+      summary: Record a finished Platinum Greg AI session's duration
+      description: |
+        Task #762. Records a finished voice/chat session's elapsed seconds
+        against the monthly allowance. The recorded amount is capped at the
+        caller's remaining time; rejected with 403 when no allowance is left.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatinumGregUsageRecordBody"
+      responses:
+        "200":
+          description: Usage recorded; returns the refreshed usage snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatinumGregUsage"
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not a Platinum member, or monthly allowance exhausted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/announcements:
+    get:
+      operationId: listPortalAnnouncements
+      tags: [announcements]
+      summary: List active announcements for the signed-in portal user
+      description: |
+        Returns published announcements visible to the current portal user
+        (audience filter applies admin-vs-all) and excludes any the user
+        has already dismissed. `mediaUrl` is a 1-hour signed GCS GET URL.
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: List of active announcements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalAnnouncementListResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/announcements/{id}/dismiss:
+    post:
+      operationId: dismissPortalAnnouncement
+      tags: [announcements]
+      summary: Dismiss an announcement for the signed-in user
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dismissed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/announcements:
+    get:
+      operationId: listAdminAnnouncements
+      tags: [announcements-admin]
+      summary: List every announcement with aggregate seen/dismissed counts
+      security:
+        - clerkBearerAuth: []
+      responses:
+        "200":
+          description: Admin list (includes drafts + unpublished, plus counts)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnnouncementListResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    post:
+      operationId: createAdminAnnouncement
+      tags: [announcements-admin]
+      summary: Create a new announcement (draft or published)
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAnnouncementWriteBody"
+      responses:
+        "200":
+          description: Created announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnnouncementResponse"
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/announcements/{id}:
+    patch:
+      operationId: updateAdminAnnouncement
+      tags: [announcements-admin]
+      summary: Update an existing announcement (any subset of fields)
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAnnouncementWriteBody"
+      responses:
+        "200":
+          description: Updated announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnnouncementResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteAdminAnnouncement
+      tags: [announcements-admin]
+      summary: Delete an announcement (cascades dismissal rows)
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/announcements/{id}/publish:
+    post:
+      operationId: publishAdminAnnouncement
+      tags: [announcements-admin]
+      summary: Publish (or republish from `unpublished`) an announcement
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Published announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnnouncementResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/announcements/{id}/unpublish:
+    post:
+      operationId: unpublishAdminAnnouncement
+      tags: [announcements-admin]
+      summary: Transition a published announcement to `unpublished`
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unpublished announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnnouncementResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/announcements/uploads/request-url:
+    post:
+      operationId: requestAnnouncementUploadUrl
+      tags: [announcements-admin]
+      summary: Request a presigned PUT URL for an announcement media upload
+      description: |
+        Stricter than `/storage/uploads/request-url`: rejects anything that
+        is not PNG/JPEG/WebP/GIF or MP4/MOV/WebM, and caps size at 100 MB.
+      security:
+        - clerkBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementUploadRequestBody"
+      responses:
+        "200":
+          description: Presigned URL + normalized objectPath + inferred mediaKind
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnouncementUploadResponse"
+        "400":
+          description: Invalid contentType or file too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/influencer-generations:
+    get:
+      operationId: listAdminInfluencerGenerations
+      tags: [influencer-generations-admin]
+      summary: List AI Influencer generation jobs across all users
+      description: |
+        Task #696. Read-only listing of `ai_influencer_jobs` rows
+        across every client, newest-first, with keyset pagination on
+        the row id. Each row includes the buyer's resolved app-user +
+        portal-user identity so support can grep by email without a
+        DB round-trip.
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Filter by job lifecycle status (queued, generating_base, enhancing, swapping_scenes, ready, ready_degraded, failed).
+        - in: query
+          name: email
+          schema:
+            type: string
+          description: Case-insensitive substring match against app-user email or portal-user email.
+        - in: query
+          name: isFreeTier
+          schema:
+            type: string
+            enum: ["true", "false"]
+          description: Filter to free-tier (`true`) or paid (`false`) generations.
+        - in: query
+          name: hasInfluencer
+          schema:
+            type: string
+            enum: ["true", "false"]
+          description: When `true`, only return rows that have already materialized an `ai_influencers` row.
+        - in: query
+          name: createdAfter
+          schema:
+            type: string
+            format: date-time
+          description: Only include rows with `created_at >= this`.
+        - in: query
+          name: createdBefore
+          schema:
+            type: string
+            format: date-time
+          description: Only include rows with `created_at < this`.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: cursor
+          schema:
+            type: string
+          description: |
+            Opaque keyset cursor encoded as `<iso8601_created_at>_<id>`. Pass
+            the `nextCursor` value from the previous page response to fetch
+            the next page in the descending (createdAt, id) ordering.
+      responses:
+        "200":
+          description: Page of jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerGenerationsList"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Authenticated but not on the admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/influencer-generations/stats:
+    get:
+      operationId: getAdminInfluencerGenerationStats
+      tags: [influencer-generations-admin]
+      summary: Generation pipeline counts by status
+      description: |
+        Task #696. Aggregate counts over `ai_influencer_jobs`: total
+        rows, per-status histogram (as a keyed object), free-tier vs
+        paid-tier split, and a "stuck" count (non-terminal rows whose
+        `updated_at` is older than the 1-hour threshold). Window
+        defaults to the last 7 days; pass an explicit ISO timestamp
+        in `since` to override.
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+          description: ISO timestamp lower bound on `created_at`. Defaults to 7 days ago when omitted.
+      responses:
+        "200":
+          description: Stats snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerGenerationStats"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Authenticated but not on the admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/influencer-generations/{id}:
+    get:
+      operationId: getAdminInfluencerGeneration
+      tags: [influencer-generations-admin]
+      summary: Full detail for one generation job
+      description: |
+        Task #696. Returns the full `ai_influencer_jobs` row plus the
+        resolved owner identity (app-user + portal-user), the
+        materialized `ai_influencers` row (if any), its angles +
+        settings + setting images, and the child
+        `ai_influencer_scene_jobs` rows.
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job detail bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerGenerationDetail"
+        "400":
+          description: Invalid id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Authenticated but not on the admin allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /portal/admin/influencer-generations/{id}/retry:
+    post:
+      operationId: retryAdminInfluencerGeneration
+      tags: [influencer-generations-admin]
+      summary: Queue a fresh job, reusing the existing influencer row
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "201":
+          description: Retry queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerRetryResponse"
+        "404":
+          description: Source job not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+  /portal/admin/influencer-generations/{id}/mark-failed:
+    post:
+      operationId: markFailedAdminInfluencerGeneration
+      tags: [influencer-generations-admin]
+      summary: Flip to failed, refund slot, email buyer
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerMarkFailedResponse"
+  /portal/admin/influencer-generations/{id}/manual-deliver:
+    post:
+      operationId: manualDeliverAdminInfluencerGeneration
+      tags: [influencer-generations-admin]
+      summary: Force-finalise with admin-supplied cover + scene URLs
+      security:
+        - clerkBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminInfluencerManualDeliverRequest"
+      responses:
+        "200":
+          description: Delivered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminInfluencerManualDeliverResponse"
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "404":
+          description: Job not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+  /portal/admin/impersonate/{userId}:
+    post:
+      operationId: startAdminImpersonation
+      tags: [admin-impersonation]
+      summary: Start a "view as user" impersonation session
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminImpersonationStartResponse"
+        "403":
+          description: Forbidden (not a super-admin, or already impersonating)
+        "404":
+          description: Target portal user not found
+  /portal/admin/impersonate/stop:
+    post:
+      operationId: stopAdminImpersonation
+      tags: [admin-impersonation]
+      summary: End the current impersonation session
+      description: |
+        The only mutating endpoint that remains callable while impersonating
+        (whitelisted in shouldBlockImpersonatedWrite) so the portal's Exit
+        button always succeeds.
+      responses:
+        "200":
+          description: Session(s) closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  closed: { type: integer }
+                required: [ok, closed]
+  /portal/admin/impersonate/status:
+    get:
+      operationId: getAdminImpersonationStatus
+      tags: [admin-impersonation]
+      summary: Check whether the current request carries an active impersonation session
+      responses:
+        "200":
+          description: Status payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminImpersonationStatusResponse"
 components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token - `Bearer <sid>`.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+  securitySchemes:
+    clerkBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Clerk JWT
+      description: |
+        Clerk-issued JWT passed as `Authorization: Bearer <token>`. The
+        course-portal artifact retrieves the token from
+        `useAuth().getToken()` and attaches it via its `fetchApi` helper.
   schemas:
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+          format: email
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/AuthUser'
+            - type: 'null'
+    MobileTokenExchangeRequest:
+      type: object
+      required: [code, code_verifier, redirect_uri, state]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        code_verifier:
+          type: string
+          minLength: 1
+        redirect_uri:
+          type: string
+          minLength: 1
+          format: uri
+        state:
+          type: string
+          minLength: 1
+        nonce:
+          type: string
+          minLength: 1
+    MobileTokenExchangeSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+    AuthErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
     HealthStatus:
       type: object
       properties:
         status:
           type: string
+        buildSha:
+          type: string
+          description: |
+            Task #200: build-time git commit SHA (or REPLIT_GIT_COMMIT
+            fallback) injected via esbuild's `define`. "unknown" when
+            built outside the canonical build flow.
+        builtAt:
+          type: string
+          nullable: true
+          description: ISO timestamp captured at build time.
+        runtime:
+          type: string
+          description: 'api | worker'
       required:
         - status
-
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: number
+        contentType:
+          type: string
+      required:
+        - name
+        - size
+        - contentType
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+        metadata:
+          type: object
+          properties:
+            name:
+              type: string
+            size:
+              type: number
+            contentType:
+              type: string
+          required:
+            - name
+            - size
+            - contentType
+      required:
+        - uploadURL
+        - objectPath
+        - metadata
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    PortalAnnouncement:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        bodyHtml:
+          type: string
+        mediaUrl:
+          type: string
+          nullable: true
+          description: Short-lived (1h) signed GCS GET URL, or null when no media or signing failed.
+        mediaKind:
+          type: string
+          nullable: true
+          enum: [image, video, null]
+        ctaLabel:
+          type: string
+          nullable: true
+        ctaHref:
+          type: string
+          nullable: true
+        ctaNewTab:
+          type: boolean
+        audience:
+          type: string
+          enum: [all, admins]
+        publishedAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - bodyHtml
+        - mediaUrl
+        - ctaNewTab
+        - audience
+        - createdAt
+    PortalAnnouncementListResponse:
+      type: object
+      properties:
+        announcements:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortalAnnouncement"
+      required:
+        - announcements
+    AdminAnnouncement:
+      allOf:
+        - $ref: "#/components/schemas/PortalAnnouncement"
+        - type: object
+          properties:
+            mediaPath:
+              type: string
+              nullable: true
+            status:
+              type: string
+              enum: [draft, published, unpublished]
+            updatedAt:
+              type: string
+            seenCount:
+              type: integer
+              description: |
+                Floor approximation of "users who have seen this." Without
+                a separate impressions table the only ack signal is a
+                dismiss, so this equals `dismissedCount` for published
+                rows and 0 for draft/unpublished rows. Treat as a lower
+                bound, not a true impression count.
+            dismissedCount:
+              type: integer
+              description: Total number of users who have explicitly dismissed the announcement.
+          required:
+            - status
+            - updatedAt
+            - seenCount
+            - dismissedCount
+    AdminAnnouncementListResponse:
+      type: object
+      properties:
+        announcements:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminAnnouncement"
+      required:
+        - announcements
+    AdminAnnouncementResponse:
+      type: object
+      properties:
+        announcement:
+          $ref: "#/components/schemas/AdminAnnouncement"
+      required:
+        - announcement
+    AdminAnnouncementWriteBody:
+      type: object
+      properties:
+        title:
+          type: string
+        bodyHtml:
+          type: string
+        mediaPath:
+          type: string
+          nullable: true
+        mediaKind:
+          type: string
+          nullable: true
+          enum: [image, video, null]
+        ctaLabel:
+          type: string
+          nullable: true
+        ctaHref:
+          type: string
+          nullable: true
+        ctaNewTab:
+          type: boolean
+        audience:
+          type: string
+          enum: [all, admins]
+        status:
+          type: string
+          enum: [draft, published, unpublished]
+    AnnouncementUploadRequestBody:
+      type: object
+      properties:
+        contentType:
+          type: string
+          description: PNG/JPEG/WebP/GIF image or MP4/MOV/WebM video MIME.
+        size:
+          type: integer
+          description: Upload size in bytes; max 100 MB.
+        name:
+          type: string
+      required:
+        - contentType
+        - size
+    AnnouncementUploadResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+        mediaKind:
+          type: string
+          enum: [image, video]
+      required:
+        - uploadURL
+        - objectPath
+        - mediaKind
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+        - ok
+    CaptureFunnelLeadBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 40
+        firstName:
+          type: string
+          maxLength: 80
+          nullable: true
+          description: Optional first name typed into the lead form. Persisted on the funnel_leads row and forwarded to KIT/WATI/CRM as a custom field (Task #607 follow-on).
+        country:
+          type: string
+          maxLength: 8
+          nullable: true
+        affiliateCode:
+          type: string
+          maxLength: 80
+          nullable: true
+        firstpromoterReferralId:
+          type: string
+          maxLength: 128
+          nullable: true
+          description: FirstPromoter `_fprom_tid` cookie value, forwarded so the server can stamp the lead row with the referral id (Task #584).
+        sourcePage:
+          type: string
+          maxLength: 200
+          nullable: true
+        referrer:
+          type: string
+          maxLength: 500
+          nullable: true
+      required:
+        - email
+    RoadmapRevenueBand:
+      type: string
+      enum:
+        - "Just starting (no revenue yet)"
+        - "Under $5k/mo"
+        - "$5k - $15k/mo"
+        - "$15k - $50k/mo"
+        - "$50k - $100k/mo"
+        - "$100k+/mo (over $1M/yr)"
+    RoadmapAudienceSize:
+      type: string
+      enum:
+        - "Under 1,000"
+        - "1,000 - 10,000"
+        - "10,000 - 50,000"
+        - "50,000 - 250,000"
+        - "250,000+"
+    RoadmapBottleneck:
+      type: string
+      enum:
+        - "Can't scale past $10k/mo"
+        - "Can't scale past $50k/mo"
+        - "Can't scale past $100k/mo"
+        - "Can't break $1M/yr ceiling"
+        - "Not enough qualified leads coming in"
+        - "Leads come in but don't convert to sales"
+        - "Selling but average order value is too low"
+        - "No premium backend, leaving money on table"
+        - "Doing everything myself, can't get leverage"
+        - "Burned out delivering 1-1, can't scale delivery"
+        - "Revenue is random, no predictable system"
+        - "Other / not sure"
+    RoadmapEventName:
+      type: string
+      enum:
+        - form_started
+        - step_completed
+        - form_submitted
+        - result_viewed
+        - cta_clicked
+        - pdf_downloaded
+    RoadmapGenerationStatus:
+      type: string
+      enum:
+        - pending
+        - processing
+        - ready
+        - failed
+    RoadmapPriceTier:
+      type: object
+      properties:
+        name:
+          type: string
+        promise:
+          type: string
+        price:
+          type: number
+          description: "Whole-dollar price as a number, e.g. 27."
+        priceLabel:
+          type: string
+          description: "Human label including frequency, e.g. '$27 one-time'."
+        whatsInside:
+          type: array
+          items:
+            type: string
+        priceRationale:
+          type: string
+      required:
+        - name
+        - promise
+        - price
+        - priceLabel
+        - whatsInside
+        - priceRationale
+    RoadmapLowTicketFormat:
+      type: string
+      enum:
+        - "Live 5-Day Challenge Funnel"
+        - "Course + AI Operating System"
+        - "Done-For-You Templates"
+    RoadmapLowTicketStack:
+      type: object
+      properties:
+        format:
+          $ref: "#/components/schemas/RoadmapLowTicketFormat"
+        formatRationale:
+          type: string
+        why:
+          type: string
+        economics:
+          type: string
+        mainOffer:
+          $ref: "#/components/schemas/RoadmapPriceTier"
+        orderBumps:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/RoadmapPriceTier"
+        upsells:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/RoadmapPriceTier"
+      required:
+        - format
+        - formatRationale
+        - why
+        - economics
+        - mainOffer
+        - orderBumps
+        - upsells
+    RoadmapPremiumStack:
+      type: object
+      properties:
+        why:
+          type: string
+        offerName:
+          type: string
+        promise:
+          type: string
+        format:
+          type: string
+        deliverables:
+          type: array
+          items:
+            type: string
+        experienceLayer:
+          type: string
+        idealClient:
+          type: string
+        price:
+          type: number
+        priceLabel:
+          type: string
+        priceRationale:
+          type: string
+        objectionHandling:
+          type: array
+          items:
+            type: string
+        salesConversation:
+          type: array
+          items:
+            type: string
+      required:
+        - why
+        - offerName
+        - promise
+        - format
+        - deliverables
+        - experienceLayer
+        - idealClient
+        - price
+        - priceLabel
+        - priceRationale
+        - objectionHandling
+        - salesConversation
+    RoadmapHundredKStack:
+      type: object
+      properties:
+        why:
+          type: string
+        mindsetShift:
+          type: string
+        offerName:
+          type: string
+        coreConcept:
+          type: string
+        deliverables:
+          type: array
+          items:
+            type: string
+        experienceLayer:
+          type: string
+        transformation:
+          type: string
+        price:
+          type: number
+        priceLabel:
+          type: string
+        profitMargin:
+          type: string
+        deliveryPlan:
+          type: string
+        idealClient:
+          type: string
+        scarcity:
+          type: string
+      required:
+        - why
+        - mindsetShift
+        - offerName
+        - coreConcept
+        - deliverables
+        - experienceLayer
+        - transformation
+        - price
+        - priceLabel
+        - profitMargin
+        - deliveryPlan
+        - idealClient
+        - scarcity
+    RoadmapOfferBundle:
+      type: object
+      properties:
+        intro:
+          type: string
+        lowTicket:
+          $ref: "#/components/schemas/RoadmapLowTicketStack"
+        premium:
+          $ref: "#/components/schemas/RoadmapPremiumStack"
+        hundredK:
+          $ref: "#/components/schemas/RoadmapHundredKStack"
+      required:
+        - intro
+        - lowTicket
+        - premium
+        - hundredK
+    CreateRoadmapLeadBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        lastName:
+          type: string
+          maxLength: 80
+          nullable: true
+        email:
+          type: string
+          format: email
+          minLength: 5
+          maxLength: 200
+        phone:
+          type: string
+          minLength: 6
+          maxLength: 32
+          description: E.164 phone number including dial code.
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: ISO-3166 alpha-2 country code.
+        niche:
+          type: string
+          minLength: 3
+          maxLength: 200
+        revenueBand:
+          $ref: "#/components/schemas/RoadmapRevenueBand"
+        audienceSize:
+          $ref: "#/components/schemas/RoadmapAudienceSize"
+        currentOffer:
+          type: string
+          minLength: 3
+          maxLength: 1000
+        bottleneck:
+          $ref: "#/components/schemas/RoadmapBottleneck"
+      required:
+        - firstName
+        - email
+        - phone
+        - country
+        - niche
+        - revenueBand
+        - audienceSize
+        - currentOffer
+        - bottleneck
+    PublicRoadmapLeadView:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        shareToken:
+          type: string
+        firstName:
+          type: string
+        niche:
+          type: string
+        revenueBand:
+          $ref: "#/components/schemas/RoadmapRevenueBand"
+        audienceSize:
+          $ref: "#/components/schemas/RoadmapAudienceSize"
+        currentOffer:
+          type: string
+          nullable: true
+        bottleneck:
+          type: string
+          nullable: true
+        generationStatus:
+          $ref: "#/components/schemas/RoadmapGenerationStatus"
+        generationError:
+          type: string
+          nullable: true
+        generatedOffers:
+          oneOf:
+            - $ref: "#/components/schemas/RoadmapOfferBundle"
+            - type: "null"
+        createdAt:
+          type: string
+          format: date-time
+        isMillionPlus:
+          type: boolean
+      required:
+        - id
+        - shareToken
+        - firstName
+        - niche
+        - revenueBand
+        - generationStatus
+        - generatedOffers
+        - createdAt
+        - isMillionPlus
+    CreateRoadmapLeadResponse:
+      type: object
+      properties:
+        lead:
+          $ref: "#/components/schemas/PublicRoadmapLeadView"
+        resultUrl:
+          type: string
+          description: Relative URL to the public result page (/roadmap/result/{shareToken}).
+      required:
+        - lead
+        - resultUrl
+    PublicRoadmapLeadResponse:
+      type: object
+      properties:
+        lead:
+          $ref: "#/components/schemas/PublicRoadmapLeadView"
+      required:
+        - lead
+    AdminRoadmapLeadView:
+      description: |
+        Admin-only view of a roadmap lead. Includes PII fields (email,
+        phone, last name) that are deliberately stripped from
+        PublicRoadmapLeadView. Never expose this shape on a public route.
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        shareToken:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        niche:
+          type: string
+        revenueBand:
+          $ref: "#/components/schemas/RoadmapRevenueBand"
+        audienceSize:
+          type: string
+          nullable: true
+        currentOffer:
+          type: string
+          nullable: true
+        bottleneck:
+          type: string
+          nullable: true
+        generationStatus:
+          $ref: "#/components/schemas/RoadmapGenerationStatus"
+        generationError:
+          type: string
+          nullable: true
+        hasOffers:
+          type: boolean
+        generatedOffers:
+          oneOf:
+            - $ref: "#/components/schemas/RoadmapOfferBundle"
+            - type: "null"
+        emailSentAt:
+          type: string
+          format: date-time
+          nullable: true
+        emailMessageId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        isMillionPlus:
+          type: boolean
+      required:
+        - id
+        - shareToken
+        - firstName
+        - email
+        - niche
+        - revenueBand
+        - generationStatus
+        - hasOffers
+        - createdAt
+        - isMillionPlus
+    AdminRoadmapLeadListResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+        sort:
+          type: string
+        leads:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminRoadmapLeadView"
+      required:
+        - total
+        - limit
+        - offset
+        - sort
+        - leads
+    CreateRoadmapLeadEventBody:
+      type: object
+      properties:
+        eventName:
+          $ref: "#/components/schemas/RoadmapEventName"
+        shareToken:
+          type: string
+          maxLength: 80
+          nullable: true
+        step:
+          type: string
+          maxLength: 80
+          nullable: true
+        cta:
+          type: string
+          maxLength: 80
+          nullable: true
+        context:
+          type: object
+          additionalProperties: true
+          nullable: true
+      required:
+        - eventName
+    QueueOperationalBucketCounts:
+      type: object
+      properties:
+        auth: { type: integer }
+        rate-limit: { type: integer }
+        quota: { type: integer }
+        unavailable: { type: integer }
+        dead: { type: integer }
+        retryable: { type: integer }
+      required: [auth, rate-limit, quota, unavailable, dead, retryable]
+    QueueHealthOutcomes:
+      type: object
+      properties:
+        totalProcessed: { type: integer }
+        usableMedia: { type: integer }
+        successRateBp: { type: integer, description: "0-10000 basis points" }
+        terminalFailures: { type: integer }
+        dismissedTotal: { type: integer }
+        retrying: { type: integer }
+        authBlocked: { type: integer }
+        rateLimited: { type: integer }
+        providerFailures: { type: integer }
+        buckets: { $ref: "#/components/schemas/QueueOperationalBucketCounts" }
+      required:
+        - totalProcessed
+        - usableMedia
+        - successRateBp
+        - terminalFailures
+        - dismissedTotal
+        - retrying
+        - authBlocked
+        - rateLimited
+        - providerFailures
+        - buckets
+    QueueRecentFailure:
+      type: object
+      properties:
+        rowKey: { type: string }
+        adLink: { type: string }
+        mediaError: { type: string, nullable: true }
+        mediaErrorClass: { type: string, nullable: true }
+        attempts: { type: integer }
+        updatedAt: { type: string, format: date-time }
+        platform:
+          type: string
+          enum: [ig, fb, yt, other]
+        bucket:
+          type: string
+          enum: [auth, rate-limit, quota, unavailable, dead, retryable]
+        terminal: { type: boolean }
+        dismissed: { type: boolean }
+      required: [rowKey, adLink, mediaError, mediaErrorClass, attempts, updatedAt, platform, bucket, terminal, dismissed]
+    QueueHealthResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        workerId: { type: string }
+        status:
+          type: object
+          properties:
+            ok: { type: integer }
+            failed: { type: integer }
+            pending: { type: integer }
+            downloading: { type: integer }
+            partial: { type: integer }
+            stuck: { type: integer }
+          required: [ok, failed, pending, downloading, partial, stuck]
+        outcomes: { $ref: "#/components/schemas/QueueHealthOutcomes" }
+        active:
+          type: object
+          properties:
+            rows: { type: integer }
+            workers:
+              type: array
+              items:
+                type: object
+                properties:
+                  owner: { type: string }
+                  rows: { type: integer }
+                  oldestLeaseSecLeft: { type: integer, nullable: true }
+                required: [owner, rows, oldestLeaseSecLeft]
+          required: [rows, workers]
+        sourceSync:
+          type: object
+          nullable: true
+          description: |
+            Task #366: latest sync session for the ad-research board.
+            Surfaces source-row drop counts (`rowsSkipped`) so admins
+            on the queue-health dashboard can see how many sheet rows
+            were silently dropped before they ever became board items.
+          properties:
+            sessionId: { type: integer }
+            startedAt: { type: string, format: date-time }
+            completedAt: { type: string, format: date-time, nullable: true }
+            status: { type: string }
+            rowsFetched: { type: integer }
+            rowsProcessed: { type: integer }
+            rowsSkipped: { type: integer }
+          required: [sessionId, startedAt, completedAt, status, rowsFetched, rowsProcessed, rowsSkipped]
+        recentFailures:
+          type: array
+          items: { $ref: "#/components/schemas/QueueRecentFailure" }
+        errorClasses:
+          type: object
+          additionalProperties: { type: integer }
+        attemptsHistogram:
+          type: object
+          additionalProperties: { type: integer }
+        processingMs:
+          type: object
+          properties:
+            count: { type: integer }
+            avg: { type: integer, nullable: true }
+            p50: { type: integer, nullable: true }
+            p95: { type: integer, nullable: true }
+            max: { type: integer, nullable: true }
+          required: [count, avg, p50, p95, max]
+        throughput:
+          type: object
+          properties:
+            last1h: { type: integer }
+            last24h: { type: integer }
+          required: [last1h, last24h]
+        providers:
+          type: object
+          description: |
+            Task #187: per-provider observability rolled up over the
+            last 24h from queue_metrics snapshots. apifySuccess /
+            ytdlpSuccess / escalationCount / escalationRecovered are
+            the existing T158 counters. ytdlpAuthRecoveries is the
+            raw count of yt-dlp successes that consumed an
+            authenticated cookie jar; ytDlpAuthenticatedRecoveries is
+            the same value re-exposed under the dashboard-friendly
+            name. apifyEscalationRecoveries is a clearer alias for
+            escalationRecovered. authFailureRecoveryRate compares
+            (escalation + ytdlp authenticated recoveries) against the
+            universe of auth-class events that triggered them.
+          properties:
+            apifySuccess: { type: integer }
+            ytdlpSuccess: { type: integer }
+            escalationCount: { type: integer }
+            escalationRecovered: { type: integer }
+            escalationRecoveryRate: { type: number, format: float }
+            ytdlpAuthRecoveries: { type: integer }
+            ytDlpAuthenticatedRecoveries: { type: integer }
+            apifyEscalationRecoveries: { type: integer }
+            authFailureRecoveryRate: { type: number, format: float }
+            windowHours: { type: integer }
+            invalidUrlsBlocked: { type: integer }
+            deadContentDismissed: { type: integer }
+            delayedRetriesScheduled: { type: integer }
+            temporaryRecoveries: { type: integer }
+            authRecoveries: { type: integer }
+            extractorRecoveries: { type: integer }
+            avgRecoveryLatencyMs: { type: integer, nullable: true }
+            perActorSuccess:
+              type: array
+              items:
+                type: object
+                properties:
+                  actor: { type: string }
+                  successes: { type: integer }
+                  share: { type: number, format: float }
+                required: [actor, successes, share]
+          required:
+            - apifySuccess
+            - ytdlpSuccess
+            - escalationCount
+            - escalationRecovered
+            - escalationRecoveryRate
+            - ytdlpAuthRecoveries
+            - ytDlpAuthenticatedRecoveries
+            - apifyEscalationRecoveries
+            - authFailureRecoveryRate
+            - windowHours
+            - invalidUrlsBlocked
+            - deadContentDismissed
+            - delayedRetriesScheduled
+            - temporaryRecoveries
+            - authRecoveries
+            - extractorRecoveries
+            - perActorSuccess
+        verificationBenchmark:
+          nullable: true
+          type: object
+          description: |
+            Task #197: persisted verification benchmark snapshot. Null
+            until an admin POSTs the verification-benchmark route. The
+            stage discriminator is "before" while the worker is still
+            draining and "completed" once a follow-up POST captured
+            the after snapshot.
+          properties:
+            stage: { type: string, enum: [before, completed] }
+            startedAt: { type: string, format: date-time }
+            completedAt: { type: string, format: date-time, nullable: true }
+            reopened: { type: integer }
+            before:
+              type: object
+              additionalProperties: { type: integer }
+            after:
+              nullable: true
+              type: object
+              additionalProperties: { type: integer }
+          required: [stage, startedAt, completedAt, reopened, before, after]
+        generatedAt: { type: string, format: date-time }
+      required:
+        - ok
+        - workerId
+        - status
+        - outcomes
+        - active
+        - recentFailures
+        - errorClasses
+        - attemptsHistogram
+        - processingMs
+        - throughput
+        - providers
+        - generatedAt
+    QueueTrendPoint:
+      type: object
+      properties:
+        capturedAt: { type: string, format: date-time }
+        statusPending: { type: integer }
+        statusDownloading: { type: integer }
+        statusOk: { type: integer }
+        statusFailed: { type: integer }
+        statusPartial: { type: integer }
+        stuck: { type: integer }
+        activeLeases: { type: integer }
+        throughput1h: { type: integer }
+        throughput24h: { type: integer }
+        failures1h: { type: integer }
+        avgProcessingMs: { type: integer, nullable: true }
+        p95ProcessingMs: { type: integer, nullable: true }
+        totalRows: { type: integer }
+        usableMedia: { type: integer }
+        successRateBp: { type: integer }
+        terminalFailures: { type: integer }
+        dismissedTotal: { type: integer }
+        authFailures24h: { type: integer }
+        rateLimits24h: { type: integer }
+        providerFailures24h: { type: integer }
+        retryVolume24h: { type: integer }
+        apifySuccess: { type: integer }
+        ytdlpSuccess: { type: integer }
+        escalationCount: { type: integer }
+        escalationRecovered: { type: integer }
+        ytdlpAuthRecoveries: { type: integer }
+      required:
+        - capturedAt
+        - statusPending
+        - statusDownloading
+        - statusOk
+        - statusFailed
+        - statusPartial
+        - stuck
+        - activeLeases
+        - throughput1h
+        - throughput24h
+        - failures1h
+        - avgProcessingMs
+        - p95ProcessingMs
+        - totalRows
+        - usableMedia
+        - successRateBp
+        - terminalFailures
+        - dismissedTotal
+        - authFailures24h
+        - rateLimits24h
+        - providerFailures24h
+        - retryVolume24h
+        - apifySuccess
+        - ytdlpSuccess
+        - escalationCount
+        - escalationRecovered
+        - ytdlpAuthRecoveries
+    QueueTrendsResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        windowHours: { type: integer }
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/QueueTrendPoint" }
+      required: [ok, windowHours, points]
+    InstagramSessionCookieMetadata:
+      type: object
+      description: |
+        Non-sensitive metadata about the saved Instagram session cookies
+        blob. Plaintext cookie values are never returned by the API.
+      properties:
+        present: { type: boolean }
+        status:
+          type: string
+          enum: [missing, active, expired]
+        savedAt: { type: string, nullable: true, format: date-time }
+        savedBy: { type: string, nullable: true }
+        cookieCount: { type: integer }
+        cookieNames:
+          type: array
+          items: { type: string }
+        sessionidPreview: { type: string, nullable: true }
+        inferredExpiresAt: { type: string, nullable: true, format: date-time }
+        hasRequiredCookies: { type: boolean }
+        missingRequired:
+          type: array
+          items: { type: string }
+        lastError: { type: string, nullable: true }
+        configured:
+          type: boolean
+          description: Whether INSTAGRAM_COOKIES_SECRET env var is set
+      required:
+        - present
+        - status
+        - savedAt
+        - savedBy
+        - cookieCount
+        - cookieNames
+        - sessionidPreview
+        - inferredExpiresAt
+        - hasRequiredCookies
+        - missingRequired
+        - lastError
+        - configured
+    InstagramSessionCookiesSaveRequest:
+      type: object
+      description: |
+        Cookie-Editor / EditThisCookie JSON export. Either a JSON array
+        of cookie objects or `{ cookies: [...] }`.
+      properties:
+        cookiesJson:
+          type: string
+          minLength: 1
+      required: [cookiesJson]
+    InstagramSessionCookieTestResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        status:
+          type: string
+          enum:
+            - ok
+            - auth-blocked
+            - rate-limited
+            - no-cookies
+            - no-token
+            - actor-error
+            - timeout
+            - no-data
+        error: { type: string, nullable: true }
+        sample:
+          type: object
+          nullable: true
+          properties:
+            username: { type: string }
+            postCount: { type: integer }
+          required: [username, postCount]
+      required: [ok, status, error, sample]
+    InstagramSessionCookieTestResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        result: { $ref: "#/components/schemas/InstagramSessionCookieTestResult" }
+        metadata: { $ref: "#/components/schemas/InstagramSessionCookieMetadata" }
+      required: [ok, result, metadata]
+    FacebookCookieJarMetadata:
+      type: object
+      description: |
+        Non-sensitive metadata about the saved Facebook cookies.txt jar.
+        Cookie bytes never leave the server.
+      properties:
+        id: { type: integer }
+        platform:
+          type: string
+          enum: [fb]
+        uploadedBy: { type: string, nullable: true }
+        uploadedAt: { type: string, format: date-time }
+        lastValidatedAt: { type: string, nullable: true, format: date-time }
+        status: { type: string }
+        notes: { type: string, nullable: true }
+        ageHours: { type: integer }
+        cookieCount:
+          type: integer
+          nullable: true
+          description: Number of cookie rows parsed from the stored jar (display only).
+        inferredExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Latest expires-at across all cookie rows in the jar (display only).
+      required:
+        - id
+        - platform
+        - uploadedBy
+        - uploadedAt
+        - lastValidatedAt
+        - status
+        - notes
+        - ageHours
+    FacebookAuthHealthRecord:
+      type: object
+      properties:
+        platform:
+          type: string
+          enum: [fb]
+        status: { type: string }
+        lastSuccessAt: { type: string, nullable: true, format: date-time }
+        lastFailureAt: { type: string, nullable: true, format: date-time }
+        lastError: { type: string, nullable: true }
+        lastErrorClass: { type: string, nullable: true }
+        lastProbeAt: { type: string, nullable: true, format: date-time }
+        probeUrl: { type: string, nullable: true }
+      required:
+        - platform
+        - status
+        - lastSuccessAt
+        - lastFailureAt
+        - lastError
+        - lastErrorClass
+        - lastProbeAt
+        - probeUrl
+    FacebookCookiesMetadataResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        configured:
+          type: boolean
+          description: Whether FACEBOOK_COOKIES_SECRET env var is set
+        jar:
+          allOf:
+            - $ref: "#/components/schemas/FacebookCookieJarMetadata"
+          nullable: true
+        health:
+          allOf:
+            - $ref: "#/components/schemas/FacebookAuthHealthRecord"
+          nullable: true
+      required: [ok, jar, health]
+    FacebookCookiesSaveRequest:
+      type: object
+      description: |
+        Cookie payload exported from facebook.com. Accepts either a
+        Netscape `cookies.txt` string or a Cookie-Editor / EditThisCookie
+        JSON export (array of cookie objects, or `{ cookies: [...] }`).
+        The server auto-detects the format and normalizes JSON to
+        Netscape before encrypting under FACEBOOK_COOKIES_SECRET.
+      properties:
+        cookiesText:
+          type: string
+          minLength: 1
+          description: Netscape cookies.txt OR JSON cookie export.
+        cookiesJson:
+          type: string
+          minLength: 1
+          nullable: true
+          description: Optional alias for cookiesText accepting a JSON export.
+        notes:
+          type: string
+          nullable: true
+      required: [cookiesText]
+    FacebookCookiesSaveResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        jar: { $ref: "#/components/schemas/FacebookCookieJarMetadata" }
+        rows: { type: integer }
+        format:
+          type: string
+          enum: [netscape, json]
+          description: Detected format of the submitted cookie payload.
+      required: [ok, jar, rows]
+    FacebookCookiesDeleteResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        jar:
+          type: object
+          nullable: true
+      required: [ok, jar]
+    FacebookCookiesTestRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          nullable: true
+          description: Optional FB URL override; defaults to a known public watch link.
+    FacebookCookiesTestStage:
+      type: object
+      properties:
+        ok: { type: boolean }
+        errorClass: { type: string, nullable: true }
+        error: { type: string, nullable: true }
+        durationMs: { type: integer }
+      required: [ok, errorClass, error, durationMs]
+    FacebookCookiesTestResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        url: { type: string }
+        platform:
+          type: string
+          enum: [fb]
+          nullable: true
+        jarId: { type: integer, nullable: true }
+        slideCount: { type: integer }
+        errorClass: { type: string, nullable: true }
+        error: { type: string, nullable: true }
+        durationMs: { type: integer }
+        stages:
+          type: object
+          properties:
+            reachability: { $ref: "#/components/schemas/FacebookCookiesTestStage" }
+            extraction:   { $ref: "#/components/schemas/FacebookCookiesTestStage" }
+            escalation:   { $ref: "#/components/schemas/FacebookCookiesTestStage" }
+          required: [reachability, extraction, escalation]
+      required:
+        - ok
+        - url
+        - platform
+        - jarId
+        - slideCount
+        - errorClass
+        - error
+        - durationMs
+        - stages
+    FacebookCookiesTestResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        result: { $ref: "#/components/schemas/FacebookCookiesTestResult" }
+      required: [ok, result]
+    PlatinumMainProduct:
+      type: object
+      properties:
+        slug: { type: string }
+        label: { type: string }
+        priceCents: { type: integer }
+      required: [slug, label, priceCents]
+    PlatinumMainProductList:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlatinumMainProduct"
+      required: [products]
+    PlatinumCode:
+      type: object
+      properties:
+        code: { type: string }
+        status:
+          type: string
+          enum: [unredeemed, redeemed, revoked]
+        ownerEmail: { type: string }
+        redeemedForProductSlug: { type: string, nullable: true }
+        redeemedForOrderId: { type: string, nullable: true }
+        redeemedAt: { type: string, format: date-time, nullable: true }
+        revokedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [code, status, ownerEmail]
+    PlatinumCodeRedeemRequest:
+      type: object
+      properties:
+        code: { type: string }
+        productSlug: { type: string }
+      required: [code, productSlug]
+    PlatinumCodeRedeemResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        code: { type: string }
+        productSlug: { type: string }
+        orderId: { type: string }
+        redeemedAt: { type: string, format: date-time }
+      required: [success, code, productSlug, orderId, redeemedAt]
+    PlatinumGregUsage:
+      type: object
+      description: |
+        Task #762. Current-calendar-month Platinum Greg AI usage snapshot.
+        All durations are in seconds. `limitSeconds` is the hard monthly
+        allowance (7200s = 120 min).
+      properties:
+        usedSeconds: { type: integer }
+        limitSeconds: { type: integer }
+        remainingSeconds: { type: integer }
+        canStart: { type: boolean }
+        resetsAt:
+          type: string
+          format: date-time
+          description: Start of next calendar month (UTC) when the allowance resets.
+      required:
+        - usedSeconds
+        - limitSeconds
+        - remainingSeconds
+        - canStart
+        - resetsAt
+    PlatinumGregUsageRecordBody:
+      type: object
+      properties:
+        channel:
+          type: string
+          enum: [voice, chat]
+        durationSeconds:
+          type: integer
+          minimum: 0
+          description: Elapsed seconds of the finished session (capped server-side at remaining allowance).
+      required:
+        - channel
+        - durationSeconds
+    AdminInfluencerGenerationOwner:
+      type: object
+      description: |
+        Buyer behind a generation job. `appUserId` is always set
+        (the FK on `ai_influencer_jobs.client_id`); the rest are
+        sourced from the joined `portal_users` row when one exists.
+      properties:
+        appUserId: { type: integer }
+        appUserEmail: { type: string, nullable: true }
+        appUserName: { type: string, nullable: true }
+        isSuperAdmin: { type: boolean }
+        portalUserId: { type: integer, nullable: true }
+        clerkId: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        name: { type: string, nullable: true }
+        isActive: { type: boolean, nullable: true }
+        isAList: { type: boolean, nullable: true }
+        portalKey: { type: string, nullable: true }
+        portalCreatedAt: { type: string, format: date-time, nullable: true }
+      required: [appUserId, isSuperAdmin]
+    AdminInfluencerGenerationInfluencerSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+        avatarUrl: { type: string, nullable: true }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, status, updatedAt]
+    AdminInfluencerGenerationPrefs:
+      type: object
+      properties:
+        gender: { type: string, nullable: true }
+        ageRange: { type: string, nullable: true }
+        ethnicity: { type: string, nullable: true }
+        vibe: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        facialHair: { type: string, nullable: true }
+        hairstyle: { type: string, nullable: true }
+    AdminInfluencerGenerationListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        clientId: { type: integer }
+        influencerId: { type: integer, nullable: true }
+        status: { type: string }
+        progress: { type: integer }
+        isFreeTier: { type: boolean }
+        etaAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        stageStartedAt: { type: string, format: date-time, nullable: true }
+        heartbeatAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        finalizeAttempts: { type: integer }
+        failureReason: { type: string, nullable: true }
+        lastErrorCode: { type: string, nullable: true }
+        prefs:
+          $ref: "#/components/schemas/AdminInfluencerGenerationPrefs"
+        owner:
+          $ref: "#/components/schemas/AdminInfluencerGenerationOwner"
+        influencer:
+          $ref: "#/components/schemas/AdminInfluencerGenerationInfluencerSummary"
+      required:
+        - id
+        - clientId
+        - status
+        - progress
+        - isFreeTier
+        - etaAt
+        - createdAt
+        - updatedAt
+        - finalizeAttempts
+        - prefs
+        - owner
+    AdminInfluencerGenerationsList:
+      type: object
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminInfluencerGenerationListItem"
+        nextCursor: { type: string, nullable: true }
+        hasMore: { type: boolean }
+      required: [jobs, nextCursor, hasMore]
+    AdminInfluencerGenerationStats:
+      type: object
+      description: |
+        `byStatus` is a keyed object: every known lifecycle status is
+        present as a numeric value (0 when no rows match). `stuck`
+        counts non-terminal rows whose `updated_at` is older than
+        `stuckThresholdMs`. `freeTier` + `paidTier` sum to `total`.
+      properties:
+        total: { type: integer }
+        stuck: { type: integer }
+        stuckThresholdMs: { type: integer }
+        freeTier: { type: integer }
+        paidTier: { type: integer }
+        since: { type: string, format: date-time }
+        byStatus:
+          type: object
+          additionalProperties:
+            type: integer
+          properties:
+            queued: { type: integer }
+            generating_base: { type: integer }
+            enhancing: { type: integer }
+            swapping_scenes: { type: integer }
+            ready: { type: integer }
+            ready_degraded: { type: integer }
+            failed: { type: integer }
+          required:
+            - queued
+            - generating_base
+            - enhancing
+            - swapping_scenes
+            - ready
+            - ready_degraded
+            - failed
+        generatedAt: { type: string, format: date-time }
+      required:
+        - total
+        - stuck
+        - stuckThresholdMs
+        - freeTier
+        - paidTier
+        - since
+        - byStatus
+        - generatedAt
+    AdminInfluencerGenerationDetail:
+      type: object
+      description: |
+        Full detail bundle for one generation job. Most of the nested
+        payloads (`scenes`, `webhookEvents`, `prefs`, `influencer`,
+        `angles`, `settings`, `sceneJobs`) are large free-form
+        objects sourced from jsonb columns and joined tables, so they
+        are exposed here as opaque objects/arrays rather than strict
+        sub-schemas.
+      properties:
+        job:
+          type: object
+          additionalProperties: true
+        owner:
+          type: object
+          nullable: true
+          additionalProperties: true
+        influencer:
+          type: object
+          nullable: true
+          additionalProperties: true
+        angles:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        settings:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        sceneJobs:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required: [job, angles, settings, sceneJobs]
+    AdminInfluencerSceneJob:
+      type: object
+      properties:
+        id: { type: integer }
+        sceneIndex: { type: integer }
+        label: { type: string, nullable: true }
+        provider: { type: string }
+        status: { type: string }
+        attemptCount: { type: integer }
+        retryCount: { type: integer }
+        nextAttemptAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        failedAt: { type: string, format: date-time, nullable: true }
+        lastErrorCode: { type: string, nullable: true }
+        lastErrorMessage: { type: string, nullable: true }
+        generatedAssetUrl: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+      required: [id, sceneIndex, provider, status, attemptCount, retryCount]
+    AdminInfluencerTimelineEntry:
+      type: object
+      properties:
+        stage: { type: string }
+        at: { type: string, format: date-time }
+      required: [stage, at]
+    AdminInfluencerBuyer:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, nullable: true }
+        name: { type: string, nullable: true }
+      required: [id]
+    AdminInfluencerInfluencer:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+        avatarUrl: { type: string, nullable: true }
+        angleCount: { type: integer }
+        settingCount: { type: integer }
+      required: [id, name, status, angleCount, settingCount]
+    AdminInfluencerJobDetail:
+      type: object
+      properties:
+        job:
+          type: object
+          description: Raw ai_influencer_jobs row with date strings.
+          additionalProperties: true
+        buyer:
+          oneOf:
+            - $ref: "#/components/schemas/AdminInfluencerBuyer"
+            - type: "null"
+        influencer:
+          oneOf:
+            - $ref: "#/components/schemas/AdminInfluencerInfluencer"
+            - type: "null"
+        sceneJobs:
+          type: array
+          items: { $ref: "#/components/schemas/AdminInfluencerSceneJob" }
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/AdminInfluencerTimelineEntry" }
+      required: [job, sceneJobs, timeline]
+    AdminInfluencerRetryResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        newJobId: { type: integer }
+        influencerId: { type: integer, nullable: true }
+      required: [ok, newJobId]
+    AdminInfluencerMarkFailedResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        jobId: { type: integer }
+        status: { type: string }
+        alreadyTerminal: { type: boolean }
+        notified: { type: boolean }
+        emailStatus:
+          type: string
+          enum: [sent, failed, skipped-already-sent, skipped-no-email]
+      required: [ok]
+    AdminInfluencerManualDeliverRequest:
+      type: object
+      properties:
+        coverImageUrl: { type: string, format: uri }
+        scenes:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            properties:
+              url: { type: string, format: uri }
+              label: { type: string, maxLength: 120 }
+            required: [url]
+      required: [coverImageUrl]
+    AdminInfluencerManualDeliverResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        jobId: { type: integer }
+        status: { type: string }
+        influencerId: { type: integer, nullable: true }
+        sceneCount: { type: integer }
+        notified: { type: boolean }
+        emailStatus:
+          type: string
+          enum: [sent, failed, skipped-already-sent, skipped-no-email]
+        alreadyDelivered: { type: boolean }
+      required: [ok]
+    AdminImpersonationStartResponse:
+      type: object
+      properties:
+        sessionId: { type: integer }
+        token: { type: string, description: "HMAC-signed session token; send back as X-Impersonate-Session header" }
+        expiresAt: { type: string, format: date-time }
+        target:
+          type: object
+          properties:
+            id: { type: integer }
+            email: { type: string }
+            firstName: { type: string, nullable: true }
+            lastName: { type: string, nullable: true }
+            role: { type: string }
+          required: [id, email, role]
+        admin:
+          type: object
+          properties:
+            clerkId: { type: string }
+            email: { type: string, nullable: true }
+          required: [clerkId]
+      required: [sessionId, token, expiresAt, target, admin]
+    AdminImpersonationStatusResponse:
+      oneOf:
+        - type: object
+          properties:
+            active: { type: boolean, enum: [false] }
+          required: [active]
+        - type: object
+          properties:
+            active: { type: boolean, enum: [true] }
+            sessionId: { type: integer }
+            admin:
+              type: object
+              properties:
+                clerkId: { type: string }
+                email: { type: string, nullable: true }
+              required: [clerkId]
+            target:
+              type: object
+              nullable: true
+              properties:
+                id: { type: integer }
+                email: { type: string }
+                firstName: { type: string, nullable: true }
+                lastName: { type: string, nullable: true }
+              required: [id, email]
+          required: [active, sessionId, admin]

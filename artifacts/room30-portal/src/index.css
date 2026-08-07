@@ -1,0 +1,481 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Raleway:wght@400;500;600;700;800&display=swap');
+
+/* Bauhaus Desk Display - GREGORY. brand display font.
+   9 weights: 100 Thin, 200 ExtraLight, 300 Light, 400 Regular,
+   500 Medium, 600 SemiBold, 700 Bold, 800 ExtraBold, 900 Black. */
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Thin.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Thin.woff') format('woff'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-ExtraLight.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-ExtraLight.woff') format('woff'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Light.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Light.woff') format('woff'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Regular.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Regular.woff') format('woff'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Medium.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Medium.woff') format('woff'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-SemiBold.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-SemiBold.woff') format('woff'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Bold.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Bold.woff') format('woff'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-ExtraBold.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-ExtraBold.woff') format('woff'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Black.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --font-sans: var(--app-font-sans);
+  --font-display: var(--app-font-display);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-display: 'Desk', 'Bauhaus Desk Display', sans-serif;
+  --app-font-mono: 'JetBrains Mono', monospace;
+
+  --button-outline: rgba(255,255,255, .10);
+  --badge-outline: rgba(255,255,255, .05);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .09);
+
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+  --border: 0 0% 14%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 95%;
+  --card-border: 0 0% 14%;
+  --sidebar: 0 0% 6%;
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-border: 0 0% 12%;
+  --sidebar-primary: 42 56% 54%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 12%;
+  --sidebar-accent-foreground: 0 0% 90%;
+  --sidebar-ring: 42 56% 54%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 95%;
+  --popover-border: 0 0% 14%;
+  --primary: 42 56% 54%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 55%;
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 0 0% 18%;
+  --ring: 42 56% 54%;
+  --chart-1: 42 56% 54%;
+  --chart-2: 200 80% 50%;
+  --chart-3: 140 60% 45%;
+  --chart-4: 40 90% 55%;
+  --chart-5: 280 70% 55%;
+  --radius: 0.625rem;
+
+  --primary-border: hsl(var(--primary));
+  --secondary-border: hsl(var(--secondary));
+  --muted-border: hsl(var(--muted));
+  --accent-border: hsl(var(--accent));
+  --destructive-border: hsl(var(--destructive));
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.font-display {
+  font-family: var(--app-font-display);
+}
+
+.gold-grad-text {
+  background-image: linear-gradient(90deg, #8C6A1F 0%, #B8902F 8%, #E8CC78 18%, #F4E0A0 25%, #C9A44C 38%, #F2DC9A 50%, #C9A44C 62%, #F4E0A0 75%, #E8CC78 82%, #B8902F 92%, #8C6A1F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.gold-grad-bg {
+  background-image: linear-gradient(90deg, #8C6A1F 0%, #B8902F 8%, #E8CC78 18%, #F4E0A0 25%, #C9A44C 38%, #F2DC9A 50%, #C9A44C 62%, #F4E0A0 75%, #E8CC78 82%, #B8902F 92%, #8C6A1F 100%);
+}
+
+.tiptap {
+  font-family: var(--app-font-sans);
+  font-size: 15px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap h2 {
+  font-family: var(--app-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: white;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+
+.tiptap h2:first-child {
+  margin-top: 0;
+}
+
+.tiptap h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin-top: 1.8em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap p {
+  margin-bottom: 1em;
+}
+
+.tiptap p strong {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tiptap ul {
+  list-style-type: disc;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+}
+
+.tiptap li {
+  margin-bottom: 0.4em;
+}
+
+.tiptap li p {
+  margin-bottom: 0.2em;
+}
+
+.tiptap li strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.tiptap blockquote {
+  border: none;
+  border-left: none;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 1.25em 0;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tiptap blockquote p {
+  margin-bottom: 0;
+}
+
+.tiptap blockquote p:first-child {
+  margin-bottom: 0;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 2em 0;
+}
+
+.tiptap .callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  margin: 1.25em 0;
+  background: rgba(201,164,76,0.08);
+  border: 1px solid rgba(201,164,76,0.25);
+  border-radius: 10px;
+}
+
+.tiptap .callout-emoji {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201,164,76,0.18);
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+}
+
+.tiptap .callout-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tiptap .callout-content > *:first-child {
+  margin-top: 0;
+}
+
+.tiptap .callout-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap code {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-size: 0.9em;
+  font-family: var(--app-font-mono);
+  color: #C9A44C;
+}
+
+.tiptap pre {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 1em 1.25em;
+  margin: 1.25em 0;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5em 0;
+}
+
+.tiptap a {
+  color: #C9A44C;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.tiptap a:hover {
+  color: rgba(201,164,76,0.8);
+}
+
+.tiptap s {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  height: 0;
+}
+
+.notes-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0a0a0a;
+  overflow-y: auto;
+}
+
+/* ── Default (dark) header + buttons ── */
+.notes-fullscreen .notes-fullscreen-header {
+  background: #0a0a0a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.notes-fullscreen .notes-fullscreen-title {
+  color: #ffffff;
+}
+.notes-fullscreen .notes-fullscreen-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+}
+.notes-fullscreen .notes-fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+.notes-fullscreen .notes-fullscreen-btn-accent:hover {
+  color: #C9A44C;
+  background: rgba(201,164,76,0.1);
+}
+
+.notes-fullscreen .tiptap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+/* ── Light theme override ── */
+.notes-fullscreen[data-theme="light"] {
+  background: #ffffff;
+}
+.notes-fullscreen[data-theme="light"] .notes-fullscreen-header {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.notes-fullscreen[data-theme="light"] .notes-fullscreen-title {
+  color: #0a0a0a;
+}
+.notes-fullscreen[data-theme="light"] .notes-fullscreen-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.55);
+}
+.notes-fullscreen[data-theme="light"] .notes-fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.9);
+}
+.notes-fullscreen[data-theme="light"] .notes-fullscreen-btn-accent:hover {
+  color: #C9A44C;
+  background: rgba(201,164,76,0.08);
+}
+
+.notes-fullscreen[data-theme="light"] .tiptap {
+  color: rgba(0, 0, 0, 0.78);
+}
+.notes-fullscreen[data-theme="light"] .tiptap h2,
+.notes-fullscreen[data-theme="light"] .tiptap h3,
+.notes-fullscreen[data-theme="light"] .tiptap p strong,
+.notes-fullscreen[data-theme="light"] .tiptap li strong {
+  color: #0a0a0a;
+}
+.notes-fullscreen[data-theme="light"] .tiptap blockquote {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.78);
+}
+.notes-fullscreen[data-theme="light"] .tiptap hr {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+.notes-fullscreen[data-theme="light"] .tiptap code {
+  background: rgba(0, 0, 0, 0.06);
+}
+.notes-fullscreen[data-theme="light"] .tiptap pre {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.notes-fullscreen[data-theme="light"] .tiptap pre code {
+  color: rgba(0, 0, 0, 0.8);
+}
+.notes-fullscreen[data-theme="light"] .tiptap s {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.notes-fullscreen .tiptap h2 {
+  font-size: 32px;
+  margin-top: 2.2em;
+}
+
+.notes-fullscreen .tiptap h3 {
+  font-size: 22px;
+}
+
+.notes-fullscreen .tiptap blockquote {
+  font-size: 15px;
+  padding: 18px 24px;
+}
+
+.notes-fullscreen .tiptap pre {
+  padding: 1.25em 1.5em;
+}
+
+.notes-fullscreen .tiptap img {
+  border-radius: 10px;
+  margin: 2em 0;
+}
+
+
+/* My Influencers page - ensure all interactive elements show pointer cursor. */
+[data-page="my-influencers"] button:not(:disabled),
+[data-page="my-influencers"] [role="button"],
+[data-page="my-influencers"] a,
+[data-page="my-influencers"] label[for],
+[data-page="my-influencers"] [onclick],
+[data-page="my-influencers"] [data-clickable] {
+  cursor: pointer;
+}
+[data-page="my-influencers"] button:disabled {
+  cursor: not-allowed;
+}

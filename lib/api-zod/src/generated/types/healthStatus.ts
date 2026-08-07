@@ -8,4 +8,13 @@
 
 export interface HealthStatus {
   status: string;
+  /** Task #200: build-time git commit SHA (or REPLIT_GIT_COMMIT
+fallback) injected via esbuild's `define`. "unknown" when
+built outside the canonical build flow.
+ */
+  buildSha?: string;
+  /** ISO timestamp captured at build time. */
+  builtAt?: string | null;
+  /** api | worker */
+  runtime?: string;
 }

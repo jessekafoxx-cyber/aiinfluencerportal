@@ -5,6 +5,1510 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface AuthUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName: string | null;
+  /** @nullable */
+  lastName: string | null;
+  /** @nullable */
+  profileImageUrl: string | null;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  code_verifier: string;
+  /** @minLength 1 */
+  redirect_uri: string;
+  /** @minLength 1 */
+  state: string;
+  /** @minLength 1 */
+  nonce?: string;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export const LogoutSuccessValue = {
+  success: true,
+} as const;
+export type LogoutSuccess = typeof LogoutSuccessValue;
+
+export interface AuthErrorEnvelope {
+  error: string;
+}
+
 export interface HealthStatus {
   status: string;
+  /** Task #200: build-time git commit SHA (or REPLIT_GIT_COMMIT
+fallback) injected via esbuild's `define`. "unknown" when
+built outside the canonical build flow.
+ */
+  buildSha?: string;
+  /** ISO timestamp captured at build time. */
+  builtAt?: string | null;
+  /** api | worker */
+  runtime?: string;
 }
+
+export interface RequestUploadUrlBody {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export type RequestUploadUrlResponseMetadata = {
+  name: string;
+  size: number;
+  contentType: string;
+};
+
+export interface RequestUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata: RequestUploadUrlResponseMetadata;
+}
+
+export interface ApiError {
+  error: string;
+}
+
+export type PortalAnnouncementMediaKind =
+  | (typeof PortalAnnouncementMediaKind)[keyof typeof PortalAnnouncementMediaKind]
+  | null;
+
+export const PortalAnnouncementMediaKind = {
+  image: "image",
+  video: "video",
+} as const;
+
+export type PortalAnnouncementAudience =
+  (typeof PortalAnnouncementAudience)[keyof typeof PortalAnnouncementAudience];
+
+export const PortalAnnouncementAudience = {
+  all: "all",
+  admins: "admins",
+} as const;
+
+export interface PortalAnnouncement {
+  id: number;
+  title: string;
+  bodyHtml: string;
+  /** Short-lived (1h) signed GCS GET URL, or null when no media or signing failed. */
+  mediaUrl: string | null;
+  mediaKind?: PortalAnnouncementMediaKind;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  ctaNewTab: boolean;
+  audience: PortalAnnouncementAudience;
+  publishedAt?: string | null;
+  createdAt: string;
+}
+
+export interface PortalAnnouncementListResponse {
+  announcements: PortalAnnouncement[];
+}
+
+export type AdminAnnouncementStatus =
+  (typeof AdminAnnouncementStatus)[keyof typeof AdminAnnouncementStatus];
+
+export const AdminAnnouncementStatus = {
+  draft: "draft",
+  published: "published",
+  unpublished: "unpublished",
+} as const;
+
+export type AdminAnnouncement = PortalAnnouncement & {
+  mediaPath?: string | null;
+  status: AdminAnnouncementStatus;
+  updatedAt: string;
+  /** Floor approximation of "users who have seen this." Without
+a separate impressions table the only ack signal is a
+dismiss, so this equals `dismissedCount` for published
+rows and 0 for draft/unpublished rows. Treat as a lower
+bound, not a true impression count.
+ */
+  seenCount: number;
+  /** Total number of users who have explicitly dismissed the announcement. */
+  dismissedCount: number;
+};
+
+export interface AdminAnnouncementListResponse {
+  announcements: AdminAnnouncement[];
+}
+
+export interface AdminAnnouncementResponse {
+  announcement: AdminAnnouncement;
+}
+
+export type AdminAnnouncementWriteBodyMediaKind =
+  | (typeof AdminAnnouncementWriteBodyMediaKind)[keyof typeof AdminAnnouncementWriteBodyMediaKind]
+  | null;
+
+export const AdminAnnouncementWriteBodyMediaKind = {
+  image: "image",
+  video: "video",
+} as const;
+
+export type AdminAnnouncementWriteBodyAudience =
+  (typeof AdminAnnouncementWriteBodyAudience)[keyof typeof AdminAnnouncementWriteBodyAudience];
+
+export const AdminAnnouncementWriteBodyAudience = {
+  all: "all",
+  admins: "admins",
+} as const;
+
+export type AdminAnnouncementWriteBodyStatus =
+  (typeof AdminAnnouncementWriteBodyStatus)[keyof typeof AdminAnnouncementWriteBodyStatus];
+
+export const AdminAnnouncementWriteBodyStatus = {
+  draft: "draft",
+  published: "published",
+  unpublished: "unpublished",
+} as const;
+
+export interface AdminAnnouncementWriteBody {
+  title?: string;
+  bodyHtml?: string;
+  mediaPath?: string | null;
+  mediaKind?: AdminAnnouncementWriteBodyMediaKind;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  ctaNewTab?: boolean;
+  audience?: AdminAnnouncementWriteBodyAudience;
+  status?: AdminAnnouncementWriteBodyStatus;
+}
+
+export interface AnnouncementUploadRequestBody {
+  /** PNG/JPEG/WebP/GIF image or MP4/MOV/WebM video MIME. */
+  contentType: string;
+  /** Upload size in bytes; max 100 MB. */
+  size: number;
+  name?: string;
+}
+
+export type AnnouncementUploadResponseMediaKind =
+  (typeof AnnouncementUploadResponseMediaKind)[keyof typeof AnnouncementUploadResponseMediaKind];
+
+export const AnnouncementUploadResponseMediaKind = {
+  image: "image",
+  video: "video",
+} as const;
+
+export interface AnnouncementUploadResponse {
+  uploadURL: string;
+  objectPath: string;
+  mediaKind: AnnouncementUploadResponseMediaKind;
+}
+
+export interface OkResponse {
+  ok: boolean;
+}
+
+export interface CaptureFunnelLeadBody {
+  /**
+   * @minLength 3
+   * @maxLength 254
+   */
+  email: string;
+  /** @maxLength 40 */
+  phone?: string;
+  /**
+   * Optional first name typed into the lead form. Persisted on the funnel_leads row and forwarded to KIT/WATI/CRM as a custom field (Task
+   * @maxLength 80
+   */
+  firstName?: string | null;
+  /** @maxLength 8 */
+  country?: string | null;
+  /** @maxLength 80 */
+  affiliateCode?: string | null;
+  /**
+   * FirstPromoter `_fprom_tid` cookie value, forwarded so the server can stamp the lead row with the referral id (Task
+   * @maxLength 128
+   */
+  firstpromoterReferralId?: string | null;
+  /** @maxLength 200 */
+  sourcePage?: string | null;
+  /** @maxLength 500 */
+  referrer?: string | null;
+}
+
+export type RoadmapRevenueBand =
+  (typeof RoadmapRevenueBand)[keyof typeof RoadmapRevenueBand];
+
+export const RoadmapRevenueBand = {
+  "Just_starting_(no_revenue_yet)": "Just starting (no revenue yet)",
+  "Under_$5k/mo": "Under $5k/mo",
+  "$5k_-_$15k/mo": "$5k - $15k/mo",
+  "$15k_-_$50k/mo": "$15k - $50k/mo",
+  "$50k_-_$100k/mo": "$50k - $100k/mo",
+  "$100k+/mo_(over_$1M/yr)": "$100k+/mo (over $1M/yr)",
+} as const;
+
+export type RoadmapAudienceSize =
+  (typeof RoadmapAudienceSize)[keyof typeof RoadmapAudienceSize];
+
+export const RoadmapAudienceSize = {
+  "Under_1,000": "Under 1,000",
+  "1,000_-_10,000": "1,000 - 10,000",
+  "10,000_-_50,000": "10,000 - 50,000",
+  "50,000_-_250,000": "50,000 - 250,000",
+  "250,000+": "250,000+",
+} as const;
+
+export type RoadmapBottleneck =
+  (typeof RoadmapBottleneck)[keyof typeof RoadmapBottleneck];
+
+export const RoadmapBottleneck = {
+  "Can't_scale_past_$10k/mo": "Can't scale past $10k/mo",
+  "Can't_scale_past_$50k/mo": "Can't scale past $50k/mo",
+  "Can't_scale_past_$100k/mo": "Can't scale past $100k/mo",
+  "Can't_break_$1M/yr_ceiling": "Can't break $1M/yr ceiling",
+  Not_enough_qualified_leads_coming_in: "Not enough qualified leads coming in",
+  "Leads_come_in_but_don't_convert_to_sales":
+    "Leads come in but don't convert to sales",
+  Selling_but_average_order_value_is_too_low:
+    "Selling but average order value is too low",
+  "No_premium_backend,_leaving_money_on_table":
+    "No premium backend, leaving money on table",
+  "Doing_everything_myself,_can't_get_leverage":
+    "Doing everything myself, can't get leverage",
+  "Burned_out_delivering_1-1,_can't_scale_delivery":
+    "Burned out delivering 1-1, can't scale delivery",
+  "Revenue_is_random,_no_predictable_system":
+    "Revenue is random, no predictable system",
+  "Other_/_not_sure": "Other / not sure",
+} as const;
+
+export type RoadmapEventName =
+  (typeof RoadmapEventName)[keyof typeof RoadmapEventName];
+
+export const RoadmapEventName = {
+  form_started: "form_started",
+  step_completed: "step_completed",
+  form_submitted: "form_submitted",
+  result_viewed: "result_viewed",
+  cta_clicked: "cta_clicked",
+  pdf_downloaded: "pdf_downloaded",
+} as const;
+
+export type RoadmapGenerationStatus =
+  (typeof RoadmapGenerationStatus)[keyof typeof RoadmapGenerationStatus];
+
+export const RoadmapGenerationStatus = {
+  pending: "pending",
+  processing: "processing",
+  ready: "ready",
+  failed: "failed",
+} as const;
+
+export interface RoadmapPriceTier {
+  name: string;
+  promise: string;
+  /** Whole-dollar price as a number, e.g. 27. */
+  price: number;
+  /** Human label including frequency, e.g. '$27 one-time'. */
+  priceLabel: string;
+  whatsInside: string[];
+  priceRationale: string;
+}
+
+export type RoadmapLowTicketFormat =
+  (typeof RoadmapLowTicketFormat)[keyof typeof RoadmapLowTicketFormat];
+
+export const RoadmapLowTicketFormat = {
+  "Live_5-Day_Challenge_Funnel": "Live 5-Day Challenge Funnel",
+  "Course_+_AI_Operating_System": "Course + AI Operating System",
+  "Done-For-You_Templates": "Done-For-You Templates",
+} as const;
+
+export interface RoadmapLowTicketStack {
+  format: RoadmapLowTicketFormat;
+  formatRationale: string;
+  why: string;
+  economics: string;
+  mainOffer: RoadmapPriceTier;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  orderBumps: RoadmapPriceTier[];
+  /**
+   * @minItems 3
+   * @maxItems 3
+   */
+  upsells: RoadmapPriceTier[];
+}
+
+export interface RoadmapPremiumStack {
+  why: string;
+  offerName: string;
+  promise: string;
+  format: string;
+  deliverables: string[];
+  experienceLayer: string;
+  idealClient: string;
+  price: number;
+  priceLabel: string;
+  priceRationale: string;
+  objectionHandling: string[];
+  salesConversation: string[];
+}
+
+export interface RoadmapHundredKStack {
+  why: string;
+  mindsetShift: string;
+  offerName: string;
+  coreConcept: string;
+  deliverables: string[];
+  experienceLayer: string;
+  transformation: string;
+  price: number;
+  priceLabel: string;
+  profitMargin: string;
+  deliveryPlan: string;
+  idealClient: string;
+  scarcity: string;
+}
+
+export interface RoadmapOfferBundle {
+  intro: string;
+  lowTicket: RoadmapLowTicketStack;
+  premium: RoadmapPremiumStack;
+  hundredK: RoadmapHundredKStack;
+}
+
+export interface CreateRoadmapLeadBody {
+  /**
+   * @minLength 1
+   * @maxLength 80
+   */
+  firstName: string;
+  /** @maxLength 80 */
+  lastName?: string | null;
+  /**
+   * @minLength 5
+   * @maxLength 200
+   */
+  email: string;
+  /**
+   * E.164 phone number including dial code.
+   * @minLength 6
+   * @maxLength 32
+   */
+  phone: string;
+  /**
+   * ISO-3166 alpha-2 country code.
+   * @minLength 2
+   * @maxLength 2
+   */
+  country: string;
+  /**
+   * @minLength 3
+   * @maxLength 200
+   */
+  niche: string;
+  revenueBand: RoadmapRevenueBand;
+  audienceSize: RoadmapAudienceSize;
+  /**
+   * @minLength 3
+   * @maxLength 1000
+   */
+  currentOffer: string;
+  bottleneck: RoadmapBottleneck;
+}
+
+export interface PublicRoadmapLeadView {
+  /** @minimum 1 */
+  id: number;
+  shareToken: string;
+  firstName: string;
+  niche: string;
+  revenueBand: RoadmapRevenueBand;
+  audienceSize?: RoadmapAudienceSize;
+  currentOffer?: string | null;
+  bottleneck?: string | null;
+  generationStatus: RoadmapGenerationStatus;
+  generationError?: string | null;
+  generatedOffers: RoadmapOfferBundle | null;
+  createdAt: string;
+  isMillionPlus: boolean;
+}
+
+export interface CreateRoadmapLeadResponse {
+  lead: PublicRoadmapLeadView;
+  /** Relative URL to the public result page (/roadmap/result/{shareToken}). */
+  resultUrl: string;
+}
+
+export interface PublicRoadmapLeadResponse {
+  lead: PublicRoadmapLeadView;
+}
+
+/**
+ * Admin-only view of a roadmap lead. Includes PII fields (email,
+phone, last name) that are deliberately stripped from
+PublicRoadmapLeadView. Never expose this shape on a public route.
+
+ */
+export interface AdminRoadmapLeadView {
+  /** @minimum 1 */
+  id: number;
+  shareToken: string;
+  firstName: string;
+  lastName?: string | null;
+  email: string;
+  phone?: string | null;
+  country?: string | null;
+  niche: string;
+  revenueBand: RoadmapRevenueBand;
+  audienceSize?: string | null;
+  currentOffer?: string | null;
+  bottleneck?: string | null;
+  generationStatus: RoadmapGenerationStatus;
+  generationError?: string | null;
+  hasOffers: boolean;
+  generatedOffers?: RoadmapOfferBundle | null;
+  emailSentAt?: string | null;
+  emailMessageId?: string | null;
+  createdAt: string;
+  isMillionPlus: boolean;
+}
+
+export interface AdminRoadmapLeadListResponse {
+  /** @minimum 0 */
+  total: number;
+  /** @minimum 1 */
+  limit: number;
+  /** @minimum 0 */
+  offset: number;
+  sort: string;
+  leads: AdminRoadmapLeadView[];
+}
+
+export type CreateRoadmapLeadEventBodyContext = {
+  [key: string]: unknown;
+} | null;
+
+export interface CreateRoadmapLeadEventBody {
+  eventName: RoadmapEventName;
+  /** @maxLength 80 */
+  shareToken?: string | null;
+  /** @maxLength 80 */
+  step?: string | null;
+  /** @maxLength 80 */
+  cta?: string | null;
+  context?: CreateRoadmapLeadEventBodyContext;
+}
+
+export interface QueueOperationalBucketCounts {
+  auth: number;
+  "rate-limit": number;
+  quota: number;
+  unavailable: number;
+  dead: number;
+  retryable: number;
+}
+
+export interface QueueHealthOutcomes {
+  totalProcessed: number;
+  usableMedia: number;
+  /** 0-10000 basis points */
+  successRateBp: number;
+  terminalFailures: number;
+  dismissedTotal: number;
+  retrying: number;
+  authBlocked: number;
+  rateLimited: number;
+  providerFailures: number;
+  buckets: QueueOperationalBucketCounts;
+}
+
+export type QueueRecentFailurePlatform =
+  (typeof QueueRecentFailurePlatform)[keyof typeof QueueRecentFailurePlatform];
+
+export const QueueRecentFailurePlatform = {
+  ig: "ig",
+  fb: "fb",
+  yt: "yt",
+  other: "other",
+} as const;
+
+export type QueueRecentFailureBucket =
+  (typeof QueueRecentFailureBucket)[keyof typeof QueueRecentFailureBucket];
+
+export const QueueRecentFailureBucket = {
+  auth: "auth",
+  "rate-limit": "rate-limit",
+  quota: "quota",
+  unavailable: "unavailable",
+  dead: "dead",
+  retryable: "retryable",
+} as const;
+
+export interface QueueRecentFailure {
+  rowKey: string;
+  adLink: string;
+  mediaError: string | null;
+  mediaErrorClass: string | null;
+  attempts: number;
+  updatedAt: string;
+  platform: QueueRecentFailurePlatform;
+  bucket: QueueRecentFailureBucket;
+  terminal: boolean;
+  dismissed: boolean;
+}
+
+export type QueueHealthResponseStatus = {
+  ok: number;
+  failed: number;
+  pending: number;
+  downloading: number;
+  partial: number;
+  stuck: number;
+};
+
+export type QueueHealthResponseActiveWorkersItem = {
+  owner: string;
+  rows: number;
+  oldestLeaseSecLeft: number | null;
+};
+
+export type QueueHealthResponseActive = {
+  rows: number;
+  workers: QueueHealthResponseActiveWorkersItem[];
+};
+
+/**
+ * Task #366: latest sync session for the ad-research board.
+Surfaces source-row drop counts (`rowsSkipped`) so admins
+on the queue-health dashboard can see how many sheet rows
+were silently dropped before they ever became board items.
+
+ */
+export type QueueHealthResponseSourceSync = {
+  sessionId: number;
+  startedAt: string;
+  completedAt: string | null;
+  status: string;
+  rowsFetched: number;
+  rowsProcessed: number;
+  rowsSkipped: number;
+} | null;
+
+export type QueueHealthResponseErrorClasses = { [key: string]: number };
+
+export type QueueHealthResponseAttemptsHistogram = { [key: string]: number };
+
+export type QueueHealthResponseProcessingMs = {
+  count: number;
+  avg: number | null;
+  p50: number | null;
+  p95: number | null;
+  max: number | null;
+};
+
+export type QueueHealthResponseThroughput = {
+  last1h: number;
+  last24h: number;
+};
+
+export type QueueHealthResponseProvidersPerActorSuccessItem = {
+  actor: string;
+  successes: number;
+  share: number;
+};
+
+/**
+ * Task #187: per-provider observability rolled up over the
+last 24h from queue_metrics snapshots. apifySuccess /
+ytdlpSuccess / escalationCount / escalationRecovered are
+the existing T158 counters. ytdlpAuthRecoveries is the
+raw count of yt-dlp successes that consumed an
+authenticated cookie jar; ytDlpAuthenticatedRecoveries is
+the same value re-exposed under the dashboard-friendly
+name. apifyEscalationRecoveries is a clearer alias for
+escalationRecovered. authFailureRecoveryRate compares
+(escalation + ytdlp authenticated recoveries) against the
+universe of auth-class events that triggered them.
+
+ */
+export type QueueHealthResponseProviders = {
+  apifySuccess: number;
+  ytdlpSuccess: number;
+  escalationCount: number;
+  escalationRecovered: number;
+  escalationRecoveryRate: number;
+  ytdlpAuthRecoveries: number;
+  ytDlpAuthenticatedRecoveries: number;
+  apifyEscalationRecoveries: number;
+  authFailureRecoveryRate: number;
+  windowHours: number;
+  invalidUrlsBlocked: number;
+  deadContentDismissed: number;
+  delayedRetriesScheduled: number;
+  temporaryRecoveries: number;
+  authRecoveries: number;
+  extractorRecoveries: number;
+  avgRecoveryLatencyMs?: number | null;
+  perActorSuccess: QueueHealthResponseProvidersPerActorSuccessItem[];
+};
+
+export type QueueHealthResponseVerificationBenchmarkStage =
+  (typeof QueueHealthResponseVerificationBenchmarkStage)[keyof typeof QueueHealthResponseVerificationBenchmarkStage];
+
+export const QueueHealthResponseVerificationBenchmarkStage = {
+  before: "before",
+  completed: "completed",
+} as const;
+
+export type QueueHealthResponseVerificationBenchmarkBefore = {
+  [key: string]: number;
+};
+
+export type QueueHealthResponseVerificationBenchmarkAfter = {
+  [key: string]: number;
+} | null;
+
+/**
+ * Task #197: persisted verification benchmark snapshot. Null
+until an admin POSTs the verification-benchmark route. The
+stage discriminator is "before" while the worker is still
+draining and "completed" once a follow-up POST captured
+the after snapshot.
+
+ */
+export type QueueHealthResponseVerificationBenchmark = {
+  stage: QueueHealthResponseVerificationBenchmarkStage;
+  startedAt: string;
+  completedAt: string | null;
+  reopened: number;
+  before: QueueHealthResponseVerificationBenchmarkBefore;
+  after: QueueHealthResponseVerificationBenchmarkAfter;
+} | null;
+
+export interface QueueHealthResponse {
+  ok: boolean;
+  workerId: string;
+  status: QueueHealthResponseStatus;
+  outcomes: QueueHealthOutcomes;
+  active: QueueHealthResponseActive;
+  /** Task #366: latest sync session for the ad-research board.
+Surfaces source-row drop counts (`rowsSkipped`) so admins
+on the queue-health dashboard can see how many sheet rows
+were silently dropped before they ever became board items.
+ */
+  sourceSync?: QueueHealthResponseSourceSync;
+  recentFailures: QueueRecentFailure[];
+  errorClasses: QueueHealthResponseErrorClasses;
+  attemptsHistogram: QueueHealthResponseAttemptsHistogram;
+  processingMs: QueueHealthResponseProcessingMs;
+  throughput: QueueHealthResponseThroughput;
+  /** Task #187: per-provider observability rolled up over the
+last 24h from queue_metrics snapshots. apifySuccess /
+ytdlpSuccess / escalationCount / escalationRecovered are
+the existing T158 counters. ytdlpAuthRecoveries is the
+raw count of yt-dlp successes that consumed an
+authenticated cookie jar; ytDlpAuthenticatedRecoveries is
+the same value re-exposed under the dashboard-friendly
+name. apifyEscalationRecoveries is a clearer alias for
+escalationRecovered. authFailureRecoveryRate compares
+(escalation + ytdlp authenticated recoveries) against the
+universe of auth-class events that triggered them.
+ */
+  providers: QueueHealthResponseProviders;
+  /** Task #197: persisted verification benchmark snapshot. Null
+until an admin POSTs the verification-benchmark route. The
+stage discriminator is "before" while the worker is still
+draining and "completed" once a follow-up POST captured
+the after snapshot.
+ */
+  verificationBenchmark?: QueueHealthResponseVerificationBenchmark;
+  generatedAt: string;
+}
+
+export interface QueueTrendPoint {
+  capturedAt: string;
+  statusPending: number;
+  statusDownloading: number;
+  statusOk: number;
+  statusFailed: number;
+  statusPartial: number;
+  stuck: number;
+  activeLeases: number;
+  throughput1h: number;
+  throughput24h: number;
+  failures1h: number;
+  avgProcessingMs: number | null;
+  p95ProcessingMs: number | null;
+  totalRows: number;
+  usableMedia: number;
+  successRateBp: number;
+  terminalFailures: number;
+  dismissedTotal: number;
+  authFailures24h: number;
+  rateLimits24h: number;
+  providerFailures24h: number;
+  retryVolume24h: number;
+  apifySuccess: number;
+  ytdlpSuccess: number;
+  escalationCount: number;
+  escalationRecovered: number;
+  ytdlpAuthRecoveries: number;
+}
+
+export interface QueueTrendsResponse {
+  ok: boolean;
+  windowHours: number;
+  points: QueueTrendPoint[];
+}
+
+export type InstagramSessionCookieMetadataStatus =
+  (typeof InstagramSessionCookieMetadataStatus)[keyof typeof InstagramSessionCookieMetadataStatus];
+
+export const InstagramSessionCookieMetadataStatus = {
+  missing: "missing",
+  active: "active",
+  expired: "expired",
+} as const;
+
+/**
+ * Non-sensitive metadata about the saved Instagram session cookies
+blob. Plaintext cookie values are never returned by the API.
+
+ */
+export interface InstagramSessionCookieMetadata {
+  present: boolean;
+  status: InstagramSessionCookieMetadataStatus;
+  savedAt: string | null;
+  savedBy: string | null;
+  cookieCount: number;
+  cookieNames: string[];
+  sessionidPreview: string | null;
+  inferredExpiresAt: string | null;
+  hasRequiredCookies: boolean;
+  missingRequired: string[];
+  lastError: string | null;
+  /** Whether INSTAGRAM_COOKIES_SECRET env var is set */
+  configured: boolean;
+}
+
+/**
+ * Cookie-Editor / EditThisCookie JSON export. Either a JSON array
+of cookie objects or `{ cookies: [...] }`.
+
+ */
+export interface InstagramSessionCookiesSaveRequest {
+  /** @minLength 1 */
+  cookiesJson: string;
+}
+
+export type InstagramSessionCookieTestResultStatus =
+  (typeof InstagramSessionCookieTestResultStatus)[keyof typeof InstagramSessionCookieTestResultStatus];
+
+export const InstagramSessionCookieTestResultStatus = {
+  ok: "ok",
+  "auth-blocked": "auth-blocked",
+  "rate-limited": "rate-limited",
+  "no-cookies": "no-cookies",
+  "no-token": "no-token",
+  "actor-error": "actor-error",
+  timeout: "timeout",
+  "no-data": "no-data",
+} as const;
+
+export type InstagramSessionCookieTestResultSample = {
+  username: string;
+  postCount: number;
+} | null;
+
+export interface InstagramSessionCookieTestResult {
+  ok: boolean;
+  status: InstagramSessionCookieTestResultStatus;
+  error: string | null;
+  sample: InstagramSessionCookieTestResultSample;
+}
+
+export interface InstagramSessionCookieTestResponse {
+  ok: boolean;
+  result: InstagramSessionCookieTestResult;
+  metadata: InstagramSessionCookieMetadata;
+}
+
+export type FacebookCookieJarMetadataPlatform =
+  (typeof FacebookCookieJarMetadataPlatform)[keyof typeof FacebookCookieJarMetadataPlatform];
+
+export const FacebookCookieJarMetadataPlatform = {
+  fb: "fb",
+} as const;
+
+/**
+ * Non-sensitive metadata about the saved Facebook cookies.txt jar.
+Cookie bytes never leave the server.
+
+ */
+export interface FacebookCookieJarMetadata {
+  id: number;
+  platform: FacebookCookieJarMetadataPlatform;
+  uploadedBy: string | null;
+  uploadedAt: string;
+  lastValidatedAt: string | null;
+  status: string;
+  notes: string | null;
+  ageHours: number;
+  /** Number of cookie rows parsed from the stored jar (display only). */
+  cookieCount?: number | null;
+  /** Latest expires-at across all cookie rows in the jar (display only). */
+  inferredExpiresAt?: string | null;
+}
+
+export type FacebookAuthHealthRecordPlatform =
+  (typeof FacebookAuthHealthRecordPlatform)[keyof typeof FacebookAuthHealthRecordPlatform];
+
+export const FacebookAuthHealthRecordPlatform = {
+  fb: "fb",
+} as const;
+
+export interface FacebookAuthHealthRecord {
+  platform: FacebookAuthHealthRecordPlatform;
+  status: string;
+  lastSuccessAt: string | null;
+  lastFailureAt: string | null;
+  lastError: string | null;
+  lastErrorClass: string | null;
+  lastProbeAt: string | null;
+  probeUrl: string | null;
+}
+
+export interface FacebookCookiesMetadataResponse {
+  ok: boolean;
+  /** Whether FACEBOOK_COOKIES_SECRET env var is set */
+  configured?: boolean;
+  jar: FacebookCookieJarMetadata | null;
+  health: FacebookAuthHealthRecord | null;
+}
+
+/**
+ * Cookie payload exported from facebook.com. Accepts either a
+Netscape `cookies.txt` string or a Cookie-Editor / EditThisCookie
+JSON export (array of cookie objects, or `{ cookies: [...] }`).
+The server auto-detects the format and normalizes JSON to
+Netscape before encrypting under FACEBOOK_COOKIES_SECRET.
+
+ */
+export interface FacebookCookiesSaveRequest {
+  /**
+   * Netscape cookies.txt OR JSON cookie export.
+   * @minLength 1
+   */
+  cookiesText: string;
+  /**
+   * Optional alias for cookiesText accepting a JSON export.
+   * @minLength 1
+   */
+  cookiesJson?: string | null;
+  notes?: string | null;
+}
+
+/**
+ * Detected format of the submitted cookie payload.
+ */
+export type FacebookCookiesSaveResponseFormat =
+  (typeof FacebookCookiesSaveResponseFormat)[keyof typeof FacebookCookiesSaveResponseFormat];
+
+export const FacebookCookiesSaveResponseFormat = {
+  netscape: "netscape",
+  json: "json",
+} as const;
+
+export interface FacebookCookiesSaveResponse {
+  ok: boolean;
+  jar: FacebookCookieJarMetadata;
+  rows: number;
+  /** Detected format of the submitted cookie payload. */
+  format?: FacebookCookiesSaveResponseFormat;
+}
+
+export type FacebookCookiesDeleteResponseJar = {
+  [key: string]: unknown;
+} | null;
+
+export interface FacebookCookiesDeleteResponse {
+  ok: boolean;
+  jar: FacebookCookiesDeleteResponseJar;
+}
+
+export interface FacebookCookiesTestRequest {
+  /** Optional FB URL override; defaults to a known public watch link. */
+  url?: string | null;
+}
+
+export interface FacebookCookiesTestStage {
+  ok: boolean;
+  errorClass: string | null;
+  error: string | null;
+  durationMs: number;
+}
+
+export type FacebookCookiesTestResultPlatform =
+  | (typeof FacebookCookiesTestResultPlatform)[keyof typeof FacebookCookiesTestResultPlatform]
+  | null;
+
+export const FacebookCookiesTestResultPlatform = {
+  fb: "fb",
+} as const;
+
+export type FacebookCookiesTestResultStages = {
+  reachability: FacebookCookiesTestStage;
+  extraction: FacebookCookiesTestStage;
+  escalation: FacebookCookiesTestStage;
+};
+
+export interface FacebookCookiesTestResult {
+  ok: boolean;
+  url: string;
+  platform: FacebookCookiesTestResultPlatform;
+  jarId: number | null;
+  slideCount: number;
+  errorClass: string | null;
+  error: string | null;
+  durationMs: number;
+  stages: FacebookCookiesTestResultStages;
+}
+
+export interface FacebookCookiesTestResponse {
+  ok: boolean;
+  result: FacebookCookiesTestResult;
+}
+
+export interface PlatinumMainProduct {
+  slug: string;
+  label: string;
+  priceCents: number;
+}
+
+export interface PlatinumMainProductList {
+  products: PlatinumMainProduct[];
+}
+
+export type PlatinumCodeStatus =
+  (typeof PlatinumCodeStatus)[keyof typeof PlatinumCodeStatus];
+
+export const PlatinumCodeStatus = {
+  unredeemed: "unredeemed",
+  redeemed: "redeemed",
+  revoked: "revoked",
+} as const;
+
+export interface PlatinumCode {
+  code: string;
+  status: PlatinumCodeStatus;
+  ownerEmail: string;
+  redeemedForProductSlug?: string | null;
+  redeemedForOrderId?: string | null;
+  redeemedAt?: string | null;
+  revokedAt?: string | null;
+  createdAt?: string;
+}
+
+export interface PlatinumCodeRedeemRequest {
+  code: string;
+  productSlug: string;
+}
+
+export interface PlatinumCodeRedeemResponse {
+  success: boolean;
+  code: string;
+  productSlug: string;
+  orderId: string;
+  redeemedAt: string;
+}
+
+/**
+ * Task #762. Current-calendar-month Platinum Greg AI usage snapshot.
+All durations are in seconds. `limitSeconds` is the hard monthly
+allowance (7200s = 120 min).
+
+ */
+export interface PlatinumGregUsage {
+  usedSeconds: number;
+  limitSeconds: number;
+  remainingSeconds: number;
+  canStart: boolean;
+  /** Start of next calendar month (UTC) when the allowance resets. */
+  resetsAt: string;
+}
+
+export type PlatinumGregUsageRecordBodyChannel =
+  (typeof PlatinumGregUsageRecordBodyChannel)[keyof typeof PlatinumGregUsageRecordBodyChannel];
+
+export const PlatinumGregUsageRecordBodyChannel = {
+  voice: "voice",
+  chat: "chat",
+} as const;
+
+export interface PlatinumGregUsageRecordBody {
+  channel: PlatinumGregUsageRecordBodyChannel;
+  /**
+   * Elapsed seconds of the finished session (capped server-side at remaining allowance).
+   * @minimum 0
+   */
+  durationSeconds: number;
+}
+
+/**
+ * Buyer behind a generation job. `appUserId` is always set
+(the FK on `ai_influencer_jobs.client_id`); the rest are
+sourced from the joined `portal_users` row when one exists.
+
+ */
+export interface AdminInfluencerGenerationOwner {
+  appUserId: number;
+  appUserEmail?: string | null;
+  appUserName?: string | null;
+  isSuperAdmin: boolean;
+  portalUserId?: number | null;
+  clerkId?: string | null;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  name?: string | null;
+  isActive?: boolean | null;
+  isAList?: boolean | null;
+  portalKey?: string | null;
+  portalCreatedAt?: string | null;
+}
+
+export interface AdminInfluencerGenerationInfluencerSummary {
+  id: number;
+  name: string;
+  status: string;
+  avatarUrl?: string | null;
+  updatedAt: string;
+}
+
+export interface AdminInfluencerGenerationPrefs {
+  gender?: string | null;
+  ageRange?: string | null;
+  ethnicity?: string | null;
+  vibe?: string | null;
+  notes?: string | null;
+  facialHair?: string | null;
+  hairstyle?: string | null;
+}
+
+export interface AdminInfluencerGenerationListItem {
+  id: number;
+  clientId: number;
+  influencerId?: number | null;
+  status: string;
+  progress: number;
+  isFreeTier: boolean;
+  etaAt: string;
+  createdAt: string;
+  updatedAt: string;
+  stageStartedAt?: string | null;
+  heartbeatAt?: string | null;
+  completedAt?: string | null;
+  finalizeAttempts: number;
+  failureReason?: string | null;
+  lastErrorCode?: string | null;
+  prefs: AdminInfluencerGenerationPrefs;
+  owner: AdminInfluencerGenerationOwner;
+  influencer?: AdminInfluencerGenerationInfluencerSummary;
+}
+
+export interface AdminInfluencerGenerationsList {
+  jobs: AdminInfluencerGenerationListItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+export type AdminInfluencerGenerationStatsByStatus = {
+  queued: number;
+  generating_base: number;
+  enhancing: number;
+  swapping_scenes: number;
+  ready: number;
+  ready_degraded: number;
+  failed: number;
+  [key: string]: number;
+};
+
+/**
+ * `byStatus` is a keyed object: every known lifecycle status is
+present as a numeric value (0 when no rows match). `stuck`
+counts non-terminal rows whose `updated_at` is older than
+`stuckThresholdMs`. `freeTier` + `paidTier` sum to `total`.
+
+ */
+export interface AdminInfluencerGenerationStats {
+  total: number;
+  stuck: number;
+  stuckThresholdMs: number;
+  freeTier: number;
+  paidTier: number;
+  since: string;
+  byStatus: AdminInfluencerGenerationStatsByStatus;
+  generatedAt: string;
+}
+
+export type AdminInfluencerGenerationDetailJob = { [key: string]: unknown };
+
+export type AdminInfluencerGenerationDetailOwner = {
+  [key: string]: unknown;
+} | null;
+
+export type AdminInfluencerGenerationDetailInfluencer = {
+  [key: string]: unknown;
+} | null;
+
+export type AdminInfluencerGenerationDetailAnglesItem = {
+  [key: string]: unknown;
+};
+
+export type AdminInfluencerGenerationDetailSettingsItem = {
+  [key: string]: unknown;
+};
+
+export type AdminInfluencerGenerationDetailSceneJobsItem = {
+  [key: string]: unknown;
+};
+
+/**
+ * Full detail bundle for one generation job. Most of the nested
+payloads (`scenes`, `webhookEvents`, `prefs`, `influencer`,
+`angles`, `settings`, `sceneJobs`) are large free-form
+objects sourced from jsonb columns and joined tables, so they
+are exposed here as opaque objects/arrays rather than strict
+sub-schemas.
+
+ */
+export interface AdminInfluencerGenerationDetail {
+  job: AdminInfluencerGenerationDetailJob;
+  owner?: AdminInfluencerGenerationDetailOwner;
+  influencer?: AdminInfluencerGenerationDetailInfluencer;
+  angles: AdminInfluencerGenerationDetailAnglesItem[];
+  settings: AdminInfluencerGenerationDetailSettingsItem[];
+  sceneJobs: AdminInfluencerGenerationDetailSceneJobsItem[];
+}
+
+export interface AdminInfluencerSceneJob {
+  id: number;
+  sceneIndex: number;
+  label?: string | null;
+  provider: string;
+  status: string;
+  attemptCount: number;
+  retryCount: number;
+  nextAttemptAt?: string | null;
+  completedAt?: string | null;
+  failedAt?: string | null;
+  lastErrorCode?: string | null;
+  lastErrorMessage?: string | null;
+  generatedAssetUrl?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface AdminInfluencerTimelineEntry {
+  stage: string;
+  at: string;
+}
+
+export interface AdminInfluencerBuyer {
+  id: number;
+  email?: string | null;
+  name?: string | null;
+}
+
+export interface AdminInfluencerInfluencer {
+  id: number;
+  name: string;
+  status: string;
+  avatarUrl?: string | null;
+  angleCount: number;
+  settingCount: number;
+}
+
+/**
+ * Raw ai_influencer_jobs row with date strings.
+ */
+export type AdminInfluencerJobDetailJob = { [key: string]: unknown };
+
+export interface AdminInfluencerJobDetail {
+  /** Raw ai_influencer_jobs row with date strings. */
+  job: AdminInfluencerJobDetailJob;
+  buyer?: AdminInfluencerBuyer | null;
+  influencer?: AdminInfluencerInfluencer | null;
+  sceneJobs: AdminInfluencerSceneJob[];
+  timeline: AdminInfluencerTimelineEntry[];
+}
+
+export interface AdminInfluencerRetryResponse {
+  ok: boolean;
+  newJobId: number;
+  influencerId?: number | null;
+}
+
+export type AdminInfluencerMarkFailedResponseEmailStatus =
+  (typeof AdminInfluencerMarkFailedResponseEmailStatus)[keyof typeof AdminInfluencerMarkFailedResponseEmailStatus];
+
+export const AdminInfluencerMarkFailedResponseEmailStatus = {
+  sent: "sent",
+  failed: "failed",
+  "skipped-already-sent": "skipped-already-sent",
+  "skipped-no-email": "skipped-no-email",
+} as const;
+
+export interface AdminInfluencerMarkFailedResponse {
+  ok: boolean;
+  jobId?: number;
+  status?: string;
+  alreadyTerminal?: boolean;
+  notified?: boolean;
+  emailStatus?: AdminInfluencerMarkFailedResponseEmailStatus;
+}
+
+export type AdminInfluencerManualDeliverRequestScenesItem = {
+  url: string;
+  /** @maxLength 120 */
+  label?: string;
+};
+
+export interface AdminInfluencerManualDeliverRequest {
+  coverImageUrl: string;
+  /** @maxItems 10 */
+  scenes?: AdminInfluencerManualDeliverRequestScenesItem[];
+}
+
+export type AdminInfluencerManualDeliverResponseEmailStatus =
+  (typeof AdminInfluencerManualDeliverResponseEmailStatus)[keyof typeof AdminInfluencerManualDeliverResponseEmailStatus];
+
+export const AdminInfluencerManualDeliverResponseEmailStatus = {
+  sent: "sent",
+  failed: "failed",
+  "skipped-already-sent": "skipped-already-sent",
+  "skipped-no-email": "skipped-no-email",
+} as const;
+
+export interface AdminInfluencerManualDeliverResponse {
+  ok: boolean;
+  jobId?: number;
+  status?: string;
+  influencerId?: number | null;
+  sceneCount?: number;
+  notified?: boolean;
+  emailStatus?: AdminInfluencerManualDeliverResponseEmailStatus;
+  alreadyDelivered?: boolean;
+}
+
+export type AdminImpersonationStartResponseTarget = {
+  id: number;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  role: string;
+};
+
+export type AdminImpersonationStartResponseAdmin = {
+  clerkId: string;
+  email?: string | null;
+};
+
+export interface AdminImpersonationStartResponse {
+  sessionId: number;
+  /** HMAC-signed session token; send back as X-Impersonate-Session header */
+  token: string;
+  expiresAt: string;
+  target: AdminImpersonationStartResponseTarget;
+  admin: AdminImpersonationStartResponseAdmin;
+}
+
+export type AdminImpersonationStatusResponse =
+  | {
+      active: boolean;
+    }
+  | {
+      active: boolean;
+      sessionId: number;
+      admin: {
+        clerkId: string;
+        email?: string | null;
+      };
+      target?: {
+        id: number;
+        email: string;
+        firstName?: string | null;
+        lastName?: string | null;
+      } | null;
+    };
+
+/**
+ * Opaque session token - `Bearer <sid>`.
+ */
+export type AuthorizationSessionHeaderParameter = string;
+
+export type BeginBrowserLoginParams = {
+  /**
+   * Relative path to redirect to after login (must start with `/`). Defaults to `/`.
+   */
+  returnTo?: string;
+};
+
+export type HandleBrowserLoginCallbackParams = {
+  code?: string;
+  state?: string;
+  iss?: string;
+};
+
+export type LogoutBrowserSessionParams = {
+  returnTo?: string;
+};
+
+export type UploadBridgePageImageBody = {
+  /** JPEG, PNG, or WebP image (max 30 MB). */
+  image: Blob;
+};
+
+export type UploadBridgePageImage200 = {
+  /** Public path served by the portal (`/api/portal/images/<file>`). */
+  url: string;
+};
+
+export type GetAdminQueueTrendsParams = {
+  /**
+   * @minimum 1
+   * @maximum 168
+   */
+  hours?: number;
+};
+
+export type RequeueAdResearchBoardAuthFailuresBody = {
+  /**
+   * How many days back to consider auth failures (default 7).
+   * @minimum 1
+   * @maximum 90
+   */
+  lookbackDays?: number;
+};
+
+export type RequeueAdResearchBoardAuthFailures200 = {
+  ok: boolean;
+  reopened: number;
+  lookbackDays: number;
+};
+
+export type RequeueFunnelsResearchBoardAuthFailuresBody = {
+  /**
+   * How many days back to consider auth failures (default 7).
+   * @minimum 1
+   * @maximum 90
+   */
+  lookbackDays?: number;
+};
+
+export type RequeueFunnelsResearchBoardAuthFailures200 = {
+  ok: boolean;
+  reopened: number;
+  lookbackDays: number;
+};
+
+export type ListAdminRoadmapLeadsParams = {
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  limit?: number;
+  /**
+   * @minimum 0
+   */
+  offset?: number;
+  /**
+ * `<field>_<direction>` where field is one of createdAt,
+firstName, email, revenueBand, generationStatus and direction
+is asc or desc. Defaults to `createdAt_desc`.
+
+ */
+  sort?: string;
+  /**
+   * Case-insensitive substring match on email, firstName, or niche.
+   */
+  search?: string;
+};
+
+export type ListAdminInfluencerGenerationsParams = {
+  /**
+   * Filter by job lifecycle status (queued, generating_base, enhancing, swapping_scenes, ready, ready_degraded, failed).
+   */
+  status?: string;
+  /**
+   * Case-insensitive substring match against app-user email or portal-user email.
+   */
+  email?: string;
+  /**
+   * Filter to free-tier (`true`) or paid (`false`) generations.
+   */
+  isFreeTier?: ListAdminInfluencerGenerationsIsFreeTier;
+  /**
+   * When `true`, only return rows that have already materialized an `ai_influencers` row.
+   */
+  hasInfluencer?: ListAdminInfluencerGenerationsHasInfluencer;
+  /**
+   * Only include rows with `created_at >= this`.
+   */
+  createdAfter?: string;
+  /**
+   * Only include rows with `created_at < this`.
+   */
+  createdBefore?: string;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  limit?: number;
+  /**
+ * Opaque keyset cursor encoded as `<iso8601_created_at>_<id>`. Pass
+the `nextCursor` value from the previous page response to fetch
+the next page in the descending (createdAt, id) ordering.
+
+ */
+  cursor?: string;
+};
+
+export type ListAdminInfluencerGenerationsIsFreeTier =
+  (typeof ListAdminInfluencerGenerationsIsFreeTier)[keyof typeof ListAdminInfluencerGenerationsIsFreeTier];
+
+export const ListAdminInfluencerGenerationsIsFreeTier = {
+  true: "true",
+  false: "false",
+} as const;
+
+export type ListAdminInfluencerGenerationsHasInfluencer =
+  (typeof ListAdminInfluencerGenerationsHasInfluencer)[keyof typeof ListAdminInfluencerGenerationsHasInfluencer];
+
+export const ListAdminInfluencerGenerationsHasInfluencer = {
+  true: "true",
+  false: "false",
+} as const;
+
+export type GetAdminInfluencerGenerationStatsParams = {
+  /**
+   * ISO timestamp lower bound on `created_at`. Defaults to 7 days ago when omitted.
+   */
+  since?: string;
+};
+
+export type StopAdminImpersonation200 = {
+  ok: boolean;
+  closed: number;
+};

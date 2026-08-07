@@ -47,3 +47,10 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Generated export bundles
+exports/*
+!exports/ghl-upsell1/
+!exports/ghl-upsell2/
+!exports/ghl-upsell3/
+!exports/ghl-thankyou/

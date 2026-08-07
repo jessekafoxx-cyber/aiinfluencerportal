@@ -1,20 +1,60 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+export * from "./auth";
+// Existing portal schemas (must remain exported)
+export * from "./portal";
+export * from "./orders";
+export * from "./stripe-events";
+export * from "./greg-ai";
+export * from "./users";
+export * from "./conversations";
+export * from "./messages";
+export * from "./ad-research-board";
+export * from "./funnels-research-board";
+export * from "./sync-sessions";
+export * from "./vsl-template-links";
+export * from "./page-notes";
+export * from "./roadmap-leads";
+export * from "./funnel-leads";
+export * from "./room30-notify";
+export * from "./content-army";
+export * from "./room30-contact";
+export * from "./prebuilt-brains";
+export * from "./script-jobs";
+export * from "./tool-generations";
+export * from "./workshop-recordings";
+export * from "./platinum-founder-codes";
+export * from "./platinum-club-resources";
+export * from "./platinum-club-builds";
+export * from "./roadmap-items";
+export * from "./announcements";
+export * from "./external-api";
+export * from "./ghl-products";
+export * from "./kit-sync";
+export * from "./wati-sync";
+export * from "./crm";
+export * from "./webinar";
+export * from "./webinar-followup";
+export * from "./admin-impersonation";
+export * from "./support-bot-sessions";
+export * from "./affiliate-tax-forms";
+export * from "./affiliate-tax-form-attempts";
 
-export {}
+// AI Influencer feature
+export * from "./clients";
+export * from "./influencers";
+export * from "./onboarding";
+export * from "./extra-influencer-builds";
+export * from "./influencer-credit-purchases";
+export * from "./video-studio";
+export * from "./ai-influencer-jobs";
+export * from "./ai-influencer-scene-jobs";
+export * from "./provider-telemetry";
+export * from "./automation";
+export * from "./credits";
+export * from "./dfy-scripts";
+export * from "./dfy-bridge-pages";
+export * from "./dfy-advertorial-pages";
+export * from "./dfy-templates";
+export * from "./dfy-broll";
+export * from "./financials";
+export * from "./command-center";
+export * from "./support-knowledge";

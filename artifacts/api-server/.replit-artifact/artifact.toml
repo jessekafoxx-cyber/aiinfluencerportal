@@ -7,7 +7,11 @@ id = "3B4_FFSkEVBkAeYMFRJ2e"
 [[services]]
 localPort = 8080
 name = "API Server"
-paths = ["/api"]
+# Task #659: `/r` owns the public vanity-affiliate-link redirect
+# (`/r/<username>` -> 302 to the matching sales page on room30.ai
+# with `?fpr=<slug>` appended). The proxy is most-specific-first so
+# `/r/...` routes here while landing-page keeps owning `/`.
+paths = ["/", "/api", "/r"]
 
 [services.development]
 run = "pnpm --filter @workspace/api-server run dev"
@@ -22,7 +26,7 @@ NODE_ENV = "production"
 
 [services.production.run]
 # we don't run through pnpm to make startup faster in production
-args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
+args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.api.mjs"]
 
 [services.production.run.env]
 PORT = "8080"
@@ -30,3 +34,55 @@ NODE_ENV = "production"
 
 [services.production.health.startup]
 path = "/api/healthz"
+
+# Task #140: media worker runtime. Hosts the media-download queue,
+# queue metrics recorder, and automation worker host in a separate
+# process so heavy media activity cannot stall API request handlers.
+# This service exposes no public HTTP paths - the /healthz endpoint on
+# WORKER_HEALTH_PORT is internal-only and exists so the workflow runner
+# can detect a live worker.
+[[services]]
+localPort = 8090
+name = "Media Worker"
+paths = []
+
+[services.env]
+WORKER_HEALTH_PORT = "8090"
+
+# Task #619: the API Server workflow owns the build. The Media Worker
+# workflow runs `dev:worker:wait`, which polls for the worker bundle
+# the API Server emits and then execs node on it. Previously both
+# workflows ran `build && start`, and `build.mjs` begins with
+# `rm -rf dist/`; the parallel-build race would wipe `dist/` while the
+# other process was between "build finished" and `node dist/index.*.mjs`,
+# producing `Cannot find module .../dist/index.api.mjs` and silently
+# 502'ing every portal call (including the Done For You Pack modal's
+# `/api/portal/stripe/addon/create-intent`). With only one builder the
+# race is structurally impossible. If the worker boots first or alone,
+# the wait helper times out after 180s (`WORKER_BUNDLE_WAIT_TIMEOUT_MS`)
+# rather than hanging forever. Production is unaffected - it uses the
+# dedicated `services.production.build` step below and runs
+# `node ./dist/index.worker.mjs` directly.
+[services.development]
+run = "pnpm --filter @workspace/api-server run dev:worker:wait"
+
+[services.production]
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/api-server", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.worker.mjs"]
+
+[services.production.run.env]
+NODE_ENV = "production"
+WORKER_HEALTH_PORT = "8090"
+
+# Deployment startup probe for the worker. Without this the deployer
+# probes GET / (default), which the worker 404s — every publish since
+# then failed at the promote step with "healthcheck / returned 404".
+[services.production.health.startup]
+path = "/healthz"

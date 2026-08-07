@@ -1,0 +1,48 @@
+How do I connect my API, which is my custom portal, and I've got an API key? I want to push some things back to there and do some automations and push stuff back there for clients, etc. How do I connect my API to Claude?
+
+Reconciled MCP integration patterns and security implications for API connection
+Reconciled MCP integration patterns and security implications for API connection
+
+Short version: Claude can't call a raw REST API directly. There's no "paste your base URL and API key" option. Claude speaks MCP, so you need a thin MCP layer in front of your portal API — and since you're already building the API, that layer goes in the same Express app.
+
+Worth separating three things you're describing, because only one of them needs Claude connected at all:
+
+1. Automation pushing deliverables into client portals. This doesn't involve Claude. n8n/Make/GHL just POSTs to /api/v1/deliverables with Authorization: Bearer mch_.... That's already covered by the endpoints in the Replit prompt — nothing more to connect.
+
+2. You, in this chat, working against your portal. This is what needs a connector — asking me to pull a client's intake, draft the 10 advertorials, and push them into their vault, in one conversation. Needs an MCP server.
+
+3. Your portal calling Claude programmatically. That's the Messages API from your own server, with your Anthropic key. Different thing entirely.
+
+For #2, add an MCP endpoint to your Replit project:
+
+Add a remote MCP server to this portal so I can connect it to Claude as a custom connector.
+
+- Mount it at POST /mcp in artifacts/api-server, using Streamable HTTP transport
+  (@modelcontextprotocol/sdk). Register it in app.ts alongside /api/v1 and
+  /api/public/webhooks so it BYPASSES the Clerk middleware.
+- Authenticate it with the SAME API keys as /api/v1 — reuse requireApiKey and the
+  api_keys table. No second auth scheme, no new secrets.
+- Expose these tools, each a thin wrapper over the v1 handlers so there is one
+  implementation, not two:
+    list_clients            (search users by email/name)
+    get_client              (profile, purchases, entitlements)
+    get_project             (DFY project + intake brief + existing deliverables)
+    push_deliverables       (the bulk 10-advertorial upsert)
+    update_deliverable      (revisions)
+    publish_research_drop   (Research Lab)
+    grant_product / revoke_product
+- Give every tool a precise JSON schema and a one-line description written for a
+  model, not a human. Mark the read tools readOnlyHint and the write tools
+  destructiveHint: false.
+- Cap list responses at 50 rows with a cursor — never dump the whole table.
+- Return real MCP errors (not 200 with an error body) so failures surface properly.
+- Then print the public URL of the /mcp endpoint and a working curl for
+  tools/list so I can verify before connecting.
+
+Once it's deployed and publicly reachable, in Claude go to Settings → Connectors → Add custom connector, paste https://your-portal.replit.app/mcp. Because your server authenticates with a bearer token rather than OAuth, you configure it in the Request headers section of that dialog — header name Authorization, value Bearer mch_... including the space. Then enable it per-conversation from the tools menu. 
+Claude
+
+One constraint that catches people out: Claude connects to your MCP server from Anthropic's cloud, not from your laptop — so it has to be reachable over the public internet. A Replit dev preview URL will be flaky here; publish the app first. 
+Claude
+
+Security note worth taking seriously. A static bearer header means the connector holds admin-level access to every client's data. Anyone using that Claude account can read any client's brief and push content into any portal. Mint a dedicated API key for it, name it something like claude-connector, and keep it separate from the key your automation uses — so you can revoke one without breaking the other.

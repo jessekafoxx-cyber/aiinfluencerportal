@@ -1,45 +1,29 @@
-# [Project name]
+# Room30 Portal
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Members course portal ("Prompt & Build") serving one main masterclass — 14 lessons on building an AI-influencer business — plus admin tooling, DFY features, and support articles.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- Workflows: `artifacts/api-server: API Server` (port 8080, `/api`), `artifacts/api-server: Media Worker`, `artifacts/room30-portal: web` (port 21021, `/members/`)
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks/Zod from OpenAPI
+- `pnpm --filter @workspace/db run push-force` — push DB schema (requires `CREATE EXTENSION vector` on a fresh DB)
+- Required env: `DATABASE_URL`, `SESSION_SECRET` (Replit Auth sessions), `AI_INTEGRATIONS_OPENAI_*`. Stripe/Whop/GCS/Apify/Wistia degrade gracefully when unset.
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- API: Express 5; Frontend: React + Vite + wouter, Replit Auth (OIDC, cookie sessions)
+- DB: PostgreSQL + Drizzle ORM; Zod (`zod/v4`), Orval codegen; esbuild bundle
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Course content seed: `artifacts/api-server/src/lib/masterclass-course-data.ts` (14 lessons, plain-text notes) applied at boot by `ensure-main-masterclass.ts`
+- DB schema: `lib/db/src/schema/` (portal tables in `portal.ts`)
+- Lesson page: `artifacts/room30-portal/src/pages/course-player.tsx` — single Brief view: video placeholder on top, brief + notes underneath (Notes/Build/Action tabs removed)
+- Admin emails: `ADMIN_EMAILS` env (default `greg@cookemedia.io`) — matching Replit Auth sign-ins get admin + active automatically; other sign-ups need activation (purchase/invite)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
-
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Old-course boot seed hooks (ensureRoom30Course, ensurePhase5, etc.) were removed and replaced with idempotent `ensureMainMasterclass`, which also prunes stale room30 phases/lessons (only phases no remaining lesson references).
+- Lessons ship with `wistia_video_id = NULL` → portal shows a video placeholder; admins add videos via the lesson page.
