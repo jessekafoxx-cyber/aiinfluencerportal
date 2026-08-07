@@ -1,13 +1,10 @@
 kind = "web"
 previewPath = "/members/"
 title = "Room30 Portal"
+description = "Members portal for Room30 AI influencer masterclass — course player, dashboard, onboarding, roadmap, admin console, and DFY resource pages."
 version = "1.0.0"
 id = "artifacts/room30-portal"
 router = "path"
-
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
 
 [[services]]
 name = "web"
@@ -19,8 +16,8 @@ run = "pnpm --filter @workspace/room30-portal run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/room30-portal", "run", "build" ]
-publicDir = "artifacts/room30-portal/dist/public"
 serve = "static"
+publicDir = "artifacts/room30-portal/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"
