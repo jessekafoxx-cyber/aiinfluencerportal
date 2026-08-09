@@ -21,3 +21,8 @@ timeoutMs = 180000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+PUBLIC_APP_URL = "portal.aiinfluencerpublishing.com"
