@@ -77,7 +77,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
-const STRIPE_CUSTOMER_PORTAL_URL = "https://billing.stripe.com/p/login/cNi5kD6qKbwmgsbbir8Vi00";
+const STRIPE_CUSTOMER_PORTAL_URL = "https://billing.stripe.com/p/login/9B6dR881G2rbgzAdd6cV200";
 
 const DELIVERABLES: { name: string; value: string }[] = [
   { name: "A Brand New Custom Digital Product Built For You Every Month", value: "$997" },

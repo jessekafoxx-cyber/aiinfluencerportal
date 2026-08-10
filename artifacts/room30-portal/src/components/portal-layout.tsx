@@ -1168,7 +1168,7 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
 const TRACKED_JOBS_KEY = "savingToBrain.trackedJobIds";
 const TOASTED_JOBS_KEY = "savingToBrain.toastedJobIds";
 
-const STRIPE_CUSTOMER_PORTAL_URL = "https://billing.stripe.com/p/login/cNi5kD6qKbwmgsbbir8Vi00";
+const STRIPE_CUSTOMER_PORTAL_URL = "https://billing.stripe.com/p/login/9B6dR881G2rbgzAdd6cV200";
 
 function SidebarManagePlatinumSubscription() {
   return (
