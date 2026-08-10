@@ -29,6 +29,8 @@ import YourInfluencers from "@/pages/your-influencers";
 import AnnouncementsFeed from "@/pages/announcements";
 import Onboarding from "@/pages/onboarding";
 import YourBuild from "@/pages/your-build";
+import YourBrain from "@/pages/your-brain";
+import OperatingSystem from "@/pages/operating-system";
 import InfluencerDetail from "@/pages/influencer-detail";
 import BuyInfluencer from "@/pages/buy-influencer";
 import Credits from "@/pages/credits";
@@ -315,6 +317,12 @@ function AppRoutes() {
           </Route>
           <Route path="/your-build">
             <ProtectedRoute><YourBuild /></ProtectedRoute>
+          </Route>
+          <Route path="/your-brain">
+            <ProtectedRoute><YourBrain /></ProtectedRoute>
+          </Route>
+          <Route path="/operating-system">
+            <ProtectedRoute><OperatingSystem /></ProtectedRoute>
           </Route>
           <Route path="/influencer/:id">
             <ProtectedRoute><InfluencerDetail /></ProtectedRoute>

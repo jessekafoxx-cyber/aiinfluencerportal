@@ -601,6 +601,8 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
               <span className="flex-1 text-left">Masterclass</span>
               {location === "/masterclass" && <ChevronRight className="w-3 h-3 ml-auto" />}
             </button>
+            {renderNavButton({ href: "/your-brain", label: "Your Brain", icon: Brain })}
+            {renderNavButton({ href: "/operating-system", label: "Operating System", icon: Cpu })}
             <button
               key="/your-influencers"
               onClick={() => {
