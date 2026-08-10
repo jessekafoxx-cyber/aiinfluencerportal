@@ -4,7 +4,7 @@ import {
   Cpu, Sparkles, Loader2, CheckCircle2, AlertCircle, Brain,
   X, ChevronDown, ChevronUp, Coins, Download, RefreshCw,
   Search, Target, TrendingUp, Layers, BarChart2, Mail,
-  Video, FileText, Zap, Users, Star, Youtube, Mic,
+  Video, FileText, Zap, Users, Star, Youtube, Mic, Monitor,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
@@ -18,8 +18,8 @@ type FieldDef = {
   label: string;
   type: "text" | "textarea" | "select";
   options?: string[];
-  placeholder?: string;
   optional?: boolean;
+  placeholder?: string;
 };
 
 type ToolDef = {
@@ -31,6 +31,7 @@ type ToolDef = {
   fields: FieldDef[];
   category: string;
   color?: string;
+  navigateTo?: string;
 };
 
 const TOOLS: ToolDef[] = [
@@ -292,6 +293,106 @@ const TOOLS: ToolDef[] = [
       { key: "sequenceLength", label: "Sequence Length", type: "select", options: ["5 messages", "7 messages", "10 messages", "14 messages"] },
       { key: "extraNotes", label: "Additional Context", type: "textarea", placeholder: "Specific angles, objections to address, or offers to mention", optional: true },
     ],
+  },
+  // Script Writer tools (navigate to dedicated script writer page)
+  {
+    slug: "sw-green-screen",
+    label: "Green Screen Script",
+    description: "60-second script built around images shown on the green screen — article headlines, charts, Stripe screenshots.",
+    credits: 0,
+    icon: Monitor,
+    category: "Marketing & Content",
+    color: "#10b981",
+    navigateTo: "/script-writer?type=green-screen",
+    fields: [],
+  },
+  {
+    slug: "sw-hook-demo",
+    label: "Hook + Demo Script",
+    description: "15–25 second screen-recording demo. Upload step screenshots and get a spoken or silent script.",
+    credits: 0,
+    icon: Video,
+    category: "Marketing & Content",
+    color: "#10b981",
+    navigateTo: "/script-writer?type=hook-demo",
+    fields: [],
+  },
+  {
+    slug: "sw-podcast-clip",
+    label: "Podcast Clip Script",
+    description: "Opinionated, contrarian 30–90 second mic clip. Recorded side-on — the kind people screenshot.",
+    credits: 0,
+    icon: Mic,
+    category: "Marketing & Content",
+    color: "#6366f1",
+    navigateTo: "/script-writer?type=podcast-clip",
+    fields: [],
+  },
+  {
+    slug: "sw-speaking-clip",
+    label: "Speaking Clip Script",
+    description: "15–90 second on-stage authority clip. Certain, composed, conviction-loaded.",
+    credits: 0,
+    icon: Mic,
+    category: "Marketing & Content",
+    color: "#8b5cf6",
+    navigateTo: "/script-writer?type=speaking-clip",
+    fields: [],
+  },
+  {
+    slug: "sw-selfie-clip",
+    label: "Selfie Yapping Script",
+    description: "Casual, raw 15–90 second clip — walking, in the car, outside. Honest and unfiltered.",
+    credits: 0,
+    icon: Users,
+    category: "Marketing & Content",
+    color: "#f59e0b",
+    navigateTo: "/script-writer?type=selfie-clip",
+    fields: [],
+  },
+  {
+    slug: "sw-slideshow",
+    label: "Viral Slideshow Script",
+    description: "TikTok/IG slideshow copy — cover hook, per-slide text overlays, image prompts, and CTA slide.",
+    credits: 0,
+    icon: Layers,
+    category: "Marketing & Content",
+    color: "#ec4899",
+    navigateTo: "/script-writer?type=slideshow",
+    fields: [],
+  },
+  {
+    slug: "sw-carousel",
+    label: "Viral Carousel Script",
+    description: "Instagram/LinkedIn carousel — swipe-stopping cover, per-slide headlines, body copy, and a follow CTA.",
+    credits: 0,
+    icon: FileText,
+    category: "Marketing & Content",
+    color: "#ec4899",
+    navigateTo: "/script-writer?type=carousel",
+    fields: [],
+  },
+  {
+    slug: "sw-overlay",
+    label: "Overlay Clip Script",
+    description: "Voiceover script for b-roll overlay content — spoken over footage of your lifestyle or product.",
+    credits: 0,
+    icon: Star,
+    category: "Marketing & Content",
+    color: "#14b8a6",
+    navigateTo: "/script-writer?type=overlay",
+    fields: [],
+  },
+  {
+    slug: "sw-fastmotion",
+    label: "Fast Motion Clip Script",
+    description: "Short punchy lines for fast-cut edit style — syncs with jump cuts, sped-up footage, or montage.",
+    credits: 0,
+    icon: Zap,
+    category: "Marketing & Content",
+    color: "#f97316",
+    navigateTo: "/script-writer?type=fastmotion",
+    fields: [],
   },
   // Business Systems
   {
@@ -662,17 +763,23 @@ export default function OperatingSystem() {
                   {catTools.map(tool => (
                     <button
                       key={tool.slug}
-                      onClick={() => setActiveTool(tool)}
+                      onClick={() => tool.navigateTo ? setLocation(tool.navigateTo) : setActiveTool(tool)}
                       className="group text-left rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] p-4 transition-all"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${tool.color}18` }}>
                           <tool.icon className="w-3.5 h-3.5" style={{ color: tool.color }} />
                         </div>
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold" style={{ background: `${tool.color}15`, color: tool.color }}>
-                          <Coins className="w-2.5 h-2.5" />
-                          {tool.credits === 0 ? "Free" : tool.credits}
-                        </span>
+                        {tool.navigateTo ? (
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold" style={{ background: `${tool.color}15`, color: tool.color }}>
+                            Script Writer
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold" style={{ background: `${tool.color}15`, color: tool.color }}>
+                            <Coins className="w-2.5 h-2.5" />
+                            {tool.credits === 0 ? "Free" : tool.credits}
+                          </span>
+                        )}
                       </div>
                       <h3 className="text-[13px] font-semibold text-white group-hover:text-white mb-1.5">{tool.label}</h3>
                       <p className="text-[11.5px] text-white/40 leading-relaxed line-clamp-2">{tool.description}</p>

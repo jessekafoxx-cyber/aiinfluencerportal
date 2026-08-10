@@ -31,6 +31,7 @@ import Onboarding from "@/pages/onboarding";
 import YourBuild from "@/pages/your-build";
 import YourBrain from "@/pages/your-brain";
 import OperatingSystem from "@/pages/operating-system";
+import ScriptWriter from "@/pages/script-writer";
 import InfluencerDetail from "@/pages/influencer-detail";
 import BuyInfluencer from "@/pages/buy-influencer";
 import Credits from "@/pages/credits";
@@ -323,6 +324,9 @@ function AppRoutes() {
           </Route>
           <Route path="/operating-system">
             <ProtectedRoute><OperatingSystem /></ProtectedRoute>
+          </Route>
+          <Route path="/script-writer">
+            <ProtectedRoute><ScriptWriter /></ProtectedRoute>
           </Route>
           <Route path="/influencer/:id">
             <ProtectedRoute><InfluencerDetail /></ProtectedRoute>
