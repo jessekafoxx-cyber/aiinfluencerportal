@@ -14,61 +14,61 @@ const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     number: 1,
     previewLink: "https://app.gohighlevel.com/v2/preview/nMPaAt4BmkKpWysjyPFx",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6a05826f89673005d6f54326",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a05826f89673005d6f54326",
   },
   {
     number: 2,
     previewLink: "https://app.gohighlevel.com/v2/preview/g205IFvwYfG177aAVOt6",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6727aacfdbe65ce4bdda7b65",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6727aacfdbe65ce4bdda7b65",
   },
   {
     number: 3,
     previewLink: "https://app.gohighlevel.com/v2/preview/jyqLm50cw6Nrv4vLGQOg",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6784e1ba53d53f215c9b905c",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6784e1ba53d53f215c9b905c",
   },
   {
     number: 4,
     previewLink: "https://app.gohighlevel.com/v2/preview/FNYRE9NPUDGJXjKj2gNR",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69dbbceab82d8fa8ab7c2d6a",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dbbceab82d8fa8ab7c2d6a",
   },
   {
     number: 5,
     previewLink: "https://app.gohighlevel.com/v2/preview/Lr8fwWraMM2kUCshUxXw",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68149a58443a572c275b048d",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68149a58443a572c275b048d",
   },
   {
     number: 6,
     previewLink: "https://app.gohighlevel.com/v2/preview/I3wVfD378EvN1waE8cba",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69dc97c42881c8212031d606",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dc97c42881c8212031d606",
   },
   {
     number: 7,
     previewLink: "https://app.gohighlevel.com/v2/preview/EnP5lKzrPIAk3JziSenc",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68149e2a092bc2ec0c394f27",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68149e2a092bc2ec0c394f27",
   },
   {
     number: 8,
     previewLink: "https://app.gohighlevel.com/v2/preview/wRUDCvqaThuySr8dMd8x",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69dccfb5b54b44b849da2c9e",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dccfb5b54b44b849da2c9e",
   },
   {
     number: 9,
     previewLink: "https://app.gohighlevel.com/v2/preview/qRn7yoFHh0xCiYjvRuGl",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69dcfb2f3ed1419cf4efc50c",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dcfb2f3ed1419cf4efc50c",
   },
   {
     number: 10,
     previewLink: "https://app.gohighlevel.com/v2/preview/BV7cpFlRT24JPM5txOkB",
     templateLink:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=682c16d16ef4e660f635dab6",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=682c16d16ef4e660f635dab6",
   },
 ];
 

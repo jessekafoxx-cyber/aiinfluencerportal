@@ -96,7 +96,7 @@ export const products: Product[] = [
     title: "How I Create $5K-$10K/Day Information Products Using AI & NotebookLM",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=689d56b7ab559a16a6495dd4" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=689d56b7ab559a16a6495dd4" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/c02L4Xy2kD6vCydVRBNR" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/ZgoC7EykvokKCqbDOXvu" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/hfnWTNcFGSCN1C6kEwI0" },
@@ -128,7 +128,7 @@ export const products: Product[] = [
     title: "The ADHD Focus Formula - Boost Productivity by 60% in 30 Days",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=681631b4c121045bc4744d64" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=681631b4c121045bc4744d64" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/iq7rjpmiT9Jh1MENFgMB" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/mX6w55pTfjV5gG6DXcEz" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/44sKmZwNlysq5ZZBYoEB" },
@@ -160,7 +160,7 @@ export const products: Product[] = [
     title: "How I Built a Predictable 6-Figure System with ChatGPT",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68f1044e28b6451a88c7ab95" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68f1044e28b6451a88c7ab95" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/3M6UpSOK77ouJR39RjxE?notrack=true" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/equ34QUBv0bAKnBOwtgM?notrack=true" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/oVRVlEbwREEfP6Xl7Y0j?notrack=true" },
@@ -193,7 +193,7 @@ export const products: Product[] = [
     title: "The Referral-Based Google Ads System - 50+ Local Clients Monthly",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6814ccaab5dd3b84d2f6a900" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6814ccaab5dd3b84d2f6a900" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/ebFQSR2Tp6LVxG5sgNBU" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/tHFnSS8tGRYdHzFuxLLh" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/66K0MUwg0GFoPK1Pa6vq" },
@@ -225,7 +225,7 @@ export const products: Product[] = [
     title: "The 30-Day Digital Product Funnel - Generate $100K/Month",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6815f4748d24ac4e9476d828" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6815f4748d24ac4e9476d828" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/YUfta7tNK4dsIu1IHuKT" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/fU0VDflBoDudqmWwo5NP" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/158KkcBS6wXSIF3grNzc" },
@@ -257,7 +257,7 @@ export const products: Product[] = [
     title: "Beat The Banks - Scaling Arena",
     category: "Finance & Crypto",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6771915058b6022b92bdeb41" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6771915058b6022b92bdeb41" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/MdHId4dR3ZQDmtsj8rXB" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/0t2qNzcsY8I7osuq6pY0" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/5KQlNyMVUowEcll6LMM9" },
@@ -274,7 +274,7 @@ export const products: Product[] = [
     title: "How I Generate $1K+ Every Single Day Using Advanced ChatGPT Systems",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6895739516594820989fbdc8" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6895739516594820989fbdc8" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/f72jLE93oKdYbfnbcIkK" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/f72jLE93oKdYbfnbcIkK" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/gV3SO4Nha7nAP0uqUNZJ" },
@@ -304,7 +304,7 @@ export const products: Product[] = [
     title: "How I Escaped The 9-To-5 Trap And Built A 6-Figure Digital Product Business",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68a6cf2457f742e191a7d011" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68a6cf2457f742e191a7d011" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/IiHKwFyhVexkMcqgWkpy" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/0QQVPAnxgspQnq7Q8OTS" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/gSipHgINnpq8XWtISJgu" },
@@ -337,7 +337,7 @@ export const products: Product[] = [
     title: "Why 90% of Businesses Are Invisible in AI Search - The AEO Formula",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68b1780865cbe697beb8ff4e" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68b1780865cbe697beb8ff4e" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/rjPmCBMICvNzySfPkkr4" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/vYtEoj2tqDJf30jyWwG0" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/2G5Gu6T5kwD8ZdB0KjJ0" },
@@ -368,7 +368,7 @@ export const products: Product[] = [
     title: "How I Unlocked Thousands Of Targeted Visitors On Demand",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68bb1abce90a06131f8d96b1" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68bb1abce90a06131f8d96b1" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/66IIbSlvzazuEqXnUlvR?notrack=true" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/FU5QndtK1dtrY51QTULl" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/yhDJpbqJtr1q7ZGVYxPK" },
@@ -402,7 +402,7 @@ export const products: Product[] = [
     title: "Converting Content Funnel System - 3x More Leads",
     category: "Content Creation",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68c7ab267e8c3657d27b0206" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68c7ab267e8c3657d27b0206" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/u3wNjmn4JCsdc0OoR1qJ" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/QdT8Hbm1go147ACWqluZ" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/xNU2LxtJPewwMD1RAxTS" },
@@ -435,7 +435,7 @@ export const products: Product[] = [
     title: "How I Built A Loyal Audience That Buys - Social Growth Engine",
     category: "Content Creation",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68cd7dcadda7e2730eb68ca8" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68cd7dcadda7e2730eb68ca8" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/LIeSpNFMW6Lb7U1aTI4W" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/Zcy5TPrEUuRi7C82SbCn" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/YuusfE0Uqz7IECrdrrGl" },
@@ -468,7 +468,7 @@ export const products: Product[] = [
     title: "AI-Driven Content Business - Scalable AI Content Ops",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68dcf95950481d2bffb083aa" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68dcf95950481d2bffb083aa" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/K4nCfqphHg9vtBzeof3f" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/WKzi2A1PUNFuDJIp6E4r" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/t3eCxdxPEE4oVkRfHf8M" },
@@ -501,7 +501,7 @@ export const products: Product[] = [
     title: "Systeme.io Automated Business That Runs 24/7",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68e3ebffcc6c1e1079b94ec3" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68e3ebffcc6c1e1079b94ec3" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/RdZuc2VgMHJnGrPQ3QCf" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/e3Ud2xib1vx9tNmxexOz?notrack=true" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/CAb0G1Td2hnHPzkM4RSO?notrack=true" },
@@ -534,7 +534,7 @@ export const products: Product[] = [
     title: "6-Figure AI Workflow System - Break Free from Information Overload",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68e3ebffcc6c1e1079b94ec3" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68e3ebffcc6c1e1079b94ec3" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/1UWxEGPESO7h9VCwPYUX" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/bNoupvGQmFM4j8oCasfk" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/2k92RVUDjcMFdYd54qOQ" },
@@ -567,7 +567,7 @@ export const products: Product[] = [
     title: "Automated Skool System That Runs At 6 Figures",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69162672105ace62132bb022" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69162672105ace62132bb022" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/LEprnWUCgAPXC0gtw24m?notrack=true" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/JO28BKNzfDDC3dtHFGz1?notrack=true" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/kbaGAYyCwvoYqfR26xlD?notrack=true" },
@@ -600,7 +600,7 @@ export const products: Product[] = [
     title: "High Trust Value Content System - Break Out of Content Confusion",
     category: "Content Creation",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=691df493cd9a60817d8d3359" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=691df493cd9a60817d8d3359" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/qY9saJnnURIWUTcBhtYS" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/0JiDRC2KIAFOAxqOZjiX" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/siyKenxzsgRVVLo1zfaz" },
@@ -633,7 +633,7 @@ export const products: Product[] = [
     title: "Reliable Membership Framework That Runs Smoothly",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6925084557584935f03295ba" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6925084557584935f03295ba" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/QcS0qIo47wLlROyEDf8g?notrack=true" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/VTy0mwM3A0rKG4cbHgfD?notrack=true" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/aiNj89jpp6TQybKNSnRL?notrack=true" },
@@ -665,7 +665,7 @@ export const products: Product[] = [
     title: "High Performance Business Operations System",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=692fa4b21ba0054b27ec5c4e" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=692fa4b21ba0054b27ec5c4e" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/265BWc4SNjXjdZqRXIa9" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/jwOgbf3IwHrbTOCh6lmy" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/L5DYCb6SuTj207D5XUQ7" },
@@ -698,7 +698,7 @@ export const products: Product[] = [
     title: "Google Search Ads System - AdVelocity Pro",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6937a1d62eec428360c386d6" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6937a1d62eec428360c386d6" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/cF5rkhaCZH5mWlfILX0O" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/HJ00qvsWbkuWGsLZVmSv" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/rQgdi8pezp0EgiCOCQFI" },
@@ -731,7 +731,7 @@ export const products: Product[] = [
     title: "How to Scale with YouTube Ads - High-Converting Video Campaigns",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6942b41661351e4eb53a7cab" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6942b41661351e4eb53a7cab" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/cjBBi6ak1VD18LXiNUgv" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/DEPR6PrYZogQzjxZlODY" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/3LP9V6PIvSOPKXNCxpNQ" },
@@ -764,7 +764,7 @@ export const products: Product[] = [
     title: "AI Profit Mastery for Small Business - Work Less, Earn More",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=694a55e386c63612e7ab4d9d" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=694a55e386c63612e7ab4d9d" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/EqyZVPdvVPuOPO0Vx7MX?notrack=true" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/yWNfhjOw3DzGcvincUFv" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/7fAOw5CEZheNvB0G1mOn" },
@@ -797,7 +797,7 @@ export const products: Product[] = [
     title: "E-Commerce Profit Margins - Increase by 41% in 60 Days",
     category: "E-Commerce",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6953d3cba07d36226962106e" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6953d3cba07d36226962106e" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/iKUSrVNmzDkHeArh5fzr" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/vLlZzuUex7Lh8TREJg39" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/qe8hi8WWtyV3Tl3tBAFv" },
@@ -830,7 +830,7 @@ export const products: Product[] = [
     title: "How I Made My First Crypto Purchase Without Getting Scammed",
     category: "Finance & Crypto",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=695ce2252d7036f6612f7df7" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=695ce2252d7036f6612f7df7" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/8Cu4U9MZMg6gAVqeovYh" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/7LtJzhrDUeHk9lJoNOm2" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/5JvzvG0xtpuvtEMERfLl" },
@@ -863,7 +863,7 @@ export const products: Product[] = [
     title: "Profitable Marketing Plan in One Weekend - Templates Inside",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=69690f4d7dd58c34b0948f5c" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69690f4d7dd58c34b0948f5c" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/KMSVpN5AzIJnEjegBBU0" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/59XT9oAb4YAu74Gm0nO9" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/bOcnJ4SxgZYlybk1tfzn" },
@@ -896,7 +896,7 @@ export const products: Product[] = [
     title: "6-Pack Evolution Program (Scaling Arena)",
     category: "Health & Fitness",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67601c30d2c5ea29b56d988f" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67601c30d2c5ea29b56d988f" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/WQQulSXG4jLJvW5J6Spl" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/Z3RuTp9SgQBRRPwtyRfJ" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/0ZQVjLgS5mRBYgTloX6F" },
@@ -913,7 +913,7 @@ export const products: Product[] = [
     title: "ADHD Productivity",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=678fa5136a26fde65ba9fdf2" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=678fa5136a26fde65ba9fdf2" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/mKi7TLeilAhkm0YZKpdm" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/mdZhVdLmI3jxDmZoHPKw" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/dGTyBpxJ4kJxH1scoY2s" },
@@ -930,7 +930,7 @@ export const products: Product[] = [
     title: "The LinkedIn Lead Machine - 20+ High-Ticket B2B Clients/Month",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=68640845f3dd8225a9023748" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68640845f3dd8225a9023748" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/VfMudllOd1v16dpHSo0l" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/2VSByRgrhfTXSk6A6pFa" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/J2WPW8ogkDZ9cMcwDmrZ" },
@@ -962,7 +962,7 @@ export const products: Product[] = [
     title: "The AI-Generated Blogging System - $16K/Month Passive Income",
     category: "Content Creation",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=681617c3443a5762ff5b06cb" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=681617c3443a5762ff5b06cb" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/ijgzh049TiZirjDhVmnd" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/scVtUPuItYzKBA2g3yrN" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/QCy6bk4OZ7eRLO032ote" },
@@ -994,7 +994,7 @@ export const products: Product[] = [
     title: "Fire Your Wedding Planner (DFY Scaling Arena)",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67604a22b94aa1f041517d47" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67604a22b94aa1f041517d47" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/Wa0B358Ylhif9rJXIHyk" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/VGCaINYDCHay2JuBMxCI" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/7G0wFmpGUvezndLeFZEF" },
@@ -1011,7 +1011,7 @@ export const products: Product[] = [
     title: "Funnel Builder - Scaling Arena",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=677b90bbf9468f3db2189bc8" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=677b90bbf9468f3db2189bc8" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/NYy0PyHIVPA3dqUkJrU1" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/Y5yqu1V7oa918eIPvzR1" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/5OoA4PWG4AxFJIfgZ1XL" },
@@ -1028,7 +1028,7 @@ export const products: Product[] = [
     title: "MicroSAAS (Scaling Arena)",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6782b699e5185a6a8d5c3520" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6782b699e5185a6a8d5c3520" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/d24SWiTVbHBhZbjP9vgS" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/rmGYtjnMMQIaayvX1TNy" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/u4IKQ13VNtLRtXFOt7mz" },
@@ -1047,7 +1047,7 @@ export const products: Product[] = [
     title: "The Zero Identity Affiliate Revolution (Scaling Arena)",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6765d79f3de878a77a986112" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6765d79f3de878a77a986112" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/i196VBx02sn7nhKeV5KR" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/c7a3Z7IBhpsEJjoMrxJw" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/aVZ0EsqmO7fA79roYdqN" },
@@ -1066,7 +1066,7 @@ export const products: Product[] = [
     title: "The Digital Course VA Starter Plan - Land Paid Work in 14 Days",
     category: "Business Systems",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6852e53b17115f3967f66943" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6852e53b17115f3967f66943" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/2tvoMcLmjc9QJAdEZKY8" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/rGreAfSywbj2XDbJkSwv" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/dnyVVQ4U3WRJtDiozCNP" },
@@ -1091,7 +1091,7 @@ export const products: Product[] = [
     title: "The Future-Proof Finances Plan - Smart Money Systems in 14 Days",
     category: "Finance & Crypto",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=684ab7c92fb4950cc5a8046c" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=684ab7c92fb4950cc5a8046c" },
       { label: "Sales Page", url: "http://app.gohighlevel.com/v2/preview/O1dZJNZe3slwPJp3DZY4" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/W5v5C8R7KKhJ2bcm9l4f" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/cOJzTzCafEfuwQ11IhU7" },
@@ -1123,7 +1123,7 @@ export const products: Product[] = [
     title: "The Time & Energy Reclaim Plan - Take Back 10+ Hours a Week",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=684265e780de0c1d7bf2e3c1" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=684265e780de0c1d7bf2e3c1" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/tq4jZq6s1HhHlPM55p00" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/afTZc7HlxmzyTbAqjovp" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/dya9v6rkD5unViv0WJmM" },
@@ -1155,7 +1155,7 @@ export const products: Product[] = [
     title: "The Cycle Breaker Starter Guide - Stop Feeling 'Too Much'",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=683854dae9bc05a6bdb805ad" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=683854dae9bc05a6bdb805ad" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/xQTItjimF959tZyFyMt0" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/4bRwsm8qYokUUihJ2eoN" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/tSguegawvcDC2pkRpxjd" },
@@ -1187,7 +1187,7 @@ export const products: Product[] = [
     title: "Flipping Digital Products on Etsy - $6K/Month Without Inventory",
     category: "E-Commerce",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=682c16d16ef4e660f635dab6" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=682c16d16ef4e660f635dab6" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/BV7cpFlRT24JPM5txOkB" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/kWNJdOtrcNZMVbVhHr4a" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/tgbNAMIPiMKRCJtyxNfl" },
@@ -1219,7 +1219,7 @@ export const products: Product[] = [
     title: "AI-Powered Resume Optimization Service - $5K+/Month",
     category: "AI & ChatGPT",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6824a6b8b8513f45e81966f7" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6824a6b8b8513f45e81966f7" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/Bgi9Y5tA1YrNA7I45UzD" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/VAvJXhqy0Ia3LJCqe8zt" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/R1179FIOZvKdwazkSeeA" },
@@ -1251,7 +1251,7 @@ export const products: Product[] = [
     title: "The No-Client Branding Studio - $8K/Month Selling Canva Templates",
     category: "E-Commerce",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=681ae539df31e5b25445265e" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=681ae539df31e5b25445265e" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/7KCZi0raVMI7BVekknVL" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/wnWlicEiHAo08Hv81kjD" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/qCouOKhuhNWyYxBincYI" },
@@ -1283,7 +1283,7 @@ export const products: Product[] = [
     title: "The Anger Reset System - Cut Outbursts by 70% in 30 Days",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6811fa6b4c725036b7114942" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6811fa6b4c725036b7114942" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/wVqJ61UAdFf8JNJy2pgx" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/BUS8OafQX73u7vsyOS58" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/JW2rRiQjT5sxyRoPy74b" },
@@ -1315,7 +1315,7 @@ export const products: Product[] = [
     title: "The Faceless Income System",
     category: "Digital Marketing",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6809e065f113920e69f81df2" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6809e065f113920e69f81df2" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/pBe0WJ3TCl3mdZnaDVg1" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/WdJfyABN3JLzLn9k9buE" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/oK5gRJXHBqye7OYsVqDY" },
@@ -1349,7 +1349,7 @@ export const products: Product[] = [
     title: "How I Built a $100K+ Investment Portfolio in 12 Months",
     category: "Finance & Crypto",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67ff896f2ff803963b822085" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67ff896f2ff803963b822085" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/TWjfs59dzkqpwycvyySS" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/6r1zPy9T0mbQ3GzA7GTO" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/nk6poNc5Zk6Mxb7STtXF" },
@@ -1383,7 +1383,7 @@ export const products: Product[] = [
     title: "100-Mile Ultra Blueprint - Finish in Under 30 Hours",
     category: "Health & Fitness",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67f51b934ef2c48356cc853c" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67f51b934ef2c48356cc853c" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/IBWoTfMYnEh0KBJOuisa" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/NhCPwgStvesNrsVfma7u" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/0eaI3SPef1bNGVoLUq4e" },
@@ -1415,7 +1415,7 @@ export const products: Product[] = [
     title: "The Heartful Hypnotherapy Method",
     category: "Personal Development",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67ea9a448ac6c51c52b13988" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67ea9a448ac6c51c52b13988" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/8R8MsYVA35v8ZQErVyri" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/P7BWrM7kz5Vc7pYAHEBL" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/o4DcV6wGm7wRPVQN5y6n" },
@@ -1447,7 +1447,7 @@ export const products: Product[] = [
     title: "Hyrox Elite Training Plan - Cut 20 Minutes Off Your Race Time",
     category: "Health & Fitness",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=67c7ed2c8779116a433b3580" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=67c7ed2c8779116a433b3580" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/syU2JDUMUrs2f2GfNLm0" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/pYiHmNDNkkwNruej021C" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/JA5M9u8DpSmWAfcBEdHr" },
@@ -1479,7 +1479,7 @@ export const products: Product[] = [
     title: "The CapCut Profit Playbook - 21 Power-Packed Video Lessons",
     category: "Content Creation",
     funnelLinks: [
-      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=685af3243864bfadc090f540" },
+      { label: "Full Funnel 1-Click Install", url: "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=685af3243864bfadc090f540" },
       { label: "Sales Page", url: "https://app.gohighlevel.com/v2/preview/cfmxBxC0McvePuznQz5M" },
       { label: "Order Page", url: "https://app.gohighlevel.com/v2/preview/bwbk5kcr0QPwzxEnrCaM" },
       { label: "Upsell V1", url: "https://app.gohighlevel.com/v2/preview/tySSGdGC5O70Zs0EsCZ0" },

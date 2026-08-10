@@ -431,7 +431,7 @@ export const PLATINUM_CLUB_RESOURCES: SeedResource[] = [
     description: "Pre-built bridge page funnel - import directly into GoHighLevel.",
     resourceType: "link",
     externalUrl:
-      "https://affiliates.gohighlevel.com/?fp_ref=justfunnel&funnel_share=6a1a6214e90fed02e5483acb",
+      "https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a1a6214e90fed02e5483acb",
     displayOrder: 7,
   },
 
