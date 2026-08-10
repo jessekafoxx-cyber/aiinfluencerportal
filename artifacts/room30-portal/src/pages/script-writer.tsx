@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearch, useLocation } from "wouter";
 import {
   Monitor, Video, Mic, User, Layers, FileText, Zap,
-  Film, Cpu, Upload, X, Copy, Check, Loader2, RefreshCw,
-  ChevronRight, Clock, AlertCircle,
+  Film, Upload, X, Copy, Check, Loader2, RefreshCw,
+  ChevronLeft, ChevronDown, Clock, AlertCircle, FileStack,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
@@ -711,7 +711,7 @@ function ScriptResult({ result, def }: { result: any; def: ScriptTypeDef }) {
 
 // ─── Script Panel (one per type) ───────────────────────────────────────────────
 
-function ScriptPanel({ def }: { def: ScriptTypeDef }) {
+function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResult?: any }) {
   const [form, setForm] = useState<Record<string, string>>({
     targetSeconds: "60",
     version: "voiceover",
@@ -721,7 +721,7 @@ function ScriptPanel({ def }: { def: ScriptTypeDef }) {
     slideCount: "7",
   });
   const [files, setFiles] = useState<File[]>([]);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<any>(externalResult ?? null);
   const [history, setHistory] = useState<ScriptJobRow[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -962,6 +962,99 @@ function ScriptPanel({ def }: { def: ScriptTypeDef }) {
   );
 }
 
+// ─── Recent Scripts Drawer ────────────────────────────────────────────────────
+
+function RecentScriptsDrawer({
+  open,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (job: ScriptJobRow, def: ScriptTypeDef) => void;
+}) {
+  const [jobs, setJobs] = useState<ScriptJobRow[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    // Load recent jobs across all types (use first type as a proxy for the list endpoint)
+    Promise.all(SCRIPT_TYPES.map((t) => listJobs(t.jobType, 3)))
+      .then((results) => {
+        const all = results.flat().sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setJobs(all.slice(0, 20));
+      })
+      .finally(() => setLoading(false));
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-end bg-black/50 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full sm:w-[400px] sm:h-full sm:max-h-screen bg-[#0f0f0f] border border-white/[0.08] shadow-2xl rounded-t-2xl sm:rounded-none flex flex-col max-h-[85dvh] sm:max-h-full overflow-hidden">
+        {/* Handle (mobile) */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <FileStack className="w-4 h-4 text-[#C9A44C]" />
+            <h3 className="text-[14px] font-semibold text-white">Recent Scripts</h3>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 p-4 space-y-2">
+          {loading && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 text-white/30 animate-spin" />
+            </div>
+          )}
+          {!loading && jobs.length === 0 && (
+            <p className="text-[13px] text-white/30 text-center py-8">No scripts yet</p>
+          )}
+          {!loading && jobs.map((j) => {
+            const def = SCRIPT_TYPES.find((t) => t.jobType === j.jobType);
+            if (!def) return null;
+            return (
+              <button
+                key={j.id}
+                onClick={() => { if (j.result) { onSelect(j, def); onClose(); } }}
+                disabled={!j.result}
+                className="w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors disabled:opacity-50 disabled:cursor-default"
+              >
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ background: `${def.color}20` }}
+                >
+                  <def.icon className="w-3.5 h-3.5" style={{ color: def.color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-medium text-white/80 truncate">{def.label}</p>
+                  <p className="text-[11px] text-white/35 mt-0.5">{fmtRelative(j.createdAt)}</p>
+                </div>
+                <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                  j.status === "succeeded" ? "bg-emerald-400" :
+                  j.status === "failed" ? "bg-red-400" : "bg-yellow-400"
+                }`} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ScriptWriterPage() {
@@ -969,65 +1062,95 @@ export default function ScriptWriterPage() {
   const params = new URLSearchParams(search);
   const typeParam = params.get("type") || "green-screen";
   const [, setLocation] = useLocation();
+  const [showRecent, setShowRecent] = useState(false);
+  const [externalResult, setExternalResult] = useState<{ result: any; def: ScriptTypeDef } | null>(null);
 
-  const activeDef =
-    SCRIPT_TYPES.find((t) => t.slug === typeParam) || SCRIPT_TYPES[0];
+  const activeDef = SCRIPT_TYPES.find((t) => t.slug === typeParam) || SCRIPT_TYPES[0];
+
+  const handleTypeChange = (slug: string) => {
+    setExternalResult(null);
+    setLocation(`/script-writer?type=${slug}`);
+  };
 
   return (
     <PortalLayout>
       <div className={PORTAL_PAGE_CLASS}>
-        {/* Page header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <button
-                onClick={() => setLocation("/operating-system")}
-                className="text-[12px] text-white/30 hover:text-white/60 transition-colors"
+
+        {/* ── Back link ── */}
+        <button
+          onClick={() => setLocation("/operating-system")}
+          className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white/70 transition-colors mb-5"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Back
+        </button>
+
+        {/* ── Page header ── */}
+        <div className="mb-7">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-2" style={{ color: GOLD }}>
+            Script Writer OS
+          </p>
+          <h1 className="text-[28px] sm:text-[34px] font-black text-white leading-none tracking-tight uppercase mb-3">
+            Write a Script
+          </h1>
+          <p className="text-[13px] text-white/45 leading-relaxed max-w-lg">
+            Pick a content type, drop in your assets, and we write a script straight from your brain plus the offer you picked — using only proven hook formulas, never invented ones.
+          </p>
+        </div>
+
+        {/* ── Type selector row ── */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="flex-1 relative">
+            <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Content Type
+            </label>
+            <div className="relative">
+              <select
+                value={activeDef.slug}
+                onChange={(e) => handleTypeChange(e.target.value)}
+                className="w-full appearance-none pl-4 pr-10 py-3 rounded-xl bg-[#111] border border-white/[0.12] text-white text-[14px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors"
+                style={{ background: "#111" }}
               >
-                Operating System
-              </button>
-              <ChevronRight className="w-3 h-3 text-white/20" />
-              <span className="text-[12px] text-white/50">Script Writer</span>
+                {SCRIPT_TYPES.map((t) => (
+                  <option key={t.slug} value={t.slug}>{t.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             </div>
-            <h1 className="text-[22px] font-bold text-white">Script Writer</h1>
-            <p className="text-[13px] text-white/40 mt-1">
-              AI-generated scripts for every content format — pulled from your Brain.
-            </p>
+          </div>
+
+          {/* Recent Scripts button — aligned to bottom of the select */}
+          <div className="flex-shrink-0 flex flex-col justify-end">
+            {/* spacer to match label + margin height */}
+            <div className="h-[22px]" />
+            <button
+              onClick={() => setShowRecent(true)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border border-white/[0.12] bg-white/[0.03] hover:bg-white/[0.06] text-white/60 hover:text-white/90 text-[13px] font-medium transition-colors whitespace-nowrap"
+            >
+              <FileStack className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Recent Scripts</span>
+              <span className="sm:hidden">Recent</span>
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Type nav */}
-          <div className="w-52 flex-shrink-0 space-y-1">
-            {SCRIPT_TYPES.map((t) => {
-              const active = t.slug === activeDef.slug;
-              return (
-                <button
-                  key={t.slug}
-                  onClick={() => setLocation(`/script-writer?type=${t.slug}`)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium transition-all ${
-                    active
-                      ? "bg-white/[0.08] text-white"
-                      : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
-                  }`}
-                >
-                  <div
-                    className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: active ? `${t.color}25` : `${t.color}12` }}
-                  >
-                    <t.icon className="w-3.5 h-3.5" style={{ color: t.color }} />
-                  </div>
-                  <span className="truncate">{t.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* ── Script Panel ── */}
+        {/* key forces re-mount on type change so each type gets its own isolated state */}
+        <ScriptPanel
+          key={activeDef.slug}
+          def={activeDef}
+          externalResult={externalResult?.def.slug === activeDef.slug ? externalResult.result : null}
+        />
 
-          {/* Panel — key forces re-mount on type change so each type gets its own isolated state */}
-          <div className="flex-1 min-w-0">
-            <ScriptPanel key={activeDef.slug} def={activeDef} />
-          </div>
-        </div>
+        {/* ── Recent Scripts Drawer ── */}
+        <RecentScriptsDrawer
+          open={showRecent}
+          onClose={() => setShowRecent(false)}
+          onSelect={(job, def) => {
+            handleTypeChange(def.slug);
+            setExternalResult({ result: job.result, def });
+          }}
+        />
       </div>
     </PortalLayout>
   );
