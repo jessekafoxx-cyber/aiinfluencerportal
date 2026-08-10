@@ -46,7 +46,7 @@ import { logger } from "./logger";
 // task #313; 100-ai-influencers was repointed to a fresh curated folder
 // per task #391 (and the old assets are purged via the one-shot below).
 export const DRIVE_FOLDERS_TO_SYNC: Record<string, string> = {
-  "100-ai-influencers": "1S7AHMU1rxn1Vu5cUfeItdvz9kDEwMfZB",
+  "100-ai-influencers": "1CEkA2kLGt027zdZLwZ-_Sl7ETB7rgnOh",
   "250-scenes": "1QRIraLJOHPupPvLkzgXzuH2eIuFPnCaZ",
 };
 
