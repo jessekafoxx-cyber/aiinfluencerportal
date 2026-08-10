@@ -160,19 +160,19 @@ export default function YourBrain() {
     <PortalLayout>
       <div className={PORTAL_PAGE_CLASS}>
         {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-[#C9A44C]" />
+        <div className="mb-8">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center flex-shrink-0">
+                <Brain className="w-5 h-5 text-[#C9A44C]" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-white">Your Brain</h1>
+                <p className="text-white/40 text-[12px] mt-0.5">Your AI profile — powers every OS tool</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Your Brain</h1>
-              <p className="text-white/40 text-[12px] mt-0.5">Your AI profile — powers every OS tool</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Status badge */}
-            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
+            {/* Status badge — always visible top-right */}
+            <span className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
               isReady ? "bg-emerald-500/10 text-emerald-400" :
               isGenerating ? "bg-[#C9A44C]/10 text-[#C9A44C]" :
               status === "error" ? "bg-red-500/10 text-red-400" :
@@ -181,25 +181,29 @@ export default function YourBrain() {
               {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> :
                isReady ? <CheckCircle2 className="w-3 h-3" /> :
                status === "error" ? <AlertCircle className="w-3 h-3" /> : null}
-              {isGenerating ? "Generating…" : STATUS_LABELS[status] ?? status}
+              <span className="hidden sm:inline">{isGenerating ? "Generating…" : STATUS_LABELS[status] ?? status}</span>
+              <span className="sm:hidden">{isReady ? "Ready" : isGenerating ? "…" : status === "error" ? "Error" : "Not set"}</span>
             </span>
+          </div>
+          {/* Action buttons — full width on mobile, row on sm+ */}
+          <div className="flex flex-col sm:flex-row gap-2">
             {dirty && (
               <button
                 onClick={() => saveMutation.mutate()}
                 disabled={saveMutation.isPending}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 hover:text-white text-[12px] font-medium transition-colors border border-white/[0.08]"
+                className="flex items-center justify-center gap-1.5 px-4 py-3 sm:py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 hover:text-white text-[13px] sm:text-[12px] font-medium transition-colors border border-white/[0.08]"
               >
-                {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                Save
+                {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Profile
               </button>
             )}
             <button
               onClick={() => generateMutation.mutate()}
               disabled={isGenerating || generateMutation.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-3 sm:py-2 rounded-lg text-[13px] sm:text-[12px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
             >
-              {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               {isReady ? "Regenerate Brain" : "Generate Brain"}
             </button>
           </div>
@@ -341,11 +345,11 @@ export default function YourBrain() {
         )}
 
         {/* Save footer */}
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-3">
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !dirty}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white text-[13px] font-medium transition-colors border border-white/[0.08] disabled:opacity-40"
+            className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white text-[13px] font-medium transition-colors border border-white/[0.08] disabled:opacity-40"
           >
             {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save Profile
@@ -353,7 +357,7 @@ export default function YourBrain() {
           <button
             onClick={() => generateMutation.mutate()}
             disabled={isGenerating || generateMutation.isPending}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
           >
             {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}

@@ -506,29 +506,41 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
   const creditWarning = quota && !quota.isAdmin && !quota.unlimited && quota.freeRemaining === 0 && quota.balance < tool.credits;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-2xl bg-[#0f0f0f] border border-white/[0.1] shadow-2xl">
+    /* Backdrop — on mobile anchors to bottom, on sm+ centers vertically */
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-start sm:justify-center sm:p-4 sm:pt-16 bg-black/60 backdrop-blur-sm"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {/* Panel — bottom-sheet on mobile, floating card on sm+ */}
+      <div className="w-full sm:max-w-2xl bg-[#0f0f0f] border border-white/[0.1] shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
+
+        {/* Mobile drag handle */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-white/[0.06]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${tool.color}20` }}>
+        <div className="flex items-start justify-between px-5 py-4 sm:p-6 border-b border-white/[0.06] flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tool.color}20` }}>
               <tool.icon className="w-4 h-4" style={{ color: tool.color }} />
             </div>
-            <div>
-              <h3 className="text-[15px] font-semibold text-white">{tool.label}</h3>
-              <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="min-w-0">
+              <h3 className="text-[15px] font-semibold text-white leading-tight">{tool.label}</h3>
+              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <Coins className="w-3 h-3 text-white/30" />
                 <span className="text-[11px] text-white/40">{tool.credits === 0 ? "Free" : `${tool.credits} credit${tool.credits !== 1 ? "s" : ""}`}</span>
-                {quota && <span className="text-[11px] text-white/25">· {quota.freeRemaining > 0 ? `${quota.freeRemaining} free run${quota.freeRemaining !== 1 ? "s" : ""} left` : `Balance: ${quota.balance} credits`}</span>}
+                {quota && <span className="text-[11px] text-white/25">· {quota.freeRemaining > 0 ? `${quota.freeRemaining} free left` : `Balance: ${quota.balance}`}</span>}
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors">
+          <button onClick={onClose} className="ml-2 flex-shrink-0 p-2 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 p-5 sm:p-6 space-y-5">
           {/* Description */}
           <p className="text-[13px] text-white/50 leading-relaxed">{tool.description}</p>
 
@@ -552,7 +564,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
                     <select
                       value={answers[field.key] ?? ""}
                       onChange={e => setAnswers(p => ({ ...p, [field.key]: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] focus:outline-none focus:border-[#C9A44C]/40 appearance-none"
+                      className="w-full px-3 py-3 sm:py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] focus:outline-none focus:border-[#C9A44C]/40 appearance-none"
                     >
                       <option value="">Select…</option>
                       {field.options?.map(o => <option key={o} value={o}>{o}</option>)}
@@ -563,14 +575,14 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
                       value={answers[field.key] ?? ""}
                       onChange={e => setAnswers(p => ({ ...p, [field.key]: e.target.value }))}
                       placeholder={field.placeholder}
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40 resize-none"
+                      className="w-full px-3 py-3 sm:py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40 resize-none"
                     />
                   ) : (
                     <input
                       value={answers[field.key] ?? ""}
                       onChange={e => setAnswers(p => ({ ...p, [field.key]: e.target.value }))}
                       placeholder={field.placeholder}
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40"
+                      className="w-full px-3 py-3 sm:py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40"
                     />
                   )}
                 </div>
@@ -597,7 +609,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
               <Loader2 className="w-4 h-4 text-[#C9A44C] animate-spin flex-shrink-0" />
               <div>
                 <p className="text-[13px] text-[#C9A44C] font-medium">Generating…</p>
-                <p className="text-[11px] text-[#C9A44C]/60 mt-0.5">This usually takes 30–90 seconds. Don't close the modal.</p>
+                <p className="text-[11px] text-[#C9A44C]/60 mt-0.5">This usually takes 30–90 seconds. Don't close this.</p>
               </div>
             </div>
           )}
@@ -613,7 +625,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
           <button
             onClick={() => generateMutation.mutate()}
             disabled={isActive || generateMutation.isPending || creditWarning}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl text-[14px] sm:text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: `linear-gradient(135deg, ${tool.color} 0%, ${tool.color}bb 100%)`, color: tool.color === "#C9A44C" || tool.color === "#f59e0b" ? "#000" : "#fff" }}
           >
             {isActive || generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -644,7 +656,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="flex items-center gap-1 px-2 py-1 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-white/50 hover:text-white/80 text-[11px] transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-white/50 hover:text-white/80 text-[11px] transition-colors"
                   >
                     <Download className="w-3 h-3" />
                     Export
@@ -653,7 +665,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
                 </div>
               </button>
               {showOutput && (
-                <div className="px-5 py-4 border-t border-white/[0.06] max-h-[50vh] overflow-y-auto">
+                <div className="px-5 py-4 border-t border-white/[0.06] max-h-[55vh] overflow-y-auto">
                   <style>{`
                     .os-output h2 { font-size: 13px; font-weight: 700; color: #C9A44C; text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 8px; padding-bottom: 4px; border-bottom: 1px solid rgba(201,164,76,0.2); }
                     .os-output h3 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); margin: 12px 0 6px; }
@@ -707,31 +719,29 @@ export default function OperatingSystem() {
     <PortalLayout>
       <div className={PORTAL_PAGE_CLASS}>
         {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center">
+        <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center flex-shrink-0">
               <Cpu className="w-5 h-5 text-[#C9A44C]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-xl font-bold text-white">Operating System</h1>
-              <p className="text-white/40 text-[12px] mt-0.5">{TOOLS.length} AI tools — powered by your Brain</p>
+              <p className="text-white/40 text-[12px] mt-0.5 truncate">{TOOLS.length} AI tools — powered by your Brain</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-              <Coins className="w-3.5 h-3.5 text-[#C9A44C]" />
-              <span className="text-[12px] font-semibold text-white">{creditsLoading ? "…" : creditBalance}</span>
-              <span className="text-[12px] text-white/40">credits</span>
-            </div>
+          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+            <Coins className="w-3.5 h-3.5 text-[#C9A44C]" />
+            <span className="text-[12px] font-semibold text-white">{creditsLoading ? "…" : creditBalance}</span>
+            <span className="text-[12px] text-white/40 hidden sm:inline">credits</span>
           </div>
         </div>
 
         {/* Brain warning */}
         {!brainReady && (
-          <div className="mb-6 p-4 rounded-xl bg-[#C9A44C]/10 border border-[#C9A44C]/20 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Brain className="w-4 h-4 text-[#C9A44C] flex-shrink-0" />
-              <p className="text-[13px] text-[#C9A44C]">
+          <div className="mb-6 p-4 rounded-xl bg-[#C9A44C]/10 border border-[#C9A44C]/20">
+            <div className="flex items-start gap-3">
+              <Brain className="w-4 h-4 text-[#C9A44C] flex-shrink-0 mt-0.5" />
+              <p className="text-[13px] text-[#C9A44C] leading-relaxed flex-1">
                 {brain?.status === "generating"
                   ? "Your Brain is being generated — most tools will be available shortly."
                   : "Set up your Brain first — most tools use it to generate personalised output."}
@@ -740,7 +750,7 @@ export default function OperatingSystem() {
             {brain?.status !== "generating" && (
               <button
                 onClick={() => setLocation("/your-brain")}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C9A44C] text-black text-[12px] font-semibold hover:bg-[#C9A44C]/90 transition-colors"
+                className="mt-3 w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-lg bg-[#C9A44C] text-black text-[13px] sm:text-[12px] font-semibold hover:bg-[#C9A44C]/90 transition-colors"
               >
                 Set Up Brain
               </button>
