@@ -17,7 +17,7 @@ type BridgePage = {
   source: "manual" | "sheet" | string;
 };
 
-const GHL_LINK = "https://www.gohighlevel.com/?fp_ref=gcooke";
+const GHL_LINK = "https://www.gohighlevel.com/?fp_ref=justfunnel";
 
 export default function DfyBridgePages() {
   const qc = useQueryClient();
