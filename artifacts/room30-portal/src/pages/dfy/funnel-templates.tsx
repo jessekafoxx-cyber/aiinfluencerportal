@@ -1,7 +1,7 @@
 import { ExternalLink, Download } from "lucide-react";
 import { DfySubPageShell } from "@/components/dfy-sub-page-shell";
 
-const GHL_LINK = "https://www.gohighlevel.com/?fp_ref=justfunnel";
+const GHL_LINK = "https://www.gohighlevel.com/?fp_ref=subtasks";
 
 type FunnelTemplate = {
   number: number;
