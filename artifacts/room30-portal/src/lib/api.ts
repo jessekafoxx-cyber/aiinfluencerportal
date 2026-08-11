@@ -1502,6 +1502,27 @@ export const api = {
             : {}),
         }),
       }),
+    createManualUser: (opts: {
+      email: string;
+      firstName?: string;
+      lastName?: string;
+      role: "student" | "team" | "admin";
+      grants: Record<string, boolean>;
+      team?: { teamRole?: string; permissions?: string[] };
+    }) =>
+      fetchApi("/admin/users/manual", {
+        method: "POST",
+        body: JSON.stringify({
+          email: opts.email,
+          firstName: opts.firstName || undefined,
+          lastName: opts.lastName || undefined,
+          role: opts.role,
+          grants: opts.grants,
+          ...(opts.role === "team" && opts.team
+            ? { teamRole: opts.team.teamRole, permissions: opts.team.permissions }
+            : {}),
+        }),
+      }),
     getInvites: () => fetchApi("/admin/invites"),
     updateUserRole: (
       userId: number,

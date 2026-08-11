@@ -3246,6 +3246,102 @@ portalRouter.get("/portal/admin/invites", requireAuth, requireCapability("users.
   res.json(invites);
 });
 
+// POST /portal/admin/users/manual
+// Creates a portal_users row directly — no email sent. The user can sign
+// up later using the same email address, at which point ensurePortalUserForClerk
+// claims the row via the email-match path and links their Clerk ID.
+portalRouter.post("/portal/admin/users/manual", requireAuth, requireCapability("users.invite"), async (req: any, res) => {
+  const { email, firstName, lastName, role: rawRole, grants: rawGrants, teamRole: rawTeamRole, permissions: rawPermissions } = req.body || {};
+  if (!email || typeof email !== "string") { res.status(400).json({ error: "Valid email required" }); return; }
+
+  const callerIsAdmin = req.portalUser?.role === "admin" || !!req.appUser?.isSuperAdmin;
+  const allowedRoles = ["student", "team", "admin"] as const;
+  const role: "student" | "team" | "admin" = allowedRoles.includes(rawRole) ? rawRole : "student";
+
+  if (role === "admin" && !req.appUser?.isSuperAdmin) {
+    res.status(403).json({ error: "Only the portal owner can add an Admin." }); return;
+  }
+  if ((role === "team" || role === "admin") && !callerIsAdmin) {
+    res.status(403).json({ error: "Only an admin can add team members." }); return;
+  }
+
+  const grantKeys = [
+    "bump1Paid","bump2Paid","bump3Paid","upsell1Paid","upsell2Paid","upsell3Paid",
+    "downsell1Paid","tiktokSlideshowPaid","hookDemoPaid","doneForYouPackPaid",
+    "portfolioPaid","platinumPaid","isAList",
+  ] as const;
+  const grants: Record<string, boolean> = {};
+  for (const k of grantKeys) {
+    if (rawGrants && typeof rawGrants[k] === "boolean") grants[k] = rawGrants[k];
+  }
+  const grantsToStore = Object.keys(grants).length > 0 ? grants : null;
+
+  let teamRole: string | null = null;
+  let teamPermissions: TeamCapability[] | null = null;
+  if (role === "team") {
+    const teamRoleKey: TeamRoleKey = isTeamRoleKey(rawTeamRole) ? rawTeamRole : "custom";
+    teamRole = teamRoleKey;
+    if (Array.isArray(rawPermissions)) {
+      teamPermissions = sanitizeCapabilities(rawPermissions);
+    } else if (teamRoleKey !== "custom") {
+      teamPermissions = [...TEAM_ROLE_PRESETS[teamRoleKey].capabilities];
+    } else {
+      teamPermissions = [];
+    }
+  }
+
+  const normalisedEmail = email.trim().toLowerCase();
+  const portalKey = getPortalKey(req);
+
+  // Check if a portal_users row already exists for this email + portal.
+  const [existing] = await db
+    .select()
+    .from(portalUsersTable)
+    .where(
+      and(
+        sql`lower(${portalUsersTable.email}) = lower(${normalisedEmail})`,
+        eq(portalUsersTable.portalKey, portalKey),
+      ),
+    )
+    .limit(1);
+
+  let user;
+  if (existing) {
+    // Apply entitlements to the existing row (same logic as invite claim).
+    await applyInviteEntitlements(existing.id, existing.email, role, grantsToStore, null, teamRole, teamPermissions);
+    if (firstName || lastName) {
+      await db.update(portalUsersTable).set({
+        ...(firstName ? { firstName } : {}),
+        ...(lastName ? { lastName } : {}),
+        updatedAt: new Date(),
+      }).where(eq(portalUsersTable.id, existing.id));
+    }
+    const [refreshed] = await db.select().from(portalUsersTable).where(eq(portalUsersTable.id, existing.id));
+    user = refreshed;
+  } else {
+    // Insert a brand-new pre-created account (no Clerk ID yet).
+    const [inserted] = await db
+      .insert(portalUsersTable)
+      .values({
+        email: normalisedEmail,
+        firstName: firstName ?? null,
+        lastName: lastName ?? null,
+        role,
+        portalKey,
+        isActive: true,
+        ...(role === "team" ? { teamRole, permissions: teamPermissions } : {}),
+      })
+      .returning();
+    user = inserted;
+    // Apply grants (isAList + synthetic order row) using the shared helper.
+    if (grantsToStore) {
+      await applyInviteEntitlements(user.id, user.email, role, grantsToStore, null, teamRole, teamPermissions);
+    }
+  }
+
+  res.json({ user, created: !existing });
+});
+
 portalRouter.patch("/portal/admin/users/:userId/role", requireAuth, requireAdmin, async (req: any, res) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }

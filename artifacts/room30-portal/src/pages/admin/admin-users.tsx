@@ -209,13 +209,16 @@ export function AdminUsers() {
     isSuperAdmin,
   );
 
-  // Invite-user form state. Role + grants are picked at invite time so
-  // the recipient gets the correct access the moment they sign up.
+  // Add Member form state
   const [showInvite, setShowInvite] = useState(false);
+  const [addMode, setAddMode] = useState<"invite" | "manual">("invite");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"student" | "team" | "admin">("student");
   const [inviteGrants, setInviteGrants] = useState<Record<string, boolean>>({});
   const [inviteResult, setInviteResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  // Manual-add extra fields
+  const [manualFirstName, setManualFirstName] = useState("");
+  const [manualLastName, setManualLastName] = useState("");
   // Team-role preset + capabilities, only used when inviteRole === "team".
   const [inviteTeamRole, setInviteTeamRole] = useState<TeamRoleKey>(
     "customer_support_specialist",
@@ -243,8 +246,51 @@ export function AdminUsers() {
     setInviteRole("student");
     setInviteGrants({});
     setInviteResult(null);
+    setManualFirstName("");
+    setManualLastName("");
     setInviteTeamRole("customer_support_specialist");
     setInviteCaps([...TEAM_ROLE_PRESETS.customer_support_specialist.capabilities]);
+  }
+
+  const manualMutation = useMutation({
+    mutationFn: () =>
+      api.admin.createManualUser({
+        email: inviteEmail.trim().toLowerCase(),
+        firstName: manualFirstName.trim() || undefined,
+        lastName: manualLastName.trim() || undefined,
+        role: inviteRole,
+        grants: inviteGrants,
+        ...(inviteRole === "team"
+          ? { team: { teamRole: inviteTeamRole, permissions: inviteCaps } }
+          : {}),
+      }),
+    onSuccess: (data: any) => {
+      setInviteResult({
+        ok: true,
+        msg: data.created
+          ? `Member added: ${inviteEmail}. They'll be linked automatically when they sign up with this email.`
+          : `Existing member updated: ${inviteEmail}. Role and access applied.`,
+      });
+      setInviteEmail("");
+      setManualFirstName("");
+      setManualLastName("");
+      setInviteGrants({});
+      setInviteRole("student");
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (err: any) => {
+      setInviteResult({ ok: false, msg: err?.message || "Could not add member." });
+    },
+  });
+
+  function submitManual() {
+    setInviteResult(null);
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setInviteResult({ ok: false, msg: "Enter a valid email." });
+      return;
+    }
+    manualMutation.mutate();
   }
 
   const inviteMutation = useMutation({
@@ -354,10 +400,33 @@ export function AdminUsers() {
 
         {showInvite && (
           <div className="mb-6 bg-[#0f0f0f] border border-white/[0.08] rounded-xl p-5 space-y-5">
+            {/* Mode tabs */}
+            <div className="flex gap-1 p-1 bg-white/[0.04] rounded-lg w-fit">
+              {(["invite", "manual"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => { setAddMode(mode); setInviteResult(null); }}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all ${
+                    addMode === mode
+                      ? "bg-[#C9A44C] text-black shadow-sm"
+                      : "text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {mode === "invite" ? <Mail className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                  {mode === "invite" ? "Send Invite" : "Add Manually"}
+                </button>
+              ))}
+            </div>
+
+            {/* Mode description */}
+            <p className="text-[12px] text-white/40 -mt-2">
+              {addMode === "invite"
+                ? "Sends a sign-up link to their email. They create their own password."
+                : "Creates their account directly — no email sent. They can sign in with this email address straight away."}
+            </p>
+
+            {/* Email (shared) */}
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-[#C9A44C] font-bold mb-3">
-                Send invite
-              </p>
               <label className="block text-[11px] text-white/55 mb-1.5">Email</label>
               <div className="relative max-w-[420px]">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -370,6 +439,33 @@ export function AdminUsers() {
                 />
               </div>
             </div>
+
+            {/* Name fields — manual mode only */}
+            {addMode === "manual" && (
+              <div className="flex gap-3 flex-wrap">
+                <div className="flex-1 min-w-[160px]">
+                  <label className="block text-[11px] text-white/55 mb-1.5">First name <span className="text-white/25">(optional)</span></label>
+                  <input
+                    type="text"
+                    value={manualFirstName}
+                    onChange={(e) => setManualFirstName(e.target.value)}
+                    placeholder="Jane"
+                    className="w-full px-3 py-2.5 rounded-lg bg-black/40 border border-white/[0.1] text-white text-[13px] placeholder-white/30 focus:outline-none focus:border-[#C9A44C]/60"
+                  />
+                </div>
+                <div className="flex-1 min-w-[160px]">
+                  <label className="block text-[11px] text-white/55 mb-1.5">Last name <span className="text-white/25">(optional)</span></label>
+                  <input
+                    type="text"
+                    value={manualLastName}
+                    onChange={(e) => setManualLastName(e.target.value)}
+                    placeholder="Smith"
+                    className="w-full px-3 py-2.5 rounded-lg bg-black/40 border border-white/[0.1] text-white text-[13px] placeholder-white/30 focus:outline-none focus:border-[#C9A44C]/60"
+                  />
+                </div>
+              </div>
+            )}
+            
 
             <div>
               <label className="block text-[11px] text-white/55 mb-1.5">Role</label>
@@ -527,26 +623,28 @@ export function AdminUsers() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3 pt-1 flex-wrap">
               <button
-                onClick={submitInvite}
-                disabled={inviteMutation.isPending}
+                onClick={addMode === "invite" ? submitInvite : submitManual}
+                disabled={inviteMutation.isPending || manualMutation.isPending}
                 className="px-5 py-2.5 rounded-lg bg-[#C9A44C] text-black text-[12px] font-bold uppercase tracking-wider hover:bg-[#d4b25a] transition-colors disabled:opacity-50 inline-flex items-center gap-2"
               >
-                {inviteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Send invite
+                {(inviteMutation.isPending || manualMutation.isPending) ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : addMode === "invite" ? (
+                  <Mail className="w-3.5 h-3.5" />
+                ) : (
+                  <UserPlus className="w-3.5 h-3.5" />
+                )}
+                {addMode === "invite" ? "Send Invite" : "Add Member"}
               </button>
               <button
                 onClick={resetInviteForm}
-                disabled={inviteMutation.isPending}
+                disabled={inviteMutation.isPending || manualMutation.isPending}
                 className="text-[11px] text-white/55 hover:text-white/80 uppercase tracking-wider"
               >
                 Reset
               </button>
-              <p className="text-[11px] text-white/45">
-                Sign-up link goes by email. Role and access apply automatically the moment they
-                create their account using the same email.
-              </p>
             </div>
 
             {inviteResult && (
