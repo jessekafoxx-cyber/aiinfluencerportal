@@ -335,7 +335,7 @@ export function AdminUsers() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[12px] font-bold uppercase tracking-wider hover:from-purple-400 hover:to-purple-500 transition-all"
               >
                 <UserPlus className="w-4 h-4" />
-                {showInvite ? "Close" : "Add User"}
+                {showInvite ? "Close" : "Add Member"}
               </button>
             )}
           </div>
