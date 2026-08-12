@@ -30,6 +30,13 @@ import { DfySubPageShell } from "@/components/dfy-sub-page-shell";
 import { fetchApi, api, getAuthHeaders } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
+/** Convert snake_case DB values to readable Title Case: "fitness_weight_loss" → "Fitness Weight Loss" */
+function humanizeOption(val: string): string {
+  return val
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export type DfyTemplateCategory =
   | "ad_swipe"
   | "canva_ad_template"
@@ -308,7 +315,7 @@ export function DfyTemplateGallery({
                 <option value="">{filterLabels?.[f.key] ?? f.label}: All</option>
                 {opts.map((o) => (
                   <option key={o} value={o}>
-                    {o}
+                    {humanizeOption(o)}
                   </option>
                 ))}
               </select>
@@ -895,7 +902,7 @@ function Pill({ label, value }: { label: string; value: string }) {
       <span className="text-white/40 text-[9.5px] uppercase tracking-[0.14em]">
         {label}
       </span>
-      <span>{value}</span>
+      <span>{humanizeOption(value)}</span>
     </span>
   );
 }
