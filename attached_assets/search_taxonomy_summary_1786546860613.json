@@ -1,0 +1,52 @@
+{
+  "template_count": 197,
+  "creative_format_counts": {
+    "blog_article": 45,
+    "news_report": 30,
+    "listicle_checklist": 23,
+    "testimonial": 16,
+    "expert_doctor": 16,
+    "product_review": 15,
+    "sale_offer": 13,
+    "before_after": 13,
+    "comparison": 12,
+    "other": 10,
+    "social_proof": 3,
+    "ugc_video": 1
+  },
+  "primary_hook_counts": {
+    "outcome_benefit": 71,
+    "curiosity": 35,
+    "problem_agitation": 31,
+    "authority": 26,
+    "proof": 19,
+    "urgency": 6,
+    "question": 5,
+    "negative_news": 4
+  },
+  "subject_counts": {
+    "health_wellness": 75,
+    "beauty_skincare": 53,
+    "home_lifestyle": 27,
+    "fitness_weight_loss": 11,
+    "pets": 8,
+    "finance_wealth": 7,
+    "software_apps": 7,
+    "general_business": 4,
+    "relationships": 2,
+    "parenting_family": 1,
+    "fashion": 1,
+    "food_beverage": 1
+  },
+  "visual_style_counts": {
+    "image_led": 60,
+    "product_hero": 34,
+    "article_editorial": 29,
+    "text_graphic": 24,
+    "before_after": 19,
+    "news_media": 19,
+    "user_generated": 9,
+    "screenshot_ui": 3
+  },
+  "mean_confidence": 0.85
+}
