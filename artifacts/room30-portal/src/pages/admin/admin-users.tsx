@@ -97,7 +97,15 @@ export function AdminUsers() {
   const roleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) =>
       api.admin.updateUserRole(userId, role),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
+    onSuccess: (_, { userId: uid, role }) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-user-profile", uid] });
+      // If the role change moves the user to a different tab, switch to it so
+      // they don't appear to vanish. (Student → team would disappear from the
+      // Customers tab; team → student would disappear from the Team tab.)
+      const isStaff = role === "team" || role === "admin";
+      setActiveTab(isStaff ? "team" : "customers");
+    },
   });
 
   const aListMutation = useMutation({
