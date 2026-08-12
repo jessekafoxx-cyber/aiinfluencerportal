@@ -276,6 +276,7 @@ const DFY_SUB_ITEMS: { href: string; label: string; external?: boolean; adminOnl
   { href: "/done-for-you-pack/b-roll", label: "70K Viral Video B-Roll" },
   { href: "/done-for-you-pack/scripts", label: "1,000+ Proven Content Scripts" },
   { href: "/done-for-you-pack/funnel-templates", label: "5+ Sales Funnel Templates" },
+  { href: "/done-for-you-pack/advertorial-ad-templates", label: "Advertorial Ad Templates" },
   { href: "/done-for-you-pack/advertorial-pages", label: "20 Advertorial Page Templates" },
   { href: "/done-for-you-pack/advertorial-swipe-file", label: "Advertorial Page Swipe File", adminOnly: true },
 ];

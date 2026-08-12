@@ -79,6 +79,7 @@ import DfyAdSwipeFile from "@/pages/dfy/ad-swipe-file";
 import DfyBRoll from "@/pages/dfy/b-roll";
 import DfyScripts from "@/pages/dfy/scripts";
 import DfyFunnelTemplates from "@/pages/dfy/funnel-templates";
+import DfyAdvertorialAdTemplates from "@/pages/dfy/advertorial-ad-templates";
 import DfyAdvertorialPages from "@/pages/dfy/advertorial-pages";
 import DfyAdvertorialSwipeFile from "@/pages/dfy/advertorial-swipe-file";
 import OurPortfolio from "@/pages/our-portfolio";
@@ -490,6 +491,9 @@ function AppRoutes() {
           </Route>
           <Route path="/done-for-you-pack/funnel-templates">
             <ProtectedRoute><DfyFunnelTemplates /></ProtectedRoute>
+          </Route>
+          <Route path="/done-for-you-pack/advertorial-ad-templates">
+            <ProtectedRoute><DfyAdvertorialAdTemplates /></ProtectedRoute>
           </Route>
           <Route path="/done-for-you-pack/advertorial-pages">
             <ProtectedRoute><DfyAdvertorialPages /></ProtectedRoute>

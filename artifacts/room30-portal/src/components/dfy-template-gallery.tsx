@@ -85,6 +85,8 @@ type Props = {
   description: string;
   pageSize?: number;
   banner?: React.ReactNode;
+  /** Override display labels for any filter key. Keys not listed fall back to defaults. */
+  filterLabels?: Partial<Record<keyof FilterOptions, string>>;
 };
 
 const FILTER_KEYS: { key: keyof FilterOptions; label: string; param: string }[] = [
@@ -140,6 +142,7 @@ export function DfyTemplateGallery({
   description,
   pageSize = 60,
   banner,
+  filterLabels,
 }: Props) {
   const qc = useQueryClient();
   const [params, setParams] = useUrlState();
@@ -302,7 +305,7 @@ export function DfyTemplateGallery({
                 }
                 className="bg-[#0a0a0a] border border-white/[0.08] rounded-md px-2.5 py-1.5 text-[12px] text-white/80 focus:outline-none focus:border-[#C9A44C]/40"
               >
-                <option value="">{f.label}: All</option>
+                <option value="">{filterLabels?.[f.key] ?? f.label}: All</option>
                 {opts.map((o) => (
                   <option key={o} value={o}>
                     {o}
