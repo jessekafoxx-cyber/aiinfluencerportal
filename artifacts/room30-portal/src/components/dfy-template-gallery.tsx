@@ -399,7 +399,7 @@ export function DfyTemplateGallery({
               ratio (1:1 / 9:16 / 4:5) and the column flow packs them
               tightly without cropping. */}
           <div
-            className="columns-2 sm:columns-3 lg:columns-4 gap-3 md:gap-4 [column-fill:_balance]"
+            className="columns-2 lg:columns-3 gap-3 md:gap-4 [column-fill:_balance]"
           >
             {items.map((t) => (
               <TemplateTile
