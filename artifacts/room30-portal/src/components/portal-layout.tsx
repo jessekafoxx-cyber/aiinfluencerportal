@@ -663,12 +663,9 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
                     if (paid) {
                       setLocation("/platinum-club");
                       setSidebarOpen(false);
-                    } else if (platinumUpsell && purchaseUrlFor(platinumUpsell)) {
-                      window.open(purchaseUrlFor(platinumUpsell)!, "_blank", "noopener,noreferrer");
+                    } else {
+                      window.open("https://checkout.aiinfluencerpublishing.com/join-platinum-club", "_blank", "noopener,noreferrer");
                       setSidebarOpen(false);
-                    } else if (platinumUpsell) {
-                      setBuyError("");
-                      setBuyModal(platinumUpsell);
                     }
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
