@@ -972,11 +972,19 @@ function UserAccessPanel({ userId }: { userId: number }) {
     queryKey: ["admin-user-access", userId],
     queryFn: () => api.admin.getUserAccess(userId),
   });
+  const [accessError, setAccessError] = useState<string | null>(null);
 
   const accessMutation = useMutation({
     mutationFn: (patch: Record<string, boolean>) => api.admin.updateUserAccess(userId, patch),
     onSuccess: (fresh) => {
+      setAccessError(null);
+      // Update the cache immediately for instant feedback, then force a
+      // refetch so the panel confirms the server-side entitlement state.
       queryClient.setQueryData(["admin-user-access", userId], fresh);
+      queryClient.invalidateQueries({ queryKey: ["admin-user-access", userId] });
+    },
+    onError: (err: any) => {
+      setAccessError(err?.message || "Could not update access. Please try again.");
     },
   });
 
@@ -990,6 +998,11 @@ function UserAccessPanel({ userId }: { userId: number }) {
         or you want to comp them). Toggling off only removes a manual grant. Real Stripe purchases
         cannot be revoked from here.
       </p>
+      {accessError && (
+        <div className="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[12px] text-red-300">
+          {accessError}
+        </div>
+      )}
       {isLoading || !data ? (
         <div className="py-6 flex justify-center">
           <Loader2 className="w-4 h-4 animate-spin text-white/40" />
