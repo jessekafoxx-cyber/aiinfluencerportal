@@ -3556,6 +3556,19 @@ portalRouter.patch("/portal/admin/users/:userId/access", requireAuth, requireCap
     });
   }
 
+  // If the user is inactive and at least one flag is being turned ON,
+  // auto-activate them so the grants immediately take effect. Manually
+  // created users (no Clerk ID yet) start with isActive=false; granting
+  // access without activating leaves the account in a broken state where
+  // the flags are stored but every portal endpoint rejects the user.
+  const anyFlagGranted = Object.values(patch).some((v) => v === true);
+  if (anyFlagGranted && !user.isActive) {
+    await db
+      .update(portalUsersTable)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(portalUsersTable.id, userId));
+  }
+
   // Task #646: if the admin flipped any entitlement from granted ->
   // revoked, mirror that into the internal Sales CRM so reps stop
   // working a row that no longer has access. Best-effort - errors
