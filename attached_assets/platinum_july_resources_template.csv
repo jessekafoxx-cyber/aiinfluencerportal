@@ -1,0 +1,20 @@
+section,title,description,resource_type,drive_file_id,external_url,cover_drive_file_id,display_order
+july_main_offer,AI Personal Finance & Wealth Builder - Ebook (PDF),The complete ebook. Your step-by-step framework to build wealth using AI tools and systems.,pdf,DRIVE_FILE_ID_HERE,,COVER_DRIVE_FILE_ID_HERE,1
+july_main_offer,AI Personal Finance & Wealth Builder - Ebook (DOCX),Editable Word version of the ebook.,docx,DRIVE_FILE_ID_HERE,,,2
+july_bonuses,Bonus Title Here,Description of the bonus resource.,pdf,DRIVE_FILE_ID_HERE,,COVER_DRIVE_FILE_ID_HERE,1
+july_bonuses,Another Bonus,Description here.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,2
+july_bumps,Order Bump Title,Description of the order bump resource.,pdf,DRIVE_FILE_ID_HERE,,COVER_DRIVE_FILE_ID_HERE,1
+july_upsells,Upsell Title,Description of the upsell resource.,pdf,DRIVE_FILE_ID_HERE,,,1
+july_creation_assets,Research Doc: AI Personal Finance & Wealth Builder,In-depth market research document.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,1
+july_creation_assets,VSL Script 1,Video sales letter script.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,2
+july_creation_assets,AI Influencer Green Screen Scripts,Full green screen video scripts.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,3
+july_content_scripts,Content Script Title,Description.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,1
+july_ads,DFY Meta Ad Static Creatives,Ready-to-upload Meta ad images.,drive_folder,,https://drive.google.com/drive/folders/YOUR_FOLDER_ID,,1
+july_ads,Google Ads Copy Variations,Google Ad copy variations.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,2
+july_sales_assets,Sales Email Sequence,Pre-written email sequence.,google_doc,,https://docs.google.com/document/d/YOUR_DOC_ID/edit,,1
+july_sales_assets,Sales Page (Preview),The full sales page.,link,,https://sites.leadconnectorhq.com/preview/YOUR_PAGE_ID?notrack=true,,2
+july_sales_assets,Order Page (Preview),The checkout / order page layout.,link,,https://sites.leadconnectorhq.com/preview/YOUR_PAGE_ID?notrack=true,,3
+july_top_ads,Our Top 20 Best-Performing Ads,Study the top 20 ads. Open the folder to browse all creatives.,drive_folder,,https://drive.google.com/drive/folders/YOUR_FOLDER_ID,,1
+july_custom_graphics,Main Offer + Bonuses Mockups,Professional mockup graphics for the main offer and all bonuses.,drive_folder,,https://drive.google.com/drive/folders/YOUR_FOLDER_ID,,1
+july_custom_graphics,Order Bumps Mockups,Mockup graphics for the order bump products.,drive_folder,,https://drive.google.com/drive/folders/YOUR_FOLDER_ID,,2
+july_custom_graphics,Upsells Mockups,Mockup graphics for the upsell products.,drive_folder,,https://drive.google.com/drive/folders/YOUR_FOLDER_ID,,3
