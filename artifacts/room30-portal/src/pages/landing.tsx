@@ -19,10 +19,10 @@ export function LandingPage() {
         {/* Top row */}
         <div className="flex items-center justify-between">
           <span
-            className="text-[22px] font-black tracking-[0.02em] text-white"
+            className="text-[18px] font-black tracking-[0.04em] text-white"
             style={{ fontFamily: "var(--app-font-display)" }}
           >
-            ROOM<span className="text-[#C9A44C]">30</span>.AI
+            AI INFLUENCER<span className="text-[#C9A44C]"> PUBLISHING</span>
           </span>
           <button
             onClick={() => setLocation("/sign-in")}
@@ -35,16 +35,15 @@ export function LandingPage() {
         {/* Hero copy */}
         <div className="my-auto py-16">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#C9A44C]/70 mb-5">
-            Welcome to Room30
+            Member Portal
           </p>
           <h1
             className="text-[clamp(36px,5vw,58px)] font-black uppercase leading-[1.0] text-white mb-6"
             style={{ fontFamily: "var(--app-font-display)" }}
           >
-            Private AI<br />
-            Immersions<br />
-            For Operators<br />
-            Who{" "}
+            Build The<br />
+            Machine.<br />
+            Collect The<br />
             <span
               className="italic"
               style={{
@@ -52,12 +51,13 @@ export function LandingPage() {
                 color: "transparent",
               }}
             >
-              Build.
+              Commissions.
             </span>
           </h1>
           <p className="text-[14px] text-white/50 leading-[1.7] max-w-[340px]">
-            Room30 is the inner room where operators come to install AI inside
-            the businesses they actually run. Sign in to keep building.
+            Everything you need to build and run faceless AI influencer
+            accounts — training, done-for-you assets, and the tools to put
+            it on autopilot. Sign in to keep going.
           </p>
         </div>
 
@@ -127,10 +127,10 @@ function SignInPanel({
         className="text-[32px] font-black uppercase text-white mb-2 leading-tight"
         style={{ fontFamily: "var(--app-font-display)" }}
       >
-        Open the Portal
+        Access Your Program
       </h2>
       <p className="text-[13.5px] text-white/45 mb-8 leading-[1.6]">
-        Use the email address tied to your Room30 account.
+        Use the email address you purchased with.
       </p>
 
       {/* Form — navigates to /sign-in */}
@@ -225,10 +225,10 @@ function CreatePanel({
         className="text-[32px] font-black uppercase text-white mb-2 leading-tight"
         style={{ fontFamily: "var(--app-font-display)" }}
       >
-        Get Inside the Room
+        Get Started
       </h2>
       <p className="text-[13.5px] text-white/45 mb-8 leading-[1.6]">
-        Use the email address you bought with so your access matches up.
+        Use the email address you purchased with so your access links up automatically.
       </p>
 
       <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-4">

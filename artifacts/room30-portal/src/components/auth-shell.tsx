@@ -5,8 +5,8 @@ import { Lock } from "lucide-react";
 const SIGN_IN_COPY: Record<string, { eyebrow: string; title: string; subtitle: string }> = {
   default: {
     eyebrow: "Sign In",
-    title: "Open the Portal",
-    subtitle: "Use the email address tied to your Room30 account.",
+    title: "Access Your Program",
+    subtitle: "Use the email address you purchased with.",
   },
   "factor-one": {
     eyebrow: "Verification",
@@ -33,8 +33,8 @@ const SIGN_IN_COPY: Record<string, { eyebrow: string; title: string; subtitle: s
 const SIGN_UP_COPY: Record<string, { eyebrow: string; title: string; subtitle: string }> = {
   default: {
     eyebrow: "Create Your Account",
-    title: "Get Inside the Room",
-    subtitle: "Use the email address you bought with so your access matches up.",
+    title: "Get Started",
+    subtitle: "Use the email address you purchased with so your access links up automatically.",
   },
   "verify-email-address": {
     eyebrow: "Verify Your Email",
@@ -80,10 +80,10 @@ export function AuthShell({ mode, children }: AuthShellProps) {
         <div className="flex items-center justify-between">
           <a
             href="/"
-            className="text-[22px] font-black tracking-[0.02em] text-white"
+            className="text-[18px] font-black tracking-[0.04em] text-white"
             style={{ fontFamily: "var(--app-font-display)" }}
           >
-            ROOM<span className="text-[#C9A44C]">30</span>.AI
+            AI INFLUENCER<span className="text-[#C9A44C]"> PUBLISHING</span>
           </a>
         </div>
 
