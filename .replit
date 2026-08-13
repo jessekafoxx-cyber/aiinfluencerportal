@@ -26,3 +26,4 @@ channel = "stable-25_05"
 
 [userenv.shared]
 PUBLIC_APP_URL = "portal.aiinfluencerpublishing.com"
+VIKTOR_SLACK_USER_ID = "U0BNUR2161J"
