@@ -18,7 +18,7 @@ import { sql, eq, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { sendEmail } from "../lib/email";
 
-const SUPPORT_EMAIL = "hello@room30.ai";
+const SUPPORT_EMAIL = "support@aiinfluencerpublishing.com";
 
 export type InfluencerEscalationResult =
   | { status: "no_account" }
