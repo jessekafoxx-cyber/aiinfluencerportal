@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useLocation } from "wouter";
 import { Lock, ArrowRight } from "lucide-react";
 
 export function LandingPage() {
-  const { login } = useAuth();
   const [view, setView] = useState<"signin" | "create">("signin");
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#0a0a0a]">
@@ -25,7 +25,7 @@ export function LandingPage() {
             ROOM<span className="text-[#C9A44C]">30</span>.AI
           </span>
           <button
-            onClick={login}
+            onClick={() => setLocation("/sign-in")}
             className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/40 hover:text-[#C9A44C] transition-colors"
           >
             Members
@@ -84,9 +84,15 @@ export function LandingPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-14 bg-[#0d0d0d] border-l border-white/[0.04]">
         <div className="w-full max-w-[420px]">
           {view === "signin" ? (
-            <SignInPanel onLogin={login} onSwitch={() => setView("create")} />
+            <SignInPanel
+              onSignIn={() => setLocation("/sign-in")}
+              onSwitch={() => setView("create")}
+            />
           ) : (
-            <CreatePanel onLogin={login} onSwitch={() => setView("signin")} />
+            <CreatePanel
+              onSignUp={() => setLocation("/sign-up")}
+              onSwitch={() => setView("signin")}
+            />
           )}
         </div>
       </div>
@@ -96,12 +102,22 @@ export function LandingPage() {
 
 /* ── Sign In panel ──────────────────────────────────────────────────────── */
 function SignInPanel({
-  onLogin,
+  onSignIn,
   onSwitch,
 }: {
-  onLogin: () => void;
+  onSignIn: () => void;
   onSwitch: () => void;
 }) {
+  const [purchaseEmail, setPurchaseEmail] = useState("");
+  const [, setLocation] = useLocation();
+
+  function handlePurchaseSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const email = purchaseEmail.trim();
+    if (!email) return;
+    setLocation(`/sign-up?email=${encodeURIComponent(email)}`);
+  }
+
   return (
     <>
       <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#C9A44C]/70 mb-2">
@@ -117,16 +133,16 @@ function SignInPanel({
         Use the email address tied to your Room30 account.
       </p>
 
-      {/* Form — visual only; Continue triggers Clerk OIDC */}
+      {/* Form — navigates to /sign-in */}
       <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-4 mb-6">
-        <AuthField label="Email Address" type="email" placeholder="you@example.com" />
+        <AuthField label="Email Address" type="email" placeholder="you@example.com" onClick={onSignIn} />
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40">
               Password
             </label>
             <button
-              onClick={onLogin}
+              onClick={onSignIn}
               className="text-[11px] text-[#C9A44C] hover:text-[#d8b566] transition-colors"
             >
               Forgot password?
@@ -136,12 +152,12 @@ function SignInPanel({
             type="password"
             placeholder="••••••••••••••"
             readOnly
-            onClick={onLogin}
+            onClick={onSignIn}
             className="w-full px-4 py-3 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13.5px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40 cursor-pointer"
           />
         </div>
         <button
-          onClick={onLogin}
+          onClick={onSignIn}
           className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg text-[13px] font-bold uppercase tracking-[0.12em] transition-colors"
           style={{
             background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)",
@@ -162,21 +178,21 @@ function SignInPanel({
           a login yet. Enter your purchase email to create your account — your
           access transfers across automatically.
         </p>
-        <div className="flex gap-2">
+        <form onSubmit={handlePurchaseSubmit} className="flex gap-2">
           <input
             type="email"
+            value={purchaseEmail}
+            onChange={(e) => setPurchaseEmail(e.target.value)}
             placeholder="you@example.com"
-            readOnly
-            onClick={onLogin}
-            className="flex-1 px-3 py-2.5 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13px] placeholder-white/25 focus:outline-none cursor-pointer"
+            className="flex-1 px-3 py-2.5 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13px] placeholder-white/25 focus:outline-none focus:border-[#C9A44C]/40"
           />
           <button
-            onClick={onLogin}
+            type="submit"
             className="px-4 py-2.5 rounded-lg bg-white/[0.06] hover:bg-[#C9A44C]/15 text-white/70 hover:text-[#C9A44C] text-[11px] font-bold uppercase tracking-wider transition-colors whitespace-nowrap border border-white/[0.06]"
           >
             Create Account
           </button>
-        </div>
+        </form>
       </div>
 
       <p className="mt-5 text-center text-[12.5px] text-white/35">
@@ -194,10 +210,10 @@ function SignInPanel({
 
 /* ── Create Account panel ───────────────────────────────────────────────── */
 function CreatePanel({
-  onLogin,
+  onSignUp,
   onSwitch,
 }: {
-  onLogin: () => void;
+  onSignUp: () => void;
   onSwitch: () => void;
 }) {
   return (
@@ -216,7 +232,7 @@ function CreatePanel({
       </p>
 
       <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-4">
-        <AuthField label="Email Address" type="email" placeholder="Enter your email address" />
+        <AuthField label="Email Address" type="email" placeholder="Enter your email address" onClick={onSignUp} />
         <div>
           <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">
             Password
@@ -226,7 +242,7 @@ function CreatePanel({
               type="password"
               placeholder="Create a password"
               readOnly
-              onClick={onLogin}
+              onClick={onSignUp}
               className="w-full px-4 py-3 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13.5px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40 cursor-pointer pr-10"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 text-[16px]">
@@ -235,7 +251,7 @@ function CreatePanel({
           </div>
         </div>
         <button
-          onClick={onLogin}
+          onClick={onSignUp}
           className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg text-[13px] font-bold uppercase tracking-[0.12em] transition-colors"
           style={{
             background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)",
@@ -264,12 +280,13 @@ function AuthField({
   label,
   type,
   placeholder,
+  onClick,
 }: {
   label: string;
   type: string;
   placeholder: string;
+  onClick: () => void;
 }) {
-  const { login } = useAuth();
   return (
     <div>
       <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">
@@ -279,7 +296,7 @@ function AuthField({
         type={type}
         placeholder={placeholder}
         readOnly
-        onClick={login}
+        onClick={onClick}
         className="w-full px-4 py-3 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13.5px] placeholder-white/20 focus:outline-none focus:border-[#C9A44C]/40 cursor-pointer"
       />
     </div>

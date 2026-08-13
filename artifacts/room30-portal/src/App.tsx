@@ -1,6 +1,12 @@
 import { useEffect, useRef, lazy, Suspense } from "react";
 import { LandingPage } from "@/pages/landing";
-import { useAuth } from "@workspace/replit-auth-web";
+import {
+  ClerkProvider,
+  useAuth,
+  useClerk,
+} from "@clerk/react";
+import { publishableKeyFromHost } from "@clerk/react/internal";
+import { shadcn } from "@clerk/themes";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
@@ -97,20 +103,37 @@ import {
   getImpersonationToken,
   clearImpersonation,
 } from "@/lib/api";
+import { SignInPage } from "@/pages/sign-in";
+import { SignUpPage } from "@/pages/sign-up";
 
+// ── Clerk configuration ────────────────────────────────────────────────────
+// REQUIRED — copy verbatim. Resolves the key from window.location.hostname so
+// the same build serves multiple Clerk custom domains.
+const clerkPubKey = publishableKeyFromHost(
+  window.location.hostname,
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
+);
+
+// REQUIRED — copy verbatim. Empty in dev, auto-set in prod.
+const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// Clerk passes full paths; wouter's setLocation prepends the base — strip it.
+function stripBase(path: string): string {
+  return basePath && path.startsWith(basePath)
+    ? path.slice(basePath.length) || "/"
+    : path;
+}
+
+// ── Impersonation listener ─────────────────────────────────────────────────
 // Task #710: global toast for any 403 { error: "impersonation_read_only" }.
-// `fetchApi` dispatches "r30:impersonation-write-blocked" on any blocked
-// write so we don't have to wire toasts into every feature page.
-// Also reconciles the sessionStorage token with the server on boot — if
-// the session is no longer active (expired, closed by another tab, or the
-// admin signed out elsewhere) we drop the local token + banner so the UI
-// can never falsely claim "Viewing as …".
 function ImpersonationToastListener() {
   useEffect(() => {
     let last = 0;
     const handler = () => {
       const now = Date.now();
-      if (now - last < 1500) return; // dedupe burst from parallel mutations
+      if (now - last < 1500) return;
       last = now;
       toast({
         title: "Read-only while viewing as a user",
@@ -122,8 +145,7 @@ function ImpersonationToastListener() {
       window.removeEventListener("r30:impersonation-write-blocked", handler as EventListener);
   }, []);
 
-  // Boot-time + tab-focus reconciliation. Only fires when a token exists so
-  // it stays free for the vast majority of users.
+  // Boot-time + tab-focus reconciliation.
   useEffect(() => {
     let cancelled = false;
     async function reconcile() {
@@ -139,8 +161,6 @@ function ImpersonationToastListener() {
           });
         }
       } catch {
-        // 403/401 means the server already considers us unauthorized to
-        // impersonate — drop the local token so the banner cannot lie.
         if (cancelled) return;
         clearImpersonation();
       }
@@ -156,31 +176,23 @@ function ImpersonationToastListener() {
   return null;
 }
 
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+// ── Auth-aware components ──────────────────────────────────────────────────
 
 function HomeRedirect() {
-  const { isLoading, isAuthenticated } = useAuth();
-  if (isLoading) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <div className="w-8 h-8 border-2 border-[#C9A44C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-  return isAuthenticated ? <Redirect to="/dashboard" /> : <LandingPage />;
+  return isSignedIn ? <Redirect to="/dashboard" /> : <LandingPage />;
 }
 
-// Task #774: ProtectedRoute previously bounced signed-out users straight
-// to "/" via <Show when="signed-out">. During the brief window where Clerk
-// is still resolving the session, neither <Show> branch renders, so a
-// desktop user with a slow/cold Clerk load saw a blank flash; and a truly
-// expired session got a silent redirect to the landing page with no clue
-// why. We now gate on Clerk's explicit isLoaded/isSignedIn so we (a) show a
-// spinner while Clerk loads (no blank flash, no premature redirect) and
-// (b) show a visible "session ended" notice with a Sign in button instead
-// of a silent bounce.
+// Task #774: Show a visible "session ended" notice instead of a silent bounce.
 function SessionEndedNotice() {
-  const { login } = useAuth();
+  const [, setLocation] = useLocation();
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6">
       <div className="max-w-sm w-full text-center bg-[#0f0f0f] border border-white/[0.06] rounded-2xl p-8">
@@ -195,7 +207,7 @@ function SessionEndedNotice() {
           purchases are safe.
         </p>
         <button
-          onClick={login}
+          onClick={() => setLocation("/sign-in")}
           className="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#C9A44C] text-black text-sm font-bold uppercase tracking-wider hover:bg-[#d8b566] transition-colors"
           data-testid="button-session-ended-signin"
         >
@@ -207,61 +219,47 @@ function SessionEndedNotice() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoading, isAuthenticated } = useAuth();
-  if (isLoading) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <div className="w-8 h-8 border-2 border-[#C9A44C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return <SessionEndedNotice />;
   }
   return <>{children}</>;
 }
 
-// /sign-in and /sign-up survive as routes because historical purchase
-// emails link to them. Both now simply hand off to the OIDC login flow.
-function AuthRedirect() {
-  const { isLoading, isAuthenticated, login } = useAuth();
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) login();
-  }, [isLoading, isAuthenticated, login]);
-  if (!isLoading && isAuthenticated) return <Redirect to="/dashboard" />;
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-      <div className="w-8 h-8 border-2 border-[#C9A44C] border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-}
-
-// Legacy buyers migrated from Whop (or added by the team) have access flags on
-// a portal_users row but no Clerk login yet, so "Sign In" dead-ends with
-// "Couldn't find your account". This callout routes them to Create Account with
-// their email prefilled - the backend auto-links their existing access on
-// sign-up (ensurePortalUserForClerk claims the row by email).
 // Clears the React Query cache when the authenticated user changes so one
 // account's cached data can never leak into another account's session.
 function AuthUserCacheInvalidator() {
-  const { user, isLoading } = useAuth();
+  const { addListener } = useClerk();
   const queryClient = useQueryClient();
   const prevUserIdRef = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
-    if (isLoading) return;
-    const userId = user?.id ?? null;
-    if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== userId) {
-      queryClient.clear();
-    }
-    prevUserIdRef.current = userId;
-  }, [user?.id, isLoading, queryClient]);
+    const unsubscribe = addListener(({ user }) => {
+      const userId = user?.id ?? null;
+      if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== userId) {
+        queryClient.clear();
+      }
+      prevUserIdRef.current = userId;
+    });
+    return unsubscribe;
+  }, [addListener, queryClient]);
+
   return null;
 }
 
 function AuthedChatWidget() {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <StephChatWidget /> : null;
+  const { isSignedIn } = useAuth();
+  return isSignedIn ? <StephChatWidget /> : null;
 }
+
+// ── Route tree ─────────────────────────────────────────────────────────────
 
 function AppRoutes() {
   return (
@@ -271,8 +269,8 @@ function AppRoutes() {
         <Switch>
           <Route path="/screenshot/lesson/:slug" component={ScreenshotLesson} />
           <Route path="/" component={HomeRedirect} />
-          <Route path="/sign-in/*?" component={AuthRedirect} />
-          <Route path="/sign-up/*?" component={AuthRedirect} />
+          <Route path="/sign-in/*?" component={SignInPage} />
+          <Route path="/sign-up/*?" component={SignUpPage} />
           <Route path="/dashboard">
             <ProtectedRoute><Dashboard /></ProtectedRoute>
           </Route>
@@ -537,11 +535,72 @@ function AppRoutes() {
   );
 }
 
+// ClerkProvider must live inside WouterRouter so useLocation is available
+// for routerPush / routerReplace.
+function ClerkProviderWithRoutes() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      proxyUrl={clerkProxyUrl}
+      appearance={{
+        theme: shadcn,
+        cssLayerName: "clerk",
+        variables: {
+          colorPrimary: "#C9A44C",
+          colorForeground: "#ffffff",
+          colorMutedForeground: "rgba(255,255,255,0.45)",
+          colorDanger: "#ef4444",
+          colorBackground: "#161616",
+          colorInput: "#1a1a1a",
+          colorInputForeground: "#ffffff",
+          colorNeutral: "rgba(255,255,255,0.12)",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          borderRadius: "0.5rem",
+        },
+        elements: {
+          rootBox: "w-full",
+          cardBox: "w-full bg-transparent shadow-none rounded-none",
+          card: "!shadow-none !border-0 !bg-transparent !rounded-none",
+          footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
+          headerTitle: "text-white font-bold",
+          headerSubtitle: "text-white/45",
+          socialButtonsBlockButtonText: "text-white",
+          formFieldLabel: "text-white/40 uppercase text-[11px] tracking-[0.12em] font-bold",
+          footerActionLink: "text-[#C9A44C] hover:text-[#d8b566]",
+          footerActionText: "text-white/35",
+          dividerText: "text-white/30",
+          identityPreviewEditButton: "text-[#C9A44C]",
+          formFieldSuccessText: "text-green-400",
+          alertText: "text-white",
+          logoBox: "hidden",
+          logoImage: "hidden",
+          socialButtonsBlockButton: "border border-white/10 bg-white/5 hover:bg-white/10 text-white",
+          formButtonPrimary: "bg-[#C9A44C] hover:bg-[#d8b566] text-black font-bold uppercase tracking-wider",
+          formFieldInput: "bg-[#161616] border border-white/10 text-white",
+          footerAction: "border-t border-white/5 pt-4",
+          dividerLine: "bg-white/10",
+          alert: "border border-red-500/20 bg-red-500/10",
+          otpCodeFieldInput: "bg-[#161616] border border-white/10 text-white text-center",
+          main: "gap-6",
+        },
+      }}
+      signInUrl={`${basePath}/sign-in`}
+      signUpUrl={`${basePath}/sign-up`}
+      routerPush={(to) => setLocation(stripBase(to))}
+      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+    >
+      <AppRoutes />
+    </ClerkProvider>
+  );
+}
+
 function App() {
   return (
     <PortalErrorBoundary>
       <WouterRouter base={basePath}>
-        <AppRoutes />
+        <ClerkProviderWithRoutes />
         <Toaster />
         <ImpersonationToastListener />
       </WouterRouter>

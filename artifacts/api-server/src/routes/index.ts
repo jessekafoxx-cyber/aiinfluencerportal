@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import authRouter from "./auth";
 import healthRouter from "./health";
 import portalRouter from "./portal";
 import dfyRouter from "./dfy";
@@ -48,7 +47,6 @@ import supportKnowledgeAdminRouter from "./support-knowledge-admin";
 
 const router: IRouter = Router();
 
-router.use(authRouter);
 router.use(healthRouter);
 router.use(portalRouter);
 router.use(dfyRouter);

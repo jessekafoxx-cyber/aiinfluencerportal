@@ -12,6 +12,7 @@
 @font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Bold.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Bold.woff') format('woff'); font-weight: 700; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-ExtraBold.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-ExtraBold.woff') format('woff'); font-weight: 800; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Desk'; src: url('/members/fonts/desk/BauhausDeskDisplay-Black.woff2') format('woff2'), url('/members/fonts/desk/BauhausDeskDisplay-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";

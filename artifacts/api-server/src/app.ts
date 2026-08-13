@@ -1,11 +1,14 @@
 import express, { type Express } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
+import { clerkMiddleware, getAuth } from "@clerk/express";
+import {
+  CLERK_PROXY_PATH,
+  clerkProxyMiddleware,
+} from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { checkRateLimit } from "./lib/rate-limit";
-import { authMiddleware } from "./middlewares/authMiddleware";
 import { handleCalendlyWebhook } from "./routes/crm-calendly";
 
 const app: Express = express();
@@ -38,6 +41,9 @@ app.use(
     },
   }),
 );
+// Clerk Frontend API proxy — must be before body parsers (streams raw bytes).
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+
 app.use(cors({ credentials: true, origin: true }));
 
 // Task #608 - Calendly webhook. Mounted with raw-body middleware
@@ -61,8 +67,9 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 
-app.use(cookieParser());
-app.use(authMiddleware);
+// Clerk session middleware — validates JWT from Clerk and populates req.auth.
+// Reads CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY from environment automatically.
+app.use(clerkMiddleware());
 
 // Security hardening (room30 anti-piracy spec 3.1 / 4.2 / 7.1): an
 // abuse-ceiling + security log for portal API traffic. The ceilings are
@@ -71,11 +78,11 @@ app.use(authMiddleware);
 // invisible to real customers (golden rule). Scoped to /api/portal/* by
 // path prefix so the live funnel / Stripe / coaching routes are NEVER
 // rate-limited. Keyed by auth user id when present, else client IP.
-// Mounted after authMiddleware (so req.user works) and before the router.
+// Mounted after clerkMiddleware and before the router.
 app.use("/api", (req, res, next) => {
   if (req.path !== "/portal" && !req.path.startsWith("/portal/")) return next();
 
-  const userId: string | null = req.user?.id ?? null;
+  const userId: string | null = getAuth(req).userId ?? null;
   const principal = userId ? `user:${userId}` : `ip:${req.ip ?? "unknown"}`;
   const key = userId ? `u:${userId}` : `ip:${req.ip ?? "unknown"}`;
 

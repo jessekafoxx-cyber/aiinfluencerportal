@@ -1295,9 +1295,9 @@ portalRouter.post("/portal/setup-account", async (req: any, res) => {
       console.warn("[setup-account] confirmation email failed", e);
     }
 
-    // Send buyers into the OIDC login flow; their access row is claimed by
-    // email the moment they finish signing in with Replit.
-    const loginUrl = `/api/login?returnTo=${encodeURIComponent("/members/dashboard")}`;
+    // Send buyers to the Clerk sign-in page; their access row is claimed by
+    // email the moment they finish authenticating.
+    const loginUrl = `/members/sign-in`;
 
     res.json({
       success: true,

@@ -1,6 +1,6 @@
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useClerk } from "@clerk/react";
 import { useEffect, useState } from "react";
 import { api, stopImpersonationBeforeSignOut } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
@@ -143,7 +143,8 @@ function SectionTitle({
 }
 
 function ProfileSection() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoaded } = useUser();
+  const isLoading = !isLoaded;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -152,9 +153,9 @@ function ProfileSection() {
 
   useEffect(() => {
     if (isLoading || !user) return;
-    const fn = user.firstName || "";
-    const ln = user.lastName || "";
-    const em = user.email || "";
+    const fn = user?.firstName || "";
+    const ln = user?.lastName || "";
+    const em = user?.primaryEmailAddress?.emailAddress || "";
     setFirstName(fn);
     setLastName(ln);
     setEmail(em);
@@ -346,7 +347,8 @@ function SecuritySection() {
 }
 
 function AccountSection() {
-  const { user, logout } = useAuth();
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   const accountId = user?.id || "";
   const createdAt = "";
@@ -357,7 +359,7 @@ function AccountSection() {
     try {
       await stopImpersonationBeforeSignOut();
     } catch {}
-    logout();
+    await signOut();
   }
 
   return (

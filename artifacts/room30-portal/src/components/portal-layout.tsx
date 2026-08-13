@@ -1,5 +1,5 @@
 // hint: Logic changed on both sides. Requires understanding intent of each change.
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useClerk } from "@clerk/react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -285,7 +285,8 @@ const SIDEBAR_COLLAPSED_KEY = "apex-portal-sidebar-collapsed";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 export function PortalLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [portugalBarVisible, setPortugalBarVisible] = useState<boolean>(() => !isDfyBarDismissed());
@@ -943,23 +944,23 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
 
         <div className="p-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-3 mb-3">
-            {user?.profileImageUrl ? (
+            {user?.imageUrl ? (
               <img
-                src={user.profileImageUrl ?? undefined}
-                alt={user.firstName || "Profile"}
+                src={user.imageUrl}
+                alt={user?.firstName || "Profile"}
                 className="w-8 h-8 rounded-full object-cover border border-white/10"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-[#C9A44C]/20 flex items-center justify-center text-[12px] font-bold text-[#C9A44C]">
-                {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || "?"}
+                {user?.firstName?.[0] || user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() || "?"}
               </div>
             )}
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-medium text-white truncate">
-                {[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || "User"}
+                {[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.primaryEmailAddress?.emailAddress || "User"}
               </p>
               <p className="text-[11px] text-white/55 truncate">
-                {user?.email || ""}
+                {user?.primaryEmailAddress?.emailAddress || ""}
               </p>
             </div>
             {overLimit && osToolCreditBalance !== null && !isAdmin && (
@@ -1036,7 +1037,7 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
             <button
               onClick={async () => {
                 await stopImpersonationBeforeSignOut().catch(() => {});
-                logout();
+                await signOut();
               }}
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-white/65 hover:text-white/70 hover:bg-white/[0.04] transition-colors"
             >
