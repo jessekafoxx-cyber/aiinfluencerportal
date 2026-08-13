@@ -117,28 +117,35 @@ function Field({ label, value, onChange, placeholder, multiline, hint }: {
   );
 }
 
-/** Read-only field for prebuilt brain data — shows text in a selectable box with copy button. */
-function PrebuiltField({ label, value, id, copiedKey, onCopy }: {
-  label: string; value: string; id: string;
+/** Editable field for prebuilt brain data — pre-populated but fully typeable, copy button copies current value. */
+function EditablePrebuiltField({ label, value, onChange, id, copiedKey, onCopy }: {
+  label: string; value: string; onChange: (v: string) => void; id: string;
   copiedKey: string | null; onCopy: (t: string, k: string) => void;
 }) {
-  if (!value) return null;
-  const isMultiline = value.length > 80;
+  const isMultiline = value.length > 80 || label.toLowerCase().includes("how") || label.toLowerCase().includes("achiev") || label.toLowerCase().includes("help");
+  const cls = "w-full px-4 py-3 bg-transparent text-[13px] text-white/80 leading-relaxed resize-none focus:outline-none focus:bg-white/[0.02] transition-colors placeholder-white/20";
   return (
-    <div className="rounded-lg border border-white/[0.07] bg-white/[0.02]">
+    <div className="rounded-lg border border-white/[0.07] bg-white/[0.02] focus-within:border-[#C9A44C]/30 transition-colors">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">{label}</span>
         <CopyButton text={value} id={id} copiedKey={copiedKey} onCopy={onCopy} />
       </div>
       {isMultiline ? (
         <textarea
-          readOnly
           value={value}
-          rows={Math.min(Math.ceil(value.length / 80), 6)}
-          className="w-full px-4 py-3 bg-transparent text-[13px] text-white/70 leading-relaxed resize-none focus:outline-none select-all cursor-text"
+          onChange={e => onChange(e.target.value)}
+          rows={Math.min(Math.max(Math.ceil(value.length / 80), 2), 6)}
+          className={cls}
+          placeholder={`Enter ${label.toLowerCase()}…`}
         />
       ) : (
-        <p className="px-4 py-3 text-[13px] text-white/70 leading-relaxed select-all cursor-text">{value}</p>
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className={cls + " block"}
+          placeholder={`Enter ${label.toLowerCase()}…`}
+        />
       )}
     </div>
   );
@@ -161,6 +168,13 @@ export default function YourBrain() {
   // Brain mode
   const [brainMode, setBrainMode] = useState<"own" | "prebuilt">("own");
   const [selectedPrebuiltId, setSelectedPrebuiltId] = useState<string | null>(null);
+
+  // Editable prebuilt brain fields (pre-populated from preset, but user can type)
+  const [prebuiltEdits, setPrebuiltEdits] = useState({
+    name: "", companyName: "", whoDoYouHelp: "", howDoYouHelpThem: "", keyAchievements: "",
+  });
+  const setPrebuiltField = (key: keyof typeof prebuiltEdits) => (v: string) =>
+    setPrebuiltEdits(prev => ({ ...prev, [key]: v }));
 
   // Own-brain form state
   const [name, setName] = useState("");
@@ -220,6 +234,19 @@ export default function YourBrain() {
     setConfirmed100kOffer(profile.confirmed100kOffer || "");
     setDirty(false);
   }, [profile?.id]);
+
+  // Populate editable prebuilt fields when preset detail loads
+  useEffect(() => {
+    if (!prebuiltBrainDetail?.brainData) return;
+    const bd = prebuiltBrainDetail.brainData;
+    setPrebuiltEdits({
+      name: bd.name || "",
+      companyName: bd.companyName || "",
+      whoDoYouHelp: bd.whoDoYouHelp || "",
+      howDoYouHelpThem: bd.howDoYouHelpThem || "",
+      keyAchievements: bd.keyAchievements || "",
+    });
+  }, [prebuiltBrainDetail?.id]);
 
   // Poll while generating
   useEffect(() => {
@@ -438,18 +465,19 @@ export default function YourBrain() {
                 </div>
 
                 <div className="p-5 space-y-3">
-                  {[
-                    { label: "Your Name", value: prebuiltBrainDetail.brainData?.name },
-                    { label: "Company Name", value: prebuiltBrainDetail.brainData?.companyName },
-                    { label: "Who Do You Help?", value: prebuiltBrainDetail.brainData?.whoDoYouHelp },
-                    { label: "How Do You Help Them?", value: prebuiltBrainDetail.brainData?.howDoYouHelpThem },
-                    { label: "Key Achievements / Results", value: prebuiltBrainDetail.brainData?.keyAchievements },
-                  ].filter(f => !!f.value).map(({ label, value }) => (
-                    <PrebuiltField
-                      key={label}
+                  {([
+                    { label: "Your Name", field: "name" as const },
+                    { label: "Company Name", field: "companyName" as const },
+                    { label: "Who Do You Help?", field: "whoDoYouHelp" as const },
+                    { label: "How Do You Help Them?", field: "howDoYouHelpThem" as const },
+                    { label: "Key Achievements / Results", field: "keyAchievements" as const },
+                  ]).map(({ label, field }) => (
+                    <EditablePrebuiltField
+                      key={field}
                       label={label}
-                      value={value!}
-                      id={`field-${label}`}
+                      value={prebuiltEdits[field]}
+                      onChange={setPrebuiltField(field)}
+                      id={`field-${field}`}
                       copiedKey={copiedKey}
                       onCopy={copy}
                     />
