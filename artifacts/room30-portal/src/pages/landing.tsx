@@ -69,15 +69,6 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Decorative gold gradient orb */}
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 w-[420px] h-[420px] opacity-20"
-          style={{
-            background:
-              "radial-gradient(circle, #C9A44C 0%, transparent 70%)",
-            transform: "translate(-40%, 40%)",
-          }}
-        />
       </div>
 
       {/* ── Right panel — auth ────────────────────────────────────────── */}
