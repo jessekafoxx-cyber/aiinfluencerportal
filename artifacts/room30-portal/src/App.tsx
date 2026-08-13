@@ -85,6 +85,8 @@ import DfyAdvertorialSwipeFile from "@/pages/dfy/advertorial-swipe-file";
 import OurPortfolio from "@/pages/our-portfolio";
 import PlatinumClub from "@/pages/platinum-club";
 import ResearchGeneration from "@/pages/research-generation";
+import DomainNameGenerator from "@/pages/domain-name-generator";
+import AvatarPromptGenerator from "@/pages/avatar-prompt-generator";
 import { AdminSupportKnowledge } from "./pages/admin/admin-support-knowledge";
 import { Toaster } from "@/components/ui/toaster";
 import { PortalErrorBoundary } from "@/components/error-boundary";
@@ -382,6 +384,12 @@ function AppRoutes() {
           </Route>
           <Route path="/research-generation">
             <ProtectedRoute><ResearchGeneration /></ProtectedRoute>
+          </Route>
+          <Route path="/domain-name-generator">
+            <ProtectedRoute><DomainNameGenerator /></ProtectedRoute>
+          </Route>
+          <Route path="/avatar-prompt-generator">
+            <ProtectedRoute><AvatarPromptGenerator /></ProtectedRoute>
           </Route>
           <Route path="/a-list">
             <ProtectedRoute><AList /></ProtectedRoute>

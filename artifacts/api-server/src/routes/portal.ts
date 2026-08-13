@@ -13182,10 +13182,19 @@ portalRouter.post("/portal/os-tools/:slug/generate", requireAuth, requireActive,
     const freeQuota = osToolFreeQuotaFor(slug);
     const creditCost = osToolCreditCostFor(slug);
 
+    // Standard phase tools are always free — unlimited for every active user.
+    // These are the Room30 OS core tools that require no credits.
+    const OS_TOOL_ALWAYS_UNLIMITED = new Set([
+      "bridge-page-headlines",
+      "kpi-generator",
+      "direct-offer-ad-generator",
+    ]);
+    const alwaysUnlimited = OS_TOOL_ALWAYS_UNLIMITED.has(slug);
+
     // Greg AI subscribers get UNLIMITED Direct Offer Ad Generator generations
     // as part of their bonus pack — no free quota consumed, no credits charged.
     let gregAiUnlimited = false;
-    if (slug === "direct-offer-ad-generator" && !isAdminUser) {
+    if (slug === "direct-offer-ad-generator" && !isAdminUser && !alwaysUnlimited) {
       const ent = await computePurchaseEntitlements(user);
       gregAiUnlimited = ent.upsell1Paid || ent.downsell1Paid;
     }
@@ -13216,7 +13225,7 @@ portalRouter.post("/portal/os-tools/:slug/generate", requireAuth, requireActive,
         lifetimeUsed = lifetimeRows.length;
         const freeRemaining = Math.max(0, freeQuota - lifetimeUsed);
 
-        if (!isAdminUser && !gregAiUnlimited && freeRemaining <= 0) {
+        if (!isAdminUser && !alwaysUnlimited && !gregAiUnlimited && freeRemaining <= 0) {
           // Past free quota: must spend credits. Re-read balance inside lock.
           const [fresh] = await tx.select({ bal: portalUsersTable.osToolPaidCredits })
             .from(portalUsersTable).where(eq(portalUsersTable.id, user.id));
@@ -13522,6 +13531,24 @@ portalRouter.get("/portal/os-tools/:slug/quota", requireAuth, async (req: any, r
       balance: 999,
       unlimited: true,
       isAdmin: true,
+    }); return;
+  }
+
+  // Standard phase tools are always free — unlimited for every active user.
+  const OS_TOOL_ALWAYS_UNLIMITED = new Set([
+    "bridge-page-headlines",
+    "kpi-generator",
+    "direct-offer-ad-generator",
+  ]);
+  if (OS_TOOL_ALWAYS_UNLIMITED.has(slug)) {
+    res.json({
+      lifetimeUsed,
+      freeQuota: 999,
+      freeRemaining: 999,
+      creditCost: 0,
+      balance: user.osToolPaidCredits ?? 0,
+      unlimited: true,
+      alwaysUnlimited: true,
     }); return;
   }
 
