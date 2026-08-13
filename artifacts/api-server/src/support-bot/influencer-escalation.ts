@@ -66,7 +66,8 @@ async function findLatestJob(
 async function postToSlack(text: string): Promise<boolean> {
   const url =
     process.env.MANUAL_INFLUENCER_SLACK_WEBHOOK_URL?.trim() ||
-    process.env.VIKTOR_SLACK_WEBHOOK_URL?.trim();
+    process.env.VIKTOR_SLACK_WEBHOOK_URL?.trim() ||
+    process.env.SLACK_WEBHOOK?.trim();
   if (!url) {
     logger.warn(
       {},
