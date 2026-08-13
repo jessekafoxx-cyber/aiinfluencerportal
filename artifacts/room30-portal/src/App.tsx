@@ -1,4 +1,5 @@
 import { useEffect, useRef, lazy, Suspense } from "react";
+import { LandingPage } from "@/pages/landing";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
@@ -156,38 +157,6 @@ function ImpersonationToastListener() {
 }
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-function LandingPage() {
-  const { login } = useAuth();
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
-      <div className="max-w-md w-full text-center">
-        <h1
-          className="text-[40px] font-bold uppercase tracking-[0.01em] text-white mb-2"
-          style={{ fontFamily: "var(--app-font-display)" }}
-        >
-          Prompt & Build
-        </h1>
-        <p className="text-[15px] text-white/50 mb-10">
-          Your AI-powered course portal. Sign in to access your training.
-        </p>
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={login}
-            className="inline-flex items-center justify-center bg-[#C9A44C] hover:bg-[#B8902F] text-white text-[15px] font-bold uppercase tracking-wider px-8 py-4 rounded-lg transition-colors"
-          >
-            Sign In
-          </button>
-          <p className="text-[12.5px] text-white/40 leading-[1.6]">
-            First time here? Sign in with the same email you purchased with
-            and your access appears automatically.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function HomeRedirect() {
   const { isLoading, isAuthenticated } = useAuth();
