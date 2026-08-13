@@ -1,14 +1,70 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Brain, Save, Sparkles, Loader2, CheckCircle2, AlertCircle,
-  Plus, X, ChevronDown, ChevronUp, Download,
+  Plus, X, ChevronDown, ChevronUp, Download, Copy, Check,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
 import { api } from "@/lib/api";
 
 const POLL_MS = 3000;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Convert backend-generated HTML to plain readable text for display / copy. */
+function htmlToPlainText(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<h2[^>]*>/gi, "\n## ")
+    .replace(/<h3[^>]*>/gi, "\n### ")
+    .replace(/<\/h[23]>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<\/li>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<p[^>]*>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<strong[^>]*>(.*?)<\/strong>/gi, "$1")
+    .replace(/<em[^>]*>(.*?)<\/em>/gi, "$1")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function useCopy() {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copy = useCallback((text: string, key: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(k => k === key ? null : k), 2000);
+    });
+  }, []);
+  return { copiedKey, copy };
+}
+
+// ── Small reusable components ─────────────────────────────────────────────────
+
+function CopyButton({ text, id, copiedKey, onCopy }: { text: string; id: string; copiedKey: string | null; onCopy: (t: string, k: string) => void }) {
+  const active = copiedKey === id;
+  return (
+    <button
+      onClick={() => onCopy(text, id)}
+      title="Copy"
+      className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
+        active ? "bg-emerald-500/15 text-emerald-400" : "bg-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.1]"
+      }`}
+    >
+      {active ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+      {active ? "Copied" : "Copy"}
+    </button>
+  );
+}
 
 function TagInput({ label, values, onChange, placeholder }: { label: string; values: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
   const [input, setInput] = useState("");
@@ -44,7 +100,10 @@ function TagInput({ label, values, onChange, placeholder }: { label: string; val
   );
 }
 
-function Field({ label, value, onChange, placeholder, multiline }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; multiline?: boolean }) {
+function Field({ label, value, onChange, placeholder, multiline, hint }: {
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; multiline?: boolean; hint?: string;
+}) {
   const cls = "w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder-white/25 focus:outline-none focus:border-[#C9A44C]/40 resize-none";
   return (
     <div>
@@ -53,6 +112,34 @@ function Field({ label, value, onChange, placeholder, multiline }: { label: stri
         ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
         : <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
       }
+      {hint && <p className="mt-1 text-[11px] text-white/25 leading-relaxed">{hint}</p>}
+    </div>
+  );
+}
+
+/** Read-only field for prebuilt brain data — shows text in a selectable box with copy button. */
+function PrebuiltField({ label, value, id, copiedKey, onCopy }: {
+  label: string; value: string; id: string;
+  copiedKey: string | null; onCopy: (t: string, k: string) => void;
+}) {
+  if (!value) return null;
+  const isMultiline = value.length > 80;
+  return (
+    <div className="rounded-lg border border-white/[0.07] bg-white/[0.02]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
+        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">{label}</span>
+        <CopyButton text={value} id={id} copiedKey={copiedKey} onCopy={onCopy} />
+      </div>
+      {isMultiline ? (
+        <textarea
+          readOnly
+          value={value}
+          rows={Math.min(Math.ceil(value.length / 80), 6)}
+          className="w-full px-4 py-3 bg-transparent text-[13px] text-white/70 leading-relaxed resize-none focus:outline-none select-all cursor-text"
+        />
+      ) : (
+        <p className="px-4 py-3 text-[13px] text-white/70 leading-relaxed select-all cursor-text">{value}</p>
+      )}
     </div>
   );
 }
@@ -69,6 +156,7 @@ export default function YourBrain() {
   const queryClient = useQueryClient();
   const [showGenerated, setShowGenerated] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const { copiedKey, copy } = useCopy();
 
   // Brain mode
   const [brainMode, setBrainMode] = useState<"own" | "prebuilt">("own");
@@ -162,10 +250,8 @@ export default function YourBrain() {
   const generateMutation = useMutation({
     mutationFn: async () => {
       if (brainMode === "prebuilt") {
-        // Prebuilt brains are instantly ready — just save the selection
         return api.saveBrainProfile(buildSavePayload());
       }
-      // Own brain: save first, then kick off AI generation
       await api.saveBrainProfile(buildSavePayload());
       return api.generateBrain();
     },
@@ -175,7 +261,6 @@ export default function YourBrain() {
     },
   });
 
-  // When user switches brain mode, mark dirty so save buttons appear
   const switchMode = (mode: "own" | "prebuilt", prebuiltId?: string) => {
     setBrainMode(mode);
     if (prebuiltId) setSelectedPrebuiltId(prebuiltId);
@@ -184,23 +269,22 @@ export default function YourBrain() {
 
   const status = profile?.status ?? "pending";
   const isGenerating = status === "generating" || generateMutation.isPending;
-  // Prebuilt brains are immediately "ready" once selected
   const isReady = status === "generated" || (brainMode === "prebuilt" && !!selectedPrebuiltId);
 
   const mark = (fn: () => void) => { fn(); setDirty(true); };
 
-  // Determine the generated brain content to show
-  const generatedBrainHtml = brainMode === "prebuilt" && prebuiltBrainDetail?.generatedBrain
+  // Plain text for generated brain — strip HTML for display and copy
+  const generatedHtml = brainMode === "prebuilt" && prebuiltBrainDetail?.generatedBrain
     ? prebuiltBrainDetail.generatedBrain
     : profile?.generatedBrain;
+  const generatedText = generatedHtml ? htmlToPlainText(generatedHtml) : "";
 
   const handleDownload = () => {
-    const html = generatedBrainHtml || "";
-    const blob = new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Your Brain</title><style>body{font-family:system-ui,sans-serif;max-width:800px;margin:40px auto;padding:0 24px;color:#1a1a1a}h2{font-size:18px;font-weight:700;margin:24px 0 10px;border-bottom:2px solid #C9A44C;padding-bottom:6px}h3{font-size:15px;font-weight:600;margin:16px 0 8px}p{line-height:1.7;margin:8px 0}ul,ol{padding-left:24px;margin:8px 0}li{line-height:1.7;margin:3px 0}</style></head><body>${html}</body></html>`], { type: "text/html" });
+    const blob = new Blob([generatedText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "your-brain.html";
+    a.download = "your-brain.txt";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -209,35 +293,32 @@ export default function YourBrain() {
     <PortalLayout>
       <div className={PORTAL_PAGE_CLASS}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center flex-shrink-0">
-                <Brain className="w-5 h-5 text-[#C9A44C]" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-xl font-bold text-white">Your Brain</h1>
-                <p className="text-white/40 text-[12px] mt-0.5">Tell us about your business so we can build everything for you</p>
-              </div>
+        <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#C9A44C]/15 flex items-center justify-center flex-shrink-0">
+              <Brain className="w-5 h-5 text-[#C9A44C]" />
             </div>
-            <span className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
-              isReady ? "bg-emerald-500/10 text-emerald-400" :
-              isGenerating ? "bg-[#C9A44C]/10 text-[#C9A44C]" :
-              status === "error" ? "bg-red-500/10 text-red-400" :
-              "bg-white/[0.06] text-white/40"
-            }`}>
-              {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> :
-               isReady ? <CheckCircle2 className="w-3 h-3" /> :
-               status === "error" ? <AlertCircle className="w-3 h-3" /> : null}
-              <span className="hidden sm:inline">{isReady ? "Brain Active" : isGenerating ? "Generating…" : STATUS_LABELS[status] ?? status}</span>
-              <span className="sm:hidden">{isReady ? "Active" : isGenerating ? "…" : "Not set"}</span>
-            </span>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-white">Your Brain</h1>
+              <p className="text-white/40 text-[12px] mt-0.5">Tell us about your business so we can build everything for you</p>
+            </div>
           </div>
+          <span className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
+            isReady ? "bg-emerald-500/10 text-emerald-400" :
+            isGenerating ? "bg-[#C9A44C]/10 text-[#C9A44C]" :
+            status === "error" ? "bg-red-500/10 text-red-400" :
+            "bg-white/[0.06] text-white/40"
+          }`}>
+            {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> :
+             isReady ? <CheckCircle2 className="w-3 h-3" /> :
+             status === "error" ? <AlertCircle className="w-3 h-3" /> : null}
+            {isReady ? "Brain Active" : isGenerating ? "Generating…" : STATUS_LABELS[status] ?? status}
+          </span>
         </div>
 
         {status === "error" && profile?.errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
-            <AlertCircle className="w-4 h-4 inline mr-2" />{profile.errorMessage}
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[13px] flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />{profile.errorMessage}
           </div>
         )}
 
@@ -248,7 +329,7 @@ export default function YourBrain() {
           </div>
         )}
 
-        {/* ── Choose Your Brain ──────────────────────────────────────── */}
+        {/* ── Choose Your Brain ──────────────────────────────────────────── */}
         <div className="mb-8 rounded-xl border border-white/[0.08] bg-white/[0.02] p-6">
           <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/30 mb-1">Choose Your Brain</h2>
           <p className="text-white/40 text-[12px] mb-5">Promote one of our pre-built offers as an affiliate, or build your own brain below.</p>
@@ -263,24 +344,22 @@ export default function YourBrain() {
                   : "border-white/[0.07] bg-white/[0.02] hover:border-white/[0.15]"
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                    brainMode === "own" ? "border-[#C9A44C]" : "border-white/20"
-                  }`}>
-                    {brainMode === "own" && <div className="w-2 h-2 rounded-full bg-[#C9A44C]" />}
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white">Use My Own Brain</p>
-                    <p className="text-[11px] text-white/40 mt-0.5">Fill in the form below and we generate your brain from your own positioning.</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  brainMode === "own" ? "border-[#C9A44C]" : "border-white/20"
+                }`}>
+                  {brainMode === "own" && <div className="w-2 h-2 rounded-full bg-[#C9A44C]" />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-white">Use My Own Brain</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">Fill in the form below and we generate your brain from your own positioning.</p>
                 </div>
                 {brainMode === "own" && <CheckCircle2 className="w-4 h-4 text-[#C9A44C] flex-shrink-0" />}
               </div>
             </button>
 
             {/* Prebuilt brains */}
-            {prebuiltBrains.filter(b => !b.comingSoon).map(brain => (
+            {prebuiltBrains.filter((b: any) => !b.comingSoon).map((brain: any) => (
               <button
                 key={brain.id}
                 onClick={() => switchMode("prebuilt", brain.id)}
@@ -305,9 +384,9 @@ export default function YourBrain() {
                     </div>
                     <p className="text-[11px] text-white/50 mb-2">{brain.tagline}</p>
                     <p className="text-[12px] text-white/40 leading-relaxed">{brain.shortDescription}</p>
-                    {brain.highlights.length > 0 && (
+                    {brain.highlights?.length > 0 && (
                       <ul className="mt-2 space-y-1">
-                        {brain.highlights.map((h, i) => (
+                        {brain.highlights.map((h: string, i: number) => (
                           <li key={i} className="flex items-center gap-1.5 text-[11px] text-white/50">
                             <CheckCircle2 className="w-3 h-3 text-[#C9A44C] flex-shrink-0" />
                             {h}
@@ -324,7 +403,6 @@ export default function YourBrain() {
             ))}
           </div>
 
-          {/* Save Brain Choice button */}
           {dirty && (
             <div className="mt-4 flex justify-end">
               <button
@@ -340,88 +418,117 @@ export default function YourBrain() {
           )}
         </div>
 
-        {/* ── Prebuilt Brain Preview ──────────────────────────────────── */}
+        {/* ── Pre-built Brain Preview ────────────────────────────────────── */}
         {brainMode === "prebuilt" && selectedPrebuiltId && (
-          <div className="mb-8 space-y-6">
-            {/* PRE-BUILT BRAIN data display */}
+          <div className="mb-8 space-y-5">
+            {/* Field-by-field data */}
             {prebuiltBrainDetail && (
-              <div className="rounded-xl border border-[#C9A44C]/20 bg-white/[0.02]">
-                <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
+              <div className="rounded-xl border border-[#C9A44C]/20 bg-white/[0.02] overflow-hidden">
+                <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C9A44C]/60">Pre-built Brain Data</p>
-                    <p className="text-[13px] font-semibold text-white mt-0.5">{prebuiltBrainDetail.name}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C9A44C]/60">Pre-built Brain Preview</p>
+                    <p className="text-[14px] font-bold text-white mt-0.5">{prebuiltBrainDetail.name}</p>
+                    {prebuiltBrainDetail.tagline && (
+                      <p className="text-[12px] text-white/40 mt-0.5">{prebuiltBrainDetail.tagline}</p>
+                    )}
                   </div>
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400">
-                    <CheckCircle2 className="w-3 h-3" />Brain Active
-                  </span>
+                  {generatedText && (
+                    <CopyButton text={generatedText} id="entire-brain" copiedKey={copiedKey} onCopy={copy} />
+                  )}
                 </div>
-                <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div className="p-5 space-y-3">
                   {[
-                    { label: "Name", value: prebuiltBrainDetail.brainData.name },
-                    { label: "Company", value: prebuiltBrainDetail.brainData.companyName },
-                    { label: "Who They Help", value: prebuiltBrainDetail.brainData.whoDoYouHelp },
-                    { label: "How They Help", value: prebuiltBrainDetail.brainData.howDoYouHelpThem },
-                    { label: "Key Results", value: prebuiltBrainDetail.brainData.keyAchievements },
-                  ].map(({ label, value }) => (
-                    <div key={label} className={label === "Who They Help" || label === "How They Help" || label === "Key Results" ? "sm:col-span-2" : ""}>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-1">{label}</p>
-                      <p className="text-[13px] text-white/70 leading-relaxed">{value || "—"}</p>
-                    </div>
+                    { label: "Your Name", value: prebuiltBrainDetail.brainData?.name },
+                    { label: "Company Name", value: prebuiltBrainDetail.brainData?.companyName },
+                    { label: "Who Do You Help?", value: prebuiltBrainDetail.brainData?.whoDoYouHelp },
+                    { label: "How Do You Help Them?", value: prebuiltBrainDetail.brainData?.howDoYouHelpThem },
+                    { label: "Key Achievements / Results", value: prebuiltBrainDetail.brainData?.keyAchievements },
+                  ].filter(f => !!f.value).map(({ label, value }) => (
+                    <PrebuiltField
+                      key={label}
+                      label={label}
+                      value={value!}
+                      id={`field-${label}`}
+                      copiedKey={copiedKey}
+                      onCopy={copy}
+                    />
                   ))}
+                </div>
+
+                {/* Note about own brain still being saved */}
+                <div className="px-5 pb-5">
+                  <p className="text-[11px] text-white/25 leading-relaxed">
+                    This pre-built brain is preserved and you can switch back any time with "Use My Own Brain". Your own brain data below is still saved.
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* Generated Brain Content */}
-            {generatedBrainHtml && (
-              <div className="rounded-xl border border-[#C9A44C]/20 bg-white/[0.02]">
-                <button
+            {/* Generated Brain full text */}
+            {generatedText && (
+              <div className="rounded-xl border border-[#C9A44C]/20 bg-white/[0.02] overflow-hidden">
+                <div
                   onClick={() => setShowGenerated(v => !v)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left"
+                  className="w-full flex items-center justify-between px-5 py-4 cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span className="text-[13px] font-semibold text-white">Generated Brain (Full)</span>
+                    <span className="text-[13px] font-semibold text-white">Generated Brain</span>
                     <span className="text-[11px] text-white/30">— powers all OS tools</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                    <CopyButton text={generatedText} id="generated-brain-copy" copiedKey={copiedKey} onCopy={copy} />
                     <button
-                      onClick={e => { e.stopPropagation(); handleDownload(); }}
+                      onClick={handleDownload}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-white/50 hover:text-white/80 text-[11px] transition-colors"
                     >
-                      <Download className="w-3 h-3" />Download Whole Brain
+                      <Download className="w-3 h-3" />Download
                     </button>
-                    {showGenerated ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                    <span onClick={() => setShowGenerated(v => !v)}>
+                      {showGenerated ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                    </span>
                   </div>
-                </button>
+                </div>
                 {showGenerated && (
-                  <div className="px-6 pb-6 prose-brain border-t border-white/[0.06]" style={{ paddingTop: "20px" }}>
-                    <style>{`
-                      .prose-brain h2 { font-size: 13px; font-weight: 700; color: #C9A44C; text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 8px; }
-                      .prose-brain h3 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); margin: 14px 0 6px; }
-                      .prose-brain p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; margin: 6px 0; }
-                      .prose-brain ul { padding-left: 18px; margin: 6px 0; }
-                      .prose-brain li { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 3px 0; }
-                      .prose-brain strong { color: rgba(255,255,255,0.85); font-weight: 600; }
-                    `}</style>
-                    <div className="prose-brain" dangerouslySetInnerHTML={{ __html: generatedBrainHtml }} />
+                  <div className="border-t border-white/[0.06]">
+                    <textarea
+                      readOnly
+                      value={generatedText}
+                      className="w-full px-5 py-4 bg-transparent text-[12.5px] text-white/65 leading-relaxed font-mono resize-none focus:outline-none cursor-text"
+                      style={{ minHeight: "400px" }}
+                      onClick={e => (e.target as HTMLTextAreaElement).select()}
+                    />
                   </div>
                 )}
               </div>
             )}
+
+            {/* Activate button */}
+            <div className="flex">
+              <button
+                onClick={() => generateMutation.mutate()}
+                disabled={generateMutation.isPending}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
+              >
+                {generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {isReady ? "Refresh Brain Selection" : "Activate This Brain"}
+              </button>
+            </div>
           </div>
         )}
 
-        {/* ── Own Brain Form ──────────────────────────────────────────── */}
+        {/* ── Own Brain Form ─────────────────────────────────────────────── */}
         {brainMode === "own" && (
           <>
-            {/* Action buttons */}
+            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-2 mb-6">
               {dirty && (
                 <button
                   onClick={() => saveMutation.mutate()}
                   disabled={saveMutation.isPending}
-                  className="flex items-center justify-center gap-1.5 px-4 py-3 sm:py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 hover:text-white text-[13px] sm:text-[12px] font-medium transition-colors border border-white/[0.08]"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 hover:text-white text-[13px] font-medium transition-colors border border-white/[0.08]"
                 >
                   {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Profile
@@ -430,7 +537,7 @@ export default function YourBrain() {
               <button
                 onClick={() => generateMutation.mutate()}
                 disabled={isGenerating || generateMutation.isPending}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-3 sm:py-2 rounded-lg text-[13px] sm:text-[12px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
               >
                 {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -438,15 +545,37 @@ export default function YourBrain() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* About You & Your Business */}
+            {/* Single-column form */}
+            <div className="space-y-5">
+
+              {/* About You */}
               <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-5">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/30">About You & Your Business</h2>
-                <Field label="Your Name" value={name} onChange={v => mark(() => setName(v))} placeholder="e.g. Alex Morgan" />
-                <Field label="Company Name" value={companyName} onChange={v => mark(() => setCompanyName(v))} placeholder="e.g. Northwind Studio" />
-                <Field label="Who Do You Help?" value={whoDoYouHelp} onChange={v => mark(() => setWhoDoYouHelp(v))} placeholder="e.g. Course creators and consultants doing $10K to $30K per month who want predictable client acquisition without burning out on manual outreach" multiline />
-                <Field label="How Do You Help Them?" value={howDoYouHelpThem} onChange={v => mark(() => setHowDoYouHelpThem(v))} placeholder="e.g. I install a complete low-ticket funnel that turns small first purchases into qualified high-ticket calls inside 30 days, no paid traffic required" multiline />
-                <Field label="Your Key Achievements / Results" value={keyAchievements} onChange={v => mark(() => setKeyAchievements(v))} placeholder="e.g. $80K per month in recurring revenue, 1,200 paying students, systems running inside 60 plus coaching businesses" multiline />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Your Name" value={name} onChange={v => mark(() => setName(v))} placeholder="e.g. Alex Morgan" />
+                  <Field label="Company Name" value={companyName} onChange={v => mark(() => setCompanyName(v))} placeholder="e.g. Northwind Studio" />
+                </div>
+                <Field
+                  label="Who Do You Help?"
+                  value={whoDoYouHelp}
+                  onChange={v => mark(() => setWhoDoYouHelp(v))}
+                  placeholder="e.g. Course creators and consultants doing $10K to $30K per month who want predictable client acquisition without burning out on manual outreach"
+                  multiline
+                />
+                <Field
+                  label="How Do You Help Them?"
+                  value={howDoYouHelpThem}
+                  onChange={v => mark(() => setHowDoYouHelpThem(v))}
+                  placeholder="e.g. I install a complete low-ticket funnel that turns small first purchases into qualified high-ticket calls inside 30 days, no paid traffic required"
+                  multiline
+                />
+                <Field
+                  label="Your Key Achievements / Results"
+                  value={keyAchievements}
+                  onChange={v => mark(() => setKeyAchievements(v))}
+                  placeholder="e.g. $80K per month in recurring revenue, 1,200 paying students, systems running inside 60 plus coaching businesses"
+                  multiline
+                />
               </div>
 
               {/* Online Presence */}
@@ -460,13 +589,13 @@ export default function YourBrain() {
               {/* Brand Colours */}
               <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-5">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/30">Brand Colours</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { label: "Primary", value: brandColorPrimary, set: setBrandColorPrimary, placeholder: "#C9A44C" },
-                    { label: "Secondary", value: brandColorSecondary, set: setBrandColorSecondary, placeholder: "#ffffff" },
+                    { label: "Primary Colour", value: brandColorPrimary, set: setBrandColorPrimary, placeholder: "#C9A44C" },
+                    { label: "Secondary Colour", value: brandColorSecondary, set: setBrandColorSecondary, placeholder: "#ffffff" },
                   ].map(({ label, value, set, placeholder }) => (
                     <div key={label}>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">{label} Colour</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">{label}</p>
                       <div className="flex items-center gap-2">
                         <input type="color" value={value || placeholder} onChange={e => mark(() => set(e.target.value))}
                           className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border border-white/[0.08]" />
@@ -482,54 +611,75 @@ export default function YourBrain() {
               <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-5">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/30">Your Confirmed Offers</h2>
                 <p className="text-white/40 text-[12px] -mt-2">OS tools use these to generate personalised output.</p>
-                <Field label="Low-Ticket Offer" value={confirmedLowTicketOffer} onChange={v => mark(() => setConfirmedLowTicketOffer(v))} placeholder="e.g. AI Influencer OS — $47. Includes: 3-day build system, 10 AI script templates, ad blueprint" multiline />
-                <Field label="Premium / High-Ticket Offer" value={confirmedPremiumOffer} onChange={v => mark(() => setConfirmedPremiumOffer(v))} placeholder="e.g. Done-With-You Accelerator — $15,000. 90 days 1-1 coaching + full funnel build" multiline />
-                <Field label="$100K+ Offer" value={confirmed100kOffer} onChange={v => mark(() => setConfirmed100kOffer(v))} placeholder="e.g. 3-day Portugal retreat — $250,000. In-person strategy + 12 months consulting" multiline />
+                <Field
+                  label="Low-Ticket Offer"
+                  value={confirmedLowTicketOffer}
+                  onChange={v => mark(() => setConfirmedLowTicketOffer(v))}
+                  placeholder="e.g. AI Influencer OS — $47. Includes: 3-day build system, 10 AI script templates, ad blueprint"
+                  multiline
+                />
+                <Field
+                  label="Premium / High-Ticket Offer"
+                  value={confirmedPremiumOffer}
+                  onChange={v => mark(() => setConfirmedPremiumOffer(v))}
+                  placeholder="e.g. Done-With-You Accelerator — $15,000. 90 days 1-1 coaching + full funnel build"
+                  multiline
+                />
+                <Field
+                  label="$100K+ Offer"
+                  value={confirmed100kOffer}
+                  onChange={v => mark(() => setConfirmed100kOffer(v))}
+                  placeholder="e.g. 3-day Portugal retreat — $250,000. In-person strategy + 12 months consulting"
+                  multiline
+                />
               </div>
             </div>
 
-            {/* Generated Brain Output (own brain) */}
-            {isReady && profile?.generatedBrain && (
-              <div className="mt-6 rounded-xl border border-[#C9A44C]/20 bg-white/[0.02]">
-                <button
+            {/* Generated Brain — own mode */}
+            {isReady && generatedText && (
+              <div className="mt-6 rounded-xl border border-[#C9A44C]/20 bg-white/[0.02] overflow-hidden">
+                <div
                   onClick={() => setShowGenerated(v => !v)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left"
+                  className="w-full flex items-center justify-between px-5 py-4 cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     <span className="text-[13px] font-semibold text-white">Your Generated Brain</span>
                     <span className="text-[11px] text-white/30">— powers all OS tools</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={e => { e.stopPropagation(); handleDownload(); }}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-white/50 hover:text-white/80 text-[11px] transition-colors">
-                      <Download className="w-3 h-3" />Download Whole Brain
+                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                    <CopyButton text={generatedText} id="own-brain-copy" copiedKey={copiedKey} onCopy={copy} />
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-white/50 hover:text-white/80 text-[11px] transition-colors"
+                    >
+                      <Download className="w-3 h-3" />Download
                     </button>
-                    {showGenerated ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                    <span onClick={() => setShowGenerated(v => !v)}>
+                      {showGenerated ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                    </span>
                   </div>
-                </button>
+                </div>
                 {showGenerated && (
-                  <div className="px-6 pb-6 prose-brain border-t border-white/[0.06]" style={{ paddingTop: "20px" }}>
-                    <style>{`
-                      .prose-brain h2 { font-size: 13px; font-weight: 700; color: #C9A44C; text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 8px; }
-                      .prose-brain h3 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); margin: 14px 0 6px; }
-                      .prose-brain p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; margin: 6px 0; }
-                      .prose-brain ul { padding-left: 18px; margin: 6px 0; }
-                      .prose-brain li { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 3px 0; }
-                      .prose-brain strong { color: rgba(255,255,255,0.85); font-weight: 600; }
-                    `}</style>
-                    <div className="prose-brain" dangerouslySetInnerHTML={{ __html: profile.generatedBrain }} />
+                  <div className="border-t border-white/[0.06]">
+                    <textarea
+                      readOnly
+                      value={generatedText}
+                      className="w-full px-5 py-4 bg-transparent text-[12.5px] text-white/65 leading-relaxed font-mono resize-none focus:outline-none cursor-text"
+                      style={{ minHeight: "400px" }}
+                      onClick={e => (e.target as HTMLTextAreaElement).select()}
+                    />
                   </div>
                 )}
               </div>
             )}
 
-            {/* Save footer */}
+            {/* Save / Generate footer */}
             <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-3">
               <button
                 onClick={() => saveMutation.mutate()}
                 disabled={saveMutation.isPending || !dirty}
-                className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white text-[13px] font-medium transition-colors border border-white/[0.08] disabled:opacity-40"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white text-[13px] font-medium transition-colors border border-white/[0.08] disabled:opacity-40"
               >
                 {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Profile
@@ -537,7 +687,7 @@ export default function YourBrain() {
               <button
                 onClick={() => generateMutation.mutate()}
                 disabled={isGenerating || generateMutation.isPending}
-                className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
               >
                 {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -545,21 +695,6 @@ export default function YourBrain() {
               </button>
             </div>
           </>
-        )}
-
-        {/* ── Prebuilt: action row ────────────────────────────────────── */}
-        {brainMode === "prebuilt" && selectedPrebuiltId && (
-          <div className="flex flex-col sm:flex-row gap-3 mt-2">
-            <button
-              onClick={() => generateMutation.mutate()}
-              disabled={generateMutation.isPending}
-              className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #C9A44C 0%, #a07830 100%)", color: "#000" }}
-            >
-              {generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {isReady ? "Refresh Brain Selection" : "Activate This Brain"}
-            </button>
-          </div>
         )}
       </div>
     </PortalLayout>
