@@ -395,10 +395,18 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
         options: ["15", "30", "45", "60"],
       },
       {
+        key: "hookType",
+        label: "Hook style",
+        type: "select",
+        options: ["any", "howI", "contrarian", "socialProof", "emotionalCuriosity", "futureBased"],
+        hint: "'any' lets the AI pick the strongest hook for the topic.",
+      },
+      {
         key: "ctaMode",
         label: "CTA",
         type: "select",
         options: ["soft", "comment", "none"],
+        hint: "Soft = conversational close. Comment = 'Comment X below.' None = ends on punchline.",
       },
       {
         key: "commentWord",
@@ -433,10 +441,25 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
         options: ["15", "30", "45", "60"],
       },
       {
+        key: "hookType",
+        label: "Hook style",
+        type: "select",
+        options: ["any", "pov", "identity", "futureBased", "emotional", "ambition"],
+        hint: "'any' lets the AI pick the strongest hook for the footage.",
+      },
+      {
+        key: "aesthetic",
+        label: "Visual aesthetic",
+        type: "select",
+        options: ["auto", "luxury", "discipline", "freedom", "wealth", "ambition", "creator", "minimalist", "travel", "highPerformance"],
+        hint: "'auto' matches the aesthetic to your Brain and offer automatically.",
+      },
+      {
         key: "ctaMode",
         label: "CTA",
         type: "select",
         options: ["soft", "comment", "none"],
+        hint: "Soft = conversational close. Comment = 'Comment X below.' None = ends on punchline.",
       },
       {
         key: "commentWord",
