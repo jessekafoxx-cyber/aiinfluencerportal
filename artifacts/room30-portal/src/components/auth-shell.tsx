@@ -78,12 +78,13 @@ export function AuthShell({ mode, children }: AuthShellProps) {
       >
         {/* Top row */}
         <div className="flex items-center justify-between">
-          <a
-            href="/"
-            className="text-[18px] font-black tracking-[0.04em] text-white"
-            style={{ fontFamily: "var(--app-font-display)" }}
-          >
-            AI INFLUENCER<span className="text-[#C9A44C]"> PUBLISHING</span>
+          <a href="/">
+            <img
+              src="/members/ai-influencers-portfolio-logo.png"
+              alt="AI Influencer Portfolio"
+              draggable={false}
+              style={{ height: "36px", width: "auto" }}
+            />
           </a>
         </div>
 

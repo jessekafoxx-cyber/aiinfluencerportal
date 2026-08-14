@@ -18,12 +18,12 @@ export function LandingPage() {
       >
         {/* Top row */}
         <div className="flex items-center justify-between">
-          <span
-            className="text-[18px] font-black tracking-[0.04em] text-white"
-            style={{ fontFamily: "var(--app-font-display)" }}
-          >
-            AI INFLUENCER<span className="text-[#C9A44C]"> PUBLISHING</span>
-          </span>
+          <img
+            src="/members/ai-influencers-portfolio-logo.png"
+            alt="AI Influencer Portfolio"
+            draggable={false}
+            style={{ height: "36px", width: "auto" }}
+          />
           <button
             onClick={() => setLocation("/sign-in")}
             className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/40 hover:text-[#C9A44C] transition-colors"
