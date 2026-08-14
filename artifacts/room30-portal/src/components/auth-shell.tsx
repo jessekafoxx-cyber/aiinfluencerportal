@@ -195,17 +195,17 @@ function PurchaseEmailForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
-        className="flex-1 px-3 py-2.5 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13px] placeholder-white/25 focus:outline-none focus:border-[#C9A44C]/40"
+        className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-[#161616] border border-white/[0.08] text-white text-[13px] placeholder-white/25 focus:outline-none focus:border-[#C9A44C]/40"
       />
       <button
         type="submit"
-        className="px-4 py-2.5 rounded-lg bg-white/[0.06] hover:bg-[#C9A44C]/15 text-white/70 hover:text-[#C9A44C] text-[11px] font-bold uppercase tracking-wider transition-colors whitespace-nowrap border border-white/[0.06]"
+        className="px-4 py-3 rounded-lg bg-white/[0.06] hover:bg-[#C9A44C]/15 text-white/70 hover:text-[#C9A44C] text-[11px] font-bold uppercase tracking-wider transition-colors border border-white/[0.06]"
       >
         Create Account
       </button>

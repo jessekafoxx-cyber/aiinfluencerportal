@@ -16,7 +16,7 @@ import { fetchApi } from "@/lib/api";
 export function usePurchaseLinks() {
   const q = useQuery({
     queryKey: ["purchase-links"],
-    queryFn: () => fetchApi<{ links: Record<string, string> }>("/portal/purchase-links"),
+    queryFn: () => fetchApi<{ links: Record<string, string> }>("/purchase-links"),
     staleTime: 5 * 60 * 1000,
   });
   return { links: q.data?.links ?? {}, isLoading: q.isLoading };

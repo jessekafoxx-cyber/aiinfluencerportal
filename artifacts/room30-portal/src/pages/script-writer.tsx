@@ -1405,7 +1405,7 @@ function GreenScreenPanel() {
         <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
           Green-Screen Images (up to 10, in the order you'll show them)
         </label>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {Array.from({ length: 10 }, (_, idx) => {
             const file = slots[idx];
             const imgUrl = file ? URL.createObjectURL(file) : null;
@@ -1849,7 +1849,7 @@ function HookDemoPanel() {
         <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
           Step Screenshots (up to 6, image 1 = step 1's screen)
         </label>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {Array.from({ length: 6 }, (_, idx) => {
             const file = slots[idx];
             const imgUrl = file ? URL.createObjectURL(file) : null;
@@ -2378,7 +2378,7 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
       {cfg.carouselTypes && (
         <div>
           <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Carousel Type</label>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {cfg.carouselTypes.map((ct) => (
               <button key={ct.value} disabled={anyActive}
                 onClick={() => setF("carouselType", ct.value)}
