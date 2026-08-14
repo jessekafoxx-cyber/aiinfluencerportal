@@ -1527,6 +1527,464 @@ function GreenScreenPanel() {
   );
 }
 
+// ─── Hook + Demo Panel ───────────────────────────────────────────────────────
+
+interface HdIdea {
+  id: number;
+  hookType: string;
+  title: string;
+  angle: string;
+  demoSteps: string[];
+  toolsUsed: string[];
+  payoff: string;
+}
+
+function HookDemoPanel() {
+  const [influencers, setInfluencers] = useState<Array<{ id: number; name: string }>>([]);
+  const [prebuiltBrains, setPrebuiltBrains] = useState<Array<{ id: string; name: string }>>([]);
+  const [form, setForm] = useState({ influencerId: "", offerBrainId: "own", context: "", commentWord: "", version: "voiceover" });
+  const [slots, setSlots] = useState<(File | null)[]>(Array(6).fill(null));
+  const [ideas, setIdeas] = useState<HdIdea[]>([]);
+  const [expandedIdea, setExpandedIdea] = useState<number | null>(null);
+  const [result, setResult] = useState<any>(null);
+  const [history, setHistory] = useState<ScriptJobRow[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [submittingIdeas, setSubmittingIdeas] = useState(false);
+  const [submittingScript, setSubmittingScript] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadSlotRef = useRef<number>(-1);
+  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const loadHistory = useCallback(() => {
+    setLoadingHistory(true);
+    listJobs("hook-demo", 10).then(setHistory).finally(() => setLoadingHistory(false));
+  }, []);
+
+  const ideasJob = useScriptJob(
+    "hook-demo-ideas",
+    (j) => { setIdeas((j.result?.ideas || []).map((idea: any, i: number) => ({ ...idea, id: i + 1 }))); },
+    () => { toast({ title: "Ideas generation failed", variant: "destructive" }); },
+    { autoResume: false }
+  );
+
+  const scriptJob = useScriptJob(
+    "hook-demo",
+    (j) => { setResult(j.result); loadHistory(); },
+    () => { toast({ title: "Script generation failed", description: "Something went wrong. Try again.", variant: "destructive" }); },
+    { autoResume: true }
+  );
+
+  useEffect(() => {
+    loadHistory();
+    getAuthHeaders().then((headers) => {
+      fetch("/api/influencers", { headers })
+        .then((r) => r.json())
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (Array.isArray(data?.influencers) ? data.influencers : []);
+          setInfluencers(list);
+        })
+        .catch(() => {});
+    });
+    api.getPrebuiltBrains()
+      .then(({ brains }) => setPrebuiltBrains(brains.filter((b: any) => b.isActive !== false && !b.comingSoon)))
+      .catch(() => {});
+  }, [loadHistory]);
+
+  const handleGenerateIdeas = async () => {
+    setSubmittingIdeas(true);
+    setIdeas([]);
+    setExpandedIdea(null);
+    try {
+      const payload: any = {};
+      if (form.context.trim()) payload.context = form.context.trim();
+      if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+      if (form.influencerId) payload.influencerId = Number(form.influencerId);
+      const jobId = await startScriptJobJson("/api/portal/script-writer/hook-demo-ideas", payload);
+      ideasJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to start", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingIdeas(false);
+    }
+  };
+
+  const handleGenerateScript = async () => {
+    const filled = slots.filter(Boolean) as File[];
+    if (filled.length === 0) {
+      toast({ title: "Upload at least one screenshot", variant: "destructive" });
+      return;
+    }
+    const cta = form.commentWord.trim().toUpperCase().replace(/[^\w\-]/g, "").slice(0, 24);
+    if (!cta) {
+      toast({ title: "Enter a CTA comment word", variant: "destructive" });
+      return;
+    }
+    setSubmittingScript(true);
+    setResult(null);
+    try {
+      const fd = new FormData();
+      for (const f of filled) fd.append("images", f);
+      if (form.context.trim()) fd.append("context", form.context.trim());
+      fd.append("commentWord", cta);
+      fd.append("version", form.version);
+      if (form.offerBrainId && form.offerBrainId !== "own") fd.append("offerBrainId", form.offerBrainId);
+      if (form.influencerId) fd.append("influencerId", form.influencerId);
+      const jobId = await startScriptJobFormData("/api/portal/script-writer/hook-demo", fd);
+      scriptJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to start script", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingScript(false);
+    }
+  };
+
+  const handleSlotClick = (idx: number) => {
+    if (scriptJob.isActive || submittingScript) return;
+    uploadSlotRef.current = idx;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const idx = uploadSlotRef.current;
+    if (idx < 0 || idx >= 6) return;
+    setSlots((prev) => { const next = [...prev]; next[idx] = file; return next; });
+    e.target.value = "";
+  };
+
+  const removeSlot = (idx: number) => {
+    setSlots((prev) => { const next = [...prev]; next[idx] = null; return next; });
+  };
+
+  const ideasActive = ideasJob.isActive || submittingIdeas;
+  const scriptActive = scriptJob.isActive || submittingScript;
+  const anyActive = ideasActive || scriptActive;
+  const filledCount = slots.filter(Boolean).length;
+
+  return (
+    <div className="space-y-5">
+      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileChange} />
+
+      {/* ── Active job banner ── */}
+      {scriptActive && (
+        <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] px-5 py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: GOLD }} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">
+                Working — You can leave this tab and come back
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-[13px] font-bold" style={{ color: GOLD }}>{scriptJob.progressPct}%</span>
+              <button
+                onClick={() => { scriptJob.cancel(); setSubmittingScript(false); }}
+                className="text-[11px] font-bold uppercase tracking-wider text-white/30 hover:text-white/60 transition-colors"
+              >Reset</button>
+            </div>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${scriptJob.progressPct}%`, background: GOLD }} />
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-white/30">
+            <span>{scriptJob.stage || "Processing…"}</span>
+            <span>Elapsed {fmtElapsed(scriptJob.elapsedMs)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Recent Scripts ── */}
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FileStack className="w-3.5 h-3.5" style={{ color: GOLD }} />
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/60">Recent Scripts</span>
+          </div>
+          <button onClick={loadHistory} className="text-[11px] text-white/30 hover:text-white/60 uppercase tracking-wider transition-colors">Refresh</button>
+        </div>
+        {loadingHistory ? (
+          <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 text-white/30 animate-spin" /></div>
+        ) : history.length === 0 ? (
+          <p className="text-[12px] text-white/25 py-1">No scripts yet for this SOP.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {history.map((h) => (
+              <button
+                key={h.id}
+                onClick={() => h.result && setResult(h.result)}
+                disabled={!h.result}
+                className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors disabled:opacity-50 disabled:cursor-default"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[12px] text-white/80 truncate flex-1">{h.label || "Hook + Demo script"}</p>
+                  <span className={`text-[10px] font-bold flex-shrink-0 ${h.status === "succeeded" ? "text-emerald-400" : h.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
+                    {h.status === "succeeded" ? "SUCCEEDED" : h.status === "failed" ? "FAILED" : "RUNNING"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-white/30 mt-0.5">{fmtRelative(h.createdAt)}</p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── AI Influencer + Offer/Brain ── */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Users className="w-3 h-3" /> AI Influencer (Optional)
+          </label>
+          <FmSelect value={form.influencerId} onChange={(v) => setF("influencerId", v)} disabled={anyActive}
+            options={[{ value: "", label: "— Owner's main brand —" }, ...influencers.map((inf) => ({ value: String(inf.id), label: inf.name }))]}
+          />
+        </div>
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Cpu className="w-3 h-3" /> Offer / Brain
+          </label>
+          <FmSelect value={form.offerBrainId} onChange={(v) => setF("offerBrainId", v)} disabled={anyActive}
+            options={[{ value: "own", label: "— Your brain (default) —" }, ...prebuiltBrains.map((b) => ({ value: b.id, label: b.name }))]}
+          />
+        </div>
+      </div>
+
+      {/* ── Step 1: Ideas ── */}
+      <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: GOLD }}>Step 1 — Need an Idea?</p>
+          <p className="text-[12px] text-white/40 mt-0.5">
+            Generate 8 demo concepts pulled from your brain + offer. Each one tells you which tools to screen-record and the exact steps to capture.
+          </p>
+        </div>
+        <button
+          onClick={handleGenerateIdeas}
+          disabled={anyActive}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl text-[13px] font-semibold text-black transition-all disabled:opacity-50 flex-shrink-0"
+          style={{ background: GOLD }}
+        >
+          {ideasActive ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</> : <><Sparkles className="w-4 h-4" /> Generate 8 Ideas</>}
+        </button>
+      </div>
+
+      {/* Ideas progress */}
+      {ideasActive && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-[11px] text-white/40">
+            <span>{ideasJob.stage || "Brainstorming demo concepts…"}</span>
+            <span>{fmtEta(ideasJob.etaMs)}</span>
+          </div>
+          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${ideasJob.progressPct}%`, background: GOLD }} />
+          </div>
+        </div>
+      )}
+
+      {/* Ideas list */}
+      {ideas.length > 0 && (
+        <div className="space-y-2">
+          {ideas.map((idea) => {
+            const isOpen = expandedIdea === idea.id;
+            return (
+              <div key={idea.id} className={`rounded-xl border transition-all ${isOpen ? "border-[#C9A44C]/40 bg-[#C9A44C]/[0.05]" : "border-white/[0.07] bg-white/[0.02]"}`}>
+                <button onClick={() => setExpandedIdea(isOpen ? null : idea.id)} className="w-full text-left px-4 py-3 flex items-start gap-3">
+                  <span className="text-[11px] font-bold text-white/25 mt-0.5 flex-shrink-0 w-5">{idea.id}.</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${GOLD}cc` }}>{idea.hookType}</span>
+                    </div>
+                    <p className="text-[14px] font-semibold text-white leading-snug">{idea.title}</p>
+                    <p className="text-[12px] text-white/40 mt-1">{idea.angle}</p>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-white/30 flex-shrink-0 mt-0.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isOpen && (
+                  <div className="px-4 pb-4 space-y-4 border-t border-white/[0.05] pt-3 ml-8">
+                    {idea.toolsUsed?.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-1.5">Tools to Screen-Record</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {idea.toolsUsed.map((t, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-lg text-[11px] font-medium border border-white/[0.1] bg-white/[0.04] text-white/60">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {idea.demoSteps?.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-1.5">Steps to Capture</p>
+                        <div className="space-y-1">
+                          {idea.demoSteps.map((step, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="text-[11px] font-bold text-white/25 flex-shrink-0 mt-0.5">{i + 1}.</span>
+                              <p className="text-[12px] text-white/60 leading-relaxed">{step}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {idea.payoff && (
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-1">Final Payoff Shot</p>
+                        <p className="text-[12px] text-white/50 italic">{idea.payoff}</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => { setF("context", `${idea.title} — ${idea.angle}`); setExpandedIdea(null); }}
+                      className="flex items-center gap-1.5 text-[12px] font-medium transition-colors"
+                      style={{ color: GOLD }}
+                    >
+                      <Check className="w-3.5 h-3.5" /> Use this concept as my context
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Screenshot Grid (6 slots: 5 + 1) ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
+          Step Screenshots (up to 6, image 1 = step 1's screen)
+        </label>
+        <div className="grid grid-cols-5 gap-2">
+          {Array.from({ length: 6 }, (_, idx) => {
+            const file = slots[idx];
+            const imgUrl = file ? URL.createObjectURL(file) : null;
+            const isNextEmpty = idx === filledCount;
+            return (
+              <div
+                key={idx}
+                onClick={() => !file && handleSlotClick(idx)}
+                className={`relative aspect-square rounded-xl border transition-all ${
+                  file
+                    ? "border-white/[0.15] cursor-default overflow-hidden"
+                    : scriptActive
+                    ? "border-white/[0.05] bg-white/[0.01] cursor-not-allowed"
+                    : "border-dashed border-white/[0.15] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.25] cursor-pointer"
+                }`}
+              >
+                <span className="absolute top-1.5 left-2 text-[10px] font-bold text-white/25 z-10">{idx + 1}</span>
+                {file && imgUrl ? (
+                  <>
+                    <img src={imgUrl} alt={`Step ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
+                      <button onClick={(e) => { e.stopPropagation(); handleSlotClick(idx); }}
+                        className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors" title="Replace">
+                        <Upload className="w-3 h-3 text-white" />
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); removeSlot(idx); }}
+                        className="p-1.5 rounded-lg bg-red-500/60 hover:bg-red-500/80 transition-colors" title="Remove">
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  </>
+                ) : isNextEmpty && !scriptActive ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
+                    <Upload className="w-4 h-4 text-white/30" />
+                    <span className="text-[9px] text-white/30 font-medium uppercase tracking-wider">Add</span>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-white/30 mt-2 leading-relaxed">
+          Drop one screenshot per step in the exact order the viewer will see them on screen. Click a filled slot to replace it.
+        </p>
+      </div>
+
+      {/* ── Version pill toggle ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Version</label>
+        <div className="flex gap-2">
+          {(["voiceover", "silent", "both"] as const).map((v) => (
+            <button
+              key={v}
+              disabled={anyActive}
+              onClick={() => setF("version", v)}
+              className={`px-5 py-2 rounded-xl text-[12px] font-bold uppercase tracking-wider transition-all disabled:opacity-40 ${
+                form.version === v ? "text-black" : "text-white/40 border border-white/[0.1] bg-white/[0.02] hover:text-white/70"
+              }`}
+              style={form.version === v ? { background: GOLD } : {}}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-white/30 mt-1.5">
+          Voiceover = you talking over the demo; Silent = no audio, big on-screen captions only. Both = we write you both versions.
+        </p>
+      </div>
+
+      {/* ── Context ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">What Does This Demo Actually Show?</label>
+        <textarea
+          disabled={scriptActive}
+          value={form.context}
+          onChange={(e) => setF("context", e.target.value)}
+          rows={3}
+          placeholder="e.g. Step 1 is Higgsfield where you build the avatar, step 2 is ChatGPT for the script prompt, step 3 is HeyGen to generate the video, step 4 shows our AI Influencer Portfolio sales page where the $10k commission comes from."
+          className="w-full rounded-xl border border-white/[0.08] text-[13px] text-white placeholder-white/25 px-4 py-3 resize-none focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40"
+          style={{ background: "#111" }}
+        />
+      </div>
+
+      {/* ── CTA Comment Word ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">CTA Comment Word</label>
+        <input
+          type="text"
+          disabled={scriptActive}
+          value={form.commentWord}
+          onChange={(e) => setF("commentWord", e.target.value.toUpperCase().replace(/[^\w\-]/g, "").slice(0, 24))}
+          placeholder="GO"
+          className="w-56 rounded-xl border border-white/[0.08] text-[14px] font-bold text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40 tracking-widest"
+          style={{ background: "#111" }}
+        />
+        <p className="text-[11px] text-white/30 mt-1.5">
+          One word — "GO", "START", "SYSTEM", "X". This becomes "Comment GO below" in the CTA.
+        </p>
+      </div>
+
+      {/* ── Generate Script button ── */}
+      <button
+        onClick={handleGenerateScript}
+        disabled={anyActive || filledCount === 0}
+        className="w-full py-4 rounded-2xl text-[13px] font-semibold text-black transition-all disabled:opacity-50"
+        style={{ background: GOLD }}
+      >
+        {scriptActive ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" /> Writing Hook + Demo Script…
+          </span>
+        ) : (
+          <span className="flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" /> Generate Hook + Demo Script
+          </span>
+        )}
+      </button>
+
+      {/* ── Result ── */}
+      {result && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-white/30">Generated Script</p>
+            <button onClick={handleGenerateScript} disabled={anyActive || filledCount === 0}
+              className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-40">
+              <RefreshCw className="w-3.5 h-3.5" /> Regenerate
+            </button>
+          </div>
+          <ScriptResult result={result} def={{ slug: "hook-demo", jobType: "hook-demo", label: "Hook + Demo", description: "", icon: Video, color: "#10b981", fields: [], endpoint: "" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── FastMotion Result ────────────────────────────────────────────────────────
 
 function FastMotionResult({ result }: { result: any }) {
@@ -2229,6 +2687,8 @@ export default function ScriptWriterPage() {
           <FastMotionPanel key="fastmotion" />
         ) : activeDef.slug === "green-screen" ? (
           <GreenScreenPanel key="green-screen" />
+        ) : activeDef.slug === "hook-demo" ? (
+          <HookDemoPanel key="hook-demo" />
         ) : (
           /* key forces re-mount on type change so each type gets its own isolated state */
           <ScriptPanel
