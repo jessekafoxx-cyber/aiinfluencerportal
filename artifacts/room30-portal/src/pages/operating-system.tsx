@@ -489,16 +489,16 @@ const TOOLS: ToolDef[] = [
 
 const STANDARD_PHASES = [
   { key: "bridge-page", label: "Phase 2 - Bridge Page", color: "#C9A44C" },
-  { key: "avatar",       label: "Phase 3 - AI Avatar",  color: "#8b5cf6" },
-  { key: "content",      label: "Phase 4 - Content",    color: "#10b981" },
-  { key: "ads-scaling",  label: "Phase 5 - Ads & Scaling", color: "#f59e0b" },
+  { key: "avatar",       label: "Phase 3 - AI Avatar",  color: "#C9A44C" },
+  { key: "content",      label: "Phase 4 - Content",    color: "#C9A44C" },
+  { key: "ads-scaling",  label: "Phase 5 - Ads & Scaling", color: "#C9A44C" },
 ];
 
 const PREMIUM_PHASES = [
-  { key: "premium-research",  label: "Research",         color: "#8b5cf6" },
-  { key: "premium-offer",     label: "Offer Building",   color: "#C9A44C" },
-  { key: "premium-marketing", label: "Marketing & Content", color: "#10b981" },
-  { key: "premium-systems",   label: "Business Systems", color: "#f59e0b" },
+  { key: "premium-research",  label: "Research",            color: "#C9A44C" },
+  { key: "premium-offer",     label: "Offer Building",      color: "#C9A44C" },
+  { key: "premium-marketing", label: "Marketing & Content", color: "#C9A44C" },
+  { key: "premium-systems",   label: "Business Systems",    color: "#C9A44C" },
 ];
 
 const POLL_MS = 2500;
@@ -578,8 +578,8 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
         </div>
         <div className="flex items-start justify-between px-5 py-4 sm:p-6 border-b border-white/[0.06] flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tool.color}20` }}>
-              <tool.icon className="w-4 h-4" style={{ color: tool.color }} />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#C9A44C]/15">
+              <tool.icon className="w-4 h-4 text-[#C9A44C]" />
             </div>
             <div className="min-w-0">
               <h3 className="text-[15px] font-semibold text-white leading-tight">{tool.label}</h3>
@@ -666,8 +666,7 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
           <button
             onClick={() => generateMutation.mutate()}
             disabled={isActive || generateMutation.isPending || creditWarning}
-            className="w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl text-[14px] sm:text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: `linear-gradient(135deg, ${tool.color} 0%, ${tool.color}bb 100%)`, color: tool.color === "#C9A44C" || tool.color === "#f59e0b" ? "#000" : "#fff" }}
+            className="w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl text-[14px] sm:text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-[#C9A44C] hover:bg-[#b8933e] text-black"
           >
             {isActive || generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             {isDone ? "Regenerate" : isActive ? "Generating…" : "Generate"}
@@ -731,17 +730,16 @@ function ToolModal({ tool, onClose }: { tool: ToolDef; onClose: () => void }) {
 // ─── Tool Card ─────────────────────────────────────────────────────────────────
 
 function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
-  const isNav = !!tool.navigateTo;
   return (
     <button
       onClick={onClick}
-      className="group text-left rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] p-4 transition-all"
+      className="group text-left rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-[#C9A44C]/[0.04] hover:border-[#C9A44C]/20 p-4 transition-all"
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${tool.color}18` }}>
-          <tool.icon className="w-3.5 h-3.5" style={{ color: tool.color }} />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#C9A44C]/10">
+          <tool.icon className="w-3.5 h-3.5 text-[#C9A44C]" />
         </div>
-        <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: tool.color }}>
+        <span className="flex items-center gap-1 text-[11px] font-semibold text-[#C9A44C]">
           OPEN <ArrowRight className="w-3 h-3" />
         </span>
       </div>
@@ -923,13 +921,13 @@ export default function OperatingSystem() {
                           <button
                             key={tool.slug}
                             onClick={() => handleToolClick(tool)}
-                            className="group text-left rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] p-4 transition-all"
+                            className="group text-left rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-[#C9A44C]/[0.04] hover:border-[#C9A44C]/20 p-4 transition-all"
                           >
                             <div className="flex items-start justify-between mb-3">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${tool.color}18` }}>
-                                <tool.icon className="w-3.5 h-3.5" style={{ color: tool.color }} />
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#C9A44C]/10">
+                                <tool.icon className="w-3.5 h-3.5 text-[#C9A44C]" />
                               </div>
-                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold" style={{ background: `${tool.color}15`, color: tool.color }}>
+                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#C9A44C]/10 text-[#C9A44C]">
                                 <Coins className="w-2.5 h-2.5" />
                                 {tool.credits === 0 ? "Free" : tool.credits}
                               </span>
