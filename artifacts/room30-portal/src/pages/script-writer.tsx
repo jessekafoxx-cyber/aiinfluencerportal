@@ -124,7 +124,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "podcast-clip",
     jobType: "podcast-clip",
-    label: "Podcast Clip",
+    label: "Podcast Clips",
     description:
       "Opinionated, conversational 30–90 second clip recorded side-on with a mic. Contrarian, truth-bomb, or polarising — the kind of clip people screenshot.",
     icon: Mic,
@@ -170,7 +170,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "speaking-clip",
     jobType: "speaking-clip",
-    label: "Speaking Clip",
+    label: "Speaking Clips",
     description:
       "15–90 second on-stage authority clip. Certain, composed, conviction-loaded. Side-on or front-on with a mic, audience implied.",
     icon: Mic,
@@ -216,7 +216,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "selfie-clip",
     jobType: "selfie-clip",
-    label: "Selfie Yapping",
+    label: "Selfie Yapping Clips",
     description:
       "Casual, raw 15–90 second clip filmed walking, in a car, or outside holding the phone. Honest, unfiltered, like a friend who had to say this.",
     icon: User,
@@ -274,7 +274,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "slideshow",
     jobType: "slideshow",
-    label: "Viral Slideshow",
+    label: "Viral Slideshows",
     description:
       "TikTok/IG slideshow copy — cover hook, per-slide text overlays, image prompts, and CTA slide. 5 to 12 slides.",
     icon: Layers,
@@ -326,7 +326,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "carousel",
     jobType: "carousel",
-    label: "Viral Carousel",
+    label: "Viral Carousels",
     description:
       "Instagram/LinkedIn carousel copy — swipe-stopping cover, per-slide headlines, body copy, and a strong follow/save CTA.",
     icon: FileText,
@@ -377,7 +377,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "overlay",
     jobType: "overlay",
-    label: "Overlay Clip",
+    label: "Overlay Clips",
     description:
       "Script for b-roll overlay content — spoken over footage of your lifestyle, product, or workspace. No face needed.",
     icon: Film,
@@ -423,7 +423,7 @@ const SCRIPT_TYPES: ScriptTypeDef[] = [
   {
     slug: "fastmotion",
     jobType: "fastmotion",
-    label: "Fast Motion Clip",
+    label: "Fast Motion Clips",
     description:
       "Script for fast-cut edit style — short punchy lines that sync with jump cuts, sped-up footage, or montage editing.",
     icon: Zap,
