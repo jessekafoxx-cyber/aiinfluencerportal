@@ -3,7 +3,8 @@ import { useSearch, useLocation } from "wouter";
 import {
   Monitor, Video, Mic, User, Layers, FileText, Zap,
   Film, Upload, X, Copy, Check, Loader2, RefreshCw,
-  ChevronLeft, ChevronDown, Clock, AlertCircle, FileStack,
+  ChevronLeft, ChevronDown, ChevronRight, Clock, AlertCircle, FileStack,
+  Sparkles, Users, Cpu,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
@@ -16,6 +17,7 @@ import {
   type ScriptJobType,
 } from "@/lib/script-jobs";
 import { toast } from "@/hooks/use-toast";
+import { api, getAuthHeaders } from "@/lib/api";
 
 const GOLD = "#C9A44C";
 
@@ -873,18 +875,22 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
                 className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder-white/25 px-4 py-3 resize-none focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40"
               />
             ) : field.type === "select" ? (
-              <select
-                disabled={inputDisabled}
-                value={form[field.key] || field.options?.[0] || ""}
-                onChange={(e) => setForm((p) => ({ ...p, [field.key]: e.target.value }))}
-                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white px-4 py-3 focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40 appearance-none cursor-pointer"
-              >
-                {field.options?.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  disabled={inputDisabled}
+                  value={form[field.key] || field.options?.[0] || ""}
+                  onChange={(e) => setForm((p) => ({ ...p, [field.key]: e.target.value }))}
+                  className="w-full rounded-xl border border-white/[0.08] text-[13px] text-white pl-4 pr-9 py-3 focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40 appearance-none cursor-pointer"
+                  style={{ background: "#111", color: "white" }}
+                >
+                  {field.options?.map((o) => (
+                    <option key={o} value={o} style={{ background: "#111" }}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+              </div>
             ) : (
               <input
                 disabled={inputDisabled}
@@ -985,6 +991,531 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
   );
 }
 
+// ─── FastMotion Result ────────────────────────────────────────────────────────
+
+function FastMotionResult({ result }: { result: any }) {
+  const hook: string = result?.onScreen?.hook || "";
+  const cta: string = result?.onScreen?.cta || "";
+  const placement: string = result?.onScreen?.hookPlacement || "center";
+  const music: string = result?.music || "";
+  const visuals: any[] = Array.isArray(result?.visuals) ? result.visuals : [];
+  const allTextPrompts = visuals.map((v, i) => `${i + 1}. ${v.textPrompt || v.prompt || ""}`).join("\n\n");
+  const allJsonPrompts = JSON.stringify(visuals.map((v) => v.jsonPrompt || v.json || {}), null, 2);
+
+  return (
+    <div className="space-y-4">
+      {/* On-screen text */}
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-white/40">On-Screen Text Overlay</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/25 uppercase tracking-wider">{placement}</span>
+            <CopyButton text={hook + (cta ? `\n${cta}` : "")} />
+          </div>
+        </div>
+        <p className="text-[18px] font-bold text-white leading-snug">{hook}</p>
+        {cta && <p className="text-[13px] text-white/50 mt-2">{cta}</p>}
+        {music && (
+          <p className="text-[12px] text-white/35 mt-4 italic border-t border-white/[0.05] pt-3">
+            Music vibe: {music}
+          </p>
+        )}
+      </div>
+
+      {/* Visuals */}
+      {visuals.length > 0 && (
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-white/40">
+              Background Visuals ({visuals.length})
+            </span>
+            <div className="flex items-center gap-2">
+              <CopyButton text={allTextPrompts} />
+              <CopyButton text={allJsonPrompts} />
+            </div>
+          </div>
+          <div className="divide-y divide-white/[0.04]">
+            {visuals.map((v, i) => {
+              const textPrompt: string = v.textPrompt || v.prompt || "";
+              const jsonPrompt: any = v.jsonPrompt || v.json || null;
+              return (
+                <div key={i} className="px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-[11px] font-bold text-white/25 flex-shrink-0 w-6 mt-0.5">
+                      {v.sequenceNumber || i + 1}.
+                    </span>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <p className="text-[13px] text-white/80 leading-relaxed">{textPrompt}</p>
+                      {jsonPrompt && (
+                        <div className="relative group">
+                          <pre className="text-[10px] text-white/30 bg-white/[0.02] rounded-xl p-3 overflow-x-auto font-mono leading-relaxed border border-white/[0.04]">
+                            {JSON.stringify(jsonPrompt, null, 2)}
+                          </pre>
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <CopyButton text={JSON.stringify(jsonPrompt, null, 2)} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── FastMotion Panel ─────────────────────────────────────────────────────────
+
+interface FmIdea {
+  id: number;
+  hookType: string;
+  topicCluster: string;
+  hook: string;
+  visualAngle: string;
+}
+
+function FmSelect({
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ value: string; label: string }>;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full appearance-none pl-3.5 pr-9 py-3 rounded-xl border border-white/[0.12] text-[13px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
+        style={{ background: "#111", color: "white" }}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value} style={{ background: "#111" }}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+    </div>
+  );
+}
+
+function FastMotionPanel() {
+  const [influencers, setInfluencers] = useState<Array<{ id: number; name: string }>>([]);
+  const [prebuiltBrains, setPrebuiltBrains] = useState<Array<{ id: string; name: string }>>([]);
+  const [form, setForm] = useState({
+    influencerId: "",
+    offerBrainId: "own",
+    hookType: "any",
+    aesthetic: "auto",
+    ctaMode: "none",
+    visualCount: "10",
+    context: "",
+  });
+  const [ideas, setIdeas] = useState<FmIdea[]>([]);
+  const [selectedIdea, setSelectedIdea] = useState<FmIdea | null>(null);
+  const [result, setResult] = useState<any>(null);
+  const [history, setHistory] = useState<ScriptJobRow[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [submittingIdeas, setSubmittingIdeas] = useState(false);
+  const [submittingClip, setSubmittingClip] = useState(false);
+
+  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const loadHistory = useCallback(() => {
+    setLoadingHistory(true);
+    listJobs("fastmotion", 12).then(setHistory).finally(() => setLoadingHistory(false));
+  }, []);
+
+  const ideasJob = useScriptJob(
+    "fastmotion-ideas",
+    (j) => { setIdeas(j.result?.ideas || []); },
+    () => { toast({ title: "Ideas generation failed", variant: "destructive" }); },
+    { autoResume: false }
+  );
+
+  const clipJob = useScriptJob(
+    "fastmotion",
+    (j) => { setResult(j.result); loadHistory(); },
+    () => { toast({ title: "Clip build failed", variant: "destructive" }); },
+    { autoResume: true }
+  );
+
+  useEffect(() => {
+    // Load AI influencers
+    getAuthHeaders().then((headers) => {
+      fetch("/api/influencers", { headers })
+        .then((r) => r.json())
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (Array.isArray(data?.influencers) ? data.influencers : []);
+          setInfluencers(list);
+        })
+        .catch(() => {});
+    });
+    // Load prebuilt offer brains
+    api.getPrebuiltBrains()
+      .then(({ brains }) => setPrebuiltBrains(brains.filter((b: any) => b.isActive !== false && !b.comingSoon)))
+      .catch(() => {});
+    loadHistory();
+  }, [loadHistory]);
+
+  const handleGenerateIdeas = async () => {
+    setSubmittingIdeas(true);
+    setIdeas([]);
+    setSelectedIdea(null);
+    try {
+      const payload: any = { hookType: form.hookType, aesthetic: form.aesthetic };
+      if (form.context.trim()) payload.context = form.context.trim();
+      if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+      if (form.influencerId) payload.influencerId = Number(form.influencerId);
+      const jobId = await startScriptJobJson("/api/portal/script-writer/fastmotion-ideas", payload);
+      ideasJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to start", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingIdeas(false);
+    }
+  };
+
+  const handleBuildClip = async () => {
+    setSubmittingClip(true);
+    setResult(null);
+    try {
+      const payload: any = {
+        hookType: form.hookType,
+        aesthetic: form.aesthetic,
+        ctaMode: form.ctaMode,
+        visualCount: Number(form.visualCount),
+      };
+      if (form.context.trim()) payload.context = form.context.trim();
+      if (selectedIdea) payload.idea = selectedIdea;
+      if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+      if (form.influencerId) payload.influencerId = Number(form.influencerId);
+      const jobId = await startScriptJobJson("/api/portal/script-writer/fastmotion", payload);
+      clipJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to build clip", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingClip(false);
+    }
+  };
+
+  const ideasActive = ideasJob.isActive || submittingIdeas;
+  const clipActive = clipJob.isActive || submittingClip;
+  const anyActive = ideasActive || clipActive;
+
+  return (
+    <div className="space-y-6">
+      {/* ── Recent Scripts ── */}
+      {(history.length > 0 || loadingHistory) && !result && (
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FileStack className="w-3.5 h-3.5" style={{ color: GOLD }} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/60">Recent Scripts</span>
+            </div>
+            <button
+              onClick={loadHistory}
+              className="text-[11px] text-white/30 hover:text-white/60 uppercase tracking-wider transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+          {loadingHistory ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="w-4 h-4 text-white/30 animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {history.map((h) => (
+                <button
+                  key={h.id}
+                  onClick={() => h.result && setResult(h.result)}
+                  disabled={!h.result}
+                  className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors disabled:opacity-50 disabled:cursor-default"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12px] text-white/80 truncate flex-1">{h.label || "Fast-motion"}</p>
+                    <span className={`text-[10px] font-bold flex-shrink-0 ${
+                      h.status === "succeeded" ? "text-emerald-400" :
+                      h.status === "failed" ? "text-red-400" : "text-yellow-400"
+                    }`}>
+                      {h.status === "succeeded" ? "SUCCEEDED" : h.status === "failed" ? "FAILED" : "RUNNING"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-white/30 mt-0.5">{fmtRelative(h.createdAt)}</p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── AI Influencer + Offer/Brain ── */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Users className="w-3 h-3" />
+            AI Influencer (Optional)
+          </label>
+          <FmSelect
+            value={form.influencerId}
+            onChange={(v) => setF("influencerId", v)}
+            disabled={anyActive}
+            options={[
+              { value: "", label: "— Owner's main brand —" },
+              ...influencers.map((inf) => ({ value: String(inf.id), label: inf.name })),
+            ]}
+          />
+        </div>
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Cpu className="w-3 h-3" />
+            Offer / Brain
+          </label>
+          <FmSelect
+            value={form.offerBrainId}
+            onChange={(v) => setF("offerBrainId", v)}
+            disabled={anyActive}
+            options={[
+              { value: "own", label: "— Your brain (default) —" },
+              ...prebuiltBrains.map((b) => ({ value: b.id, label: b.name })),
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* ── Hook Style + Visual Aesthetic + CTA Mode ── */}
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Hook Style</label>
+          <FmSelect
+            value={form.hookType}
+            onChange={(v) => setF("hookType", v)}
+            disabled={anyActive}
+            options={[
+              { value: "any", label: "Any (mixed)" },
+              { value: "pov", label: "POV" },
+              { value: "identity", label: "Identity" },
+              { value: "futureBased", label: "Future-based" },
+              { value: "emotional", label: "Emotional" },
+              { value: "ambition", label: "Ambition" },
+            ]}
+          />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Visual Aesthetic</label>
+          <FmSelect
+            value={form.aesthetic}
+            onChange={(v) => setF("aesthetic", v)}
+            disabled={anyActive}
+            options={[
+              { value: "auto", label: "Auto (let the brain pick)" },
+              { value: "luxury", label: "Luxury" },
+              { value: "discipline", label: "Discipline" },
+              { value: "freedom", label: "Freedom" },
+              { value: "wealth", label: "Wealth" },
+              { value: "ambition", label: "Ambition" },
+              { value: "creator", label: "Creator" },
+              { value: "minimalist", label: "Minimalist" },
+              { value: "travel", label: "Travel" },
+              { value: "highPerformance", label: "High Performance" },
+            ]}
+          />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">CTA Mode</label>
+          <FmSelect
+            value={form.ctaMode}
+            onChange={(v) => setF("ctaMode", v)}
+            disabled={anyActive}
+            options={[
+              { value: "none", label: "None (hook does the work)" },
+              { value: "soft", label: "Soft identity close" },
+              { value: "keyword", label: "Comment keyword" },
+              { value: "follow", label: "Follow" },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* ── Visual Count ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2.5">
+          How Many Background Visuals?
+        </label>
+        <div className="flex items-center gap-2">
+          {(["5", "7", "10", "12", "15"] as const).map((n) => (
+            <button
+              key={n}
+              onClick={() => !anyActive && setF("visualCount", n)}
+              disabled={anyActive}
+              className={`w-10 h-10 rounded-xl text-[13px] font-bold transition-all disabled:opacity-40 ${
+                form.visualCount === n
+                  ? "text-black"
+                  : "bg-white/[0.06] text-white/50 hover:bg-white/[0.1] hover:text-white"
+              }`}
+              style={form.visualCount === n ? { background: GOLD } : undefined}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Context ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+          What's the clip about?{" "}
+          <span className="normal-case text-white/25 font-normal tracking-normal">(optional — feeds both ideas + the clip)</span>
+        </label>
+        <textarea
+          disabled={anyActive}
+          value={form.context}
+          onChange={(e) => setF("context", e.target.value)}
+          rows={3}
+          placeholder="e.g. The version of me that built this from nothing. OR the moment everything changed after years of quiet work. OR leave blank and let the brain generate ideas."
+          className="w-full rounded-xl border border-white/[0.08] text-[13px] text-white placeholder-white/25 px-4 py-3 resize-none focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40"
+          style={{ background: "#111" }}
+        />
+      </div>
+
+      {/* ── Step 1 bar ── */}
+      <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: GOLD }}>
+            Step 1 — Pick a Fast-Motion Concept
+          </p>
+          <p className="text-[12px] text-white/40 mt-0.5">
+            Generate 10 emotional / identity hooks. Click one to load it into the writer below.
+          </p>
+        </div>
+        <button
+          onClick={handleGenerateIdeas}
+          disabled={anyActive}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl text-[13px] font-semibold text-black transition-all disabled:opacity-50 flex-shrink-0"
+          style={{ background: GOLD }}
+        >
+          {ideasActive ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+          ) : (
+            <><Sparkles className="w-4 h-4" /> Generate 10 Ideas</>
+          )}
+        </button>
+      </div>
+
+      {/* Ideas progress */}
+      {ideasActive && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-[11px] text-white/40">
+            <span>{ideasJob.stage || "Brainstorming concepts…"}</span>
+            <span>{fmtEta(ideasJob.etaMs)}</span>
+          </div>
+          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${ideasJob.progressPct}%`, background: GOLD }} />
+          </div>
+        </div>
+      )}
+
+      {/* Ideas list */}
+      {ideas.length > 0 && (
+        <div className="space-y-2">
+          {ideas.map((idea) => (
+            <button
+              key={idea.id}
+              onClick={() => !anyActive && setSelectedIdea(selectedIdea?.id === idea.id ? null : idea)}
+              disabled={anyActive}
+              className={`w-full text-left px-4 py-3.5 rounded-xl border transition-all ${
+                selectedIdea?.id === idea.id
+                  ? "border-[#C9A44C]/50 bg-[#C9A44C]/[0.07]"
+                  : "border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-[11px] font-bold text-white/25 mt-0.5 flex-shrink-0 w-5">{idea.id}.</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-semibold text-white leading-snug">{idea.hook}</p>
+                  {idea.visualAngle && (
+                    <p className="text-[12px] text-white/40 mt-1 leading-relaxed">{idea.visualAngle}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${GOLD}bb` }}>{idea.hookType}</span>
+                    {idea.topicCluster && (
+                      <span className="text-[10px] text-white/25">· {idea.topicCluster}</span>
+                    )}
+                  </div>
+                </div>
+                {selectedIdea?.id === idea.id && (
+                  <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: GOLD }} />
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Build Clip button ── */}
+      <button
+        onClick={handleBuildClip}
+        disabled={anyActive}
+        className="w-full py-4 rounded-2xl text-[13px] font-semibold transition-all disabled:opacity-50 border border-white/[0.12] bg-white/[0.04] hover:bg-white/[0.07] text-white"
+        style={clipActive ? {} : { borderColor: `${GOLD}40` }}
+      >
+        {clipActive ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Building clip{clipJob.stage ? ` — ${clipJob.stage}` : "…"}
+          </span>
+        ) : (
+          <span className="flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
+            {`Build the Clip From My Context (${form.visualCount} Visuals)`}
+          </span>
+        )}
+      </button>
+
+      {/* Clip progress */}
+      {clipActive && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-[11px] text-white/40">
+            <span>{clipJob.stage || "Generating visuals…"}</span>
+            <span>{fmtEta(clipJob.etaMs)}</span>
+          </div>
+          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${clipJob.progressPct}%`, background: GOLD }} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Result ── */}
+      {result && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-white/30">Generated Clip</p>
+            <button
+              onClick={handleBuildClip}
+              disabled={anyActive}
+              className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-40"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Regenerate
+            </button>
+          </div>
+          <FastMotionResult result={result} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Recent Scripts Drawer ────────────────────────────────────────────────────
 
 function RecentScriptsDrawer({
@@ -1046,7 +1577,7 @@ function RecentScriptsDrawer({
             <p className="text-[13px] text-white/30 text-center py-8">No scripts yet</p>
           )}
           {!loading && jobs.map((j) => {
-            const def = SCRIPT_TYPES.find((t) => t.jobType === j.jobType);
+            const def = SCRIPT_TYPES.find((t) => t.jobType === j.type);
             if (!def) return null;
             return (
               <button
@@ -1158,12 +1689,16 @@ export default function ScriptWriterPage() {
         </div>
 
         {/* ── Script Panel ── */}
-        {/* key forces re-mount on type change so each type gets its own isolated state */}
-        <ScriptPanel
-          key={activeDef.slug}
-          def={activeDef}
-          externalResult={externalResult?.def.slug === activeDef.slug ? externalResult.result : null}
-        />
+        {activeDef.slug === "fastmotion" ? (
+          <FastMotionPanel key="fastmotion" />
+        ) : (
+          /* key forces re-mount on type change so each type gets its own isolated state */
+          <ScriptPanel
+            key={activeDef.slug}
+            def={activeDef}
+            externalResult={externalResult?.def.slug === activeDef.slug ? externalResult.result : null}
+          />
+        )}
 
         {/* ── Recent Scripts Drawer ── */}
         <RecentScriptsDrawer
