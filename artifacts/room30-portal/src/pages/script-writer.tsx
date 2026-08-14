@@ -744,12 +744,16 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
     hookType: "any",
     formula: "any",
     slideCount: "7",
+    influencerId: "",
+    offerBrainId: "own",
   });
   const [files, setFiles] = useState<File[]>([]);
   const [result, setResult] = useState<any>(externalResult ?? null);
   const [history, setHistory] = useState<ScriptJobRow[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [influencers, setInfluencers] = useState<Array<{ id: number; name: string }>>([]);
+  const [prebuiltBrains, setPrebuiltBrains] = useState<Array<{ id: string; name: string }>>([]);
 
   const job = useScriptJob(
     def.jobType,
@@ -771,6 +775,20 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
   useEffect(() => {
     setLoadingHistory(true);
     listJobs(def.jobType, 5).then(setHistory).finally(() => setLoadingHistory(false));
+    // Load AI influencers
+    getAuthHeaders().then((headers) => {
+      fetch("/api/influencers", { headers })
+        .then((r) => r.json())
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (Array.isArray(data?.influencers) ? data.influencers : []);
+          setInfluencers(list);
+        })
+        .catch(() => {});
+    });
+    // Load prebuilt offer brains
+    api.getPrebuiltBrains()
+      .then(({ brains }) => setPrebuiltBrains(brains.filter((b: any) => b.isActive !== false && !b.comingSoon)))
+      .catch(() => {});
   }, [def.jobType]);
 
   const handleGenerate = async () => {
@@ -794,12 +812,16 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
     setSubmitting(true);
     try {
       let jobId: number;
+      const influencerId = form.influencerId ? Number(form.influencerId) : null;
+      const offerBrainId = form.offerBrainId && form.offerBrainId !== "own" ? form.offerBrainId : null;
       if (def.imageUpload) {
         const fd = new FormData();
         for (const f of files) fd.append("images", f);
         fd.append("context", context);
         if (form.commentWord) fd.append("commentWord", form.commentWord.trim().toUpperCase());
         if (form.version) fd.append("version", form.version);
+        if (influencerId) fd.append("influencerId", String(influencerId));
+        if (offerBrainId) fd.append("offerBrainId", offerBrainId);
         jobId = await startScriptJobFormData(
           `/api/portal/script-writer/${def.slug}`,
           fd
@@ -812,6 +834,8 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
         if (form.formula && form.formula !== "any") payload.formula = form.formula;
         if (form.ctaMode) payload.ctaMode = form.ctaMode;
         if (form.slideCount) payload.slideCount = Number(form.slideCount);
+        if (influencerId) payload.influencerId = influencerId;
+        if (offerBrainId) payload.offerBrainId = offerBrainId;
         jobId = await startScriptJobJson(
           `/api/portal/script-writer/${def.slug}`,
           payload
@@ -847,6 +871,53 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
 
       {/* Form */}
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 space-y-5">
+
+        {/* AI Influencer + Offer/Brain */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+              <Users className="w-3 h-3" />
+              AI Influencer (Optional)
+            </label>
+            <div className="relative">
+              <select
+                disabled={inputDisabled}
+                value={form.influencerId || ""}
+                onChange={(e) => setForm((p) => ({ ...p, influencerId: e.target.value }))}
+                className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
+                style={{ background: "#111", color: "white" }}
+              >
+                <option value="" style={{ background: "#111" }}>— Owner's main brand —</option>
+                {influencers.map((inf) => (
+                  <option key={inf.id} value={String(inf.id)} style={{ background: "#111" }}>{inf.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+            </div>
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+              <Cpu className="w-3 h-3" />
+              Offer / Brain
+            </label>
+            <div className="relative">
+              <select
+                disabled={inputDisabled}
+                value={form.offerBrainId || "own"}
+                onChange={(e) => setForm((p) => ({ ...p, offerBrainId: e.target.value }))}
+                className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
+                style={{ background: "#111", color: "white" }}
+              >
+                <option value="own" style={{ background: "#111" }}>— Your brain (default) —</option>
+                {prebuiltBrains.map((b) => (
+                  <option key={b.id} value={b.id} style={{ background: "#111" }}>{b.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+            </div>
+          </div>
+        </div>
+
         {/* Image upload */}
         {def.imageUpload && (
           <ImageUploadGrid
