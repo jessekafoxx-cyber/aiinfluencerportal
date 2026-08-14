@@ -18,6 +18,9 @@ const LEGACY_APEX_SLUGS = [
   // members, so the article is dropped from the seed AND removed from any
   // database that already has it.
   "greg-ai",
+  // Renamed: slugs no longer use "room30" branding.
+  "welcome-to-room30",
+  "how-room30-works",
 ];
 
 type SeedArticle = {
@@ -34,7 +37,7 @@ const CHAT_LINE =
 
 export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
   {
-    slug: "welcome-to-room30",
+    slug: "welcome-to-ai-influencer-portfolio",
     title: "Welcome to AI Influencer Portfolio",
     category: "getting-started",
     summary: "What AI Influencer Portfolio is and how the portal is laid out.",
@@ -54,7 +57,7 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
 <p>${CHAT_LINE}</p>`,
   },
   {
-    slug: "how-room30-works",
+    slug: "how-ai-influencer-portfolio-works",
     title: "How the AI Influencer Portfolio System Works",
     category: "getting-started",
     summary: "The 4 layers of the system - Brain, Build, Influencer, Distribution.",
