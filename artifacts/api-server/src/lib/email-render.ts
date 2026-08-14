@@ -23,7 +23,7 @@ type BrandConfig = {
 };
 
 const ROOM30_CONFIG: BrandConfig = {
-  fromEmail: "AI Influencer Portfolio <team@users.room30.ai>",
+  fromEmail: "AI Influencer Portfolio <team@aiinfluencerpublishing.com>",
   wordmark: "AI Influencer Portfolio",
   kicker: "AI Influencer Portfolio",
   footerCopy:
