@@ -29,8 +29,8 @@ export function Room30Logo({
         src={LOGO_SRC}
         alt=""
         draggable={false}
-        className="block w-auto"
-        style={{ height: "1.35em" }}
+        className="block w-auto max-w-full"
+        style={{ height: "1.35em", objectFit: "contain" }}
       />
     </span>
   );

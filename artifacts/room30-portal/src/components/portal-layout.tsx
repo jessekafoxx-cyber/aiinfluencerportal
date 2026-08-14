@@ -566,7 +566,7 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="px-5 pt-5 pb-3 border-b border-white/[0.06] flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <Room30Logo className="text-[52px] flex-1 min-w-0" />
+            <Room30Logo className="text-[34px] flex-1 min-w-0" />
           </div>
           <button
             type="button"
