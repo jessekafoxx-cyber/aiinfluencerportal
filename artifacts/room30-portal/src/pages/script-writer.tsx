@@ -1985,6 +1985,580 @@ function HookDemoPanel() {
   );
 }
 
+// ─── TextScriptPanel (podcast, speaking, selfie, slideshow, carousel, overlay) ─
+
+const HOOK_LABELS: Record<string, string> = {
+  any: "Any (mixed)", contrarian: "Contrarian", truthBomb: "Truth bomb",
+  polarising: "Polarising", iRealised: "I realised...", strongStatement: "Strong statement",
+  audienceChallenge: "Audience challenge", futureBased: "Future-based",
+  emotionalTruth: "Emotional truth", curiosityBased: "Curiosity-based",
+  howI: "How I...", socialProof: "Social proof", emotionalCuriosity: "Emotional curiosity",
+  xThings: "X things list",
+};
+const FORMULA_LABELS: Record<string, string> = {
+  any: "Any (mixed)", realisation: "Realisation", contrarianOpinion: "Contrarian opinion", storyBased: "Story-based",
+};
+const VISUAL_STYLE_LABELS: Record<string, string> = {
+  cinematic: "Cinematic", minimal: "Minimal", moody: "Moody", luxury: "Luxury", documentary: "Documentary", retro: "Retro",
+};
+const BROLL_LABELS: Record<string, string> = {
+  auto: "Auto (let the brain pick)", walking: "Walking shot", gym: "Gym shot",
+  lifestyle: "Lifestyle shot", laptop: "Laptop / desk", driving: "Driving shot",
+  cinematic: "Cinematic b-roll", city: "City footage",
+};
+const OVERLAY_CTA_LABELS: Record<string, string> = {
+  engagement: 'Engagement ("Anyone else relate?")', keyword: "Keyword (Comment X below)",
+  identity: "Identity check", save: "Save / share bait",
+};
+
+interface TspDropdownDef { key: string; label: string; options: string[]; labelMap?: Record<string, string>; hint?: string }
+interface TspCarouselType { value: string; label: string; description: string }
+
+interface TspConfig {
+  ideasJobType: ScriptJobType;
+  ideasEndpoint: string;
+  step1Label: string;
+  step1Desc: (form: Record<string, string>) => string;
+  contextLabel: string;
+  contextPlaceholder: string;
+  generateLabel: (form: Record<string, string>) => string;
+  ideaPrimary: (idea: any) => string;
+  ideaSecondary?: (idea: any) => string;
+  ideaBadge?: (idea: any) => string | null;
+  ideaExtra?: (idea: any) => string | null;
+  ideaToContext: (idea: any) => string;
+  pillField?: { key: string; label: string; options: string[] };
+  dropdowns: TspDropdownDef[];
+  carouselTypes?: TspCarouselType[];
+  hasCommentWord?: boolean;
+  ctaModeNote?: string;
+  overlayCheckbox?: boolean;
+  overlayCtaKey?: string; // "ctaType" for overlay vs "ctaMode" for others
+  buildIdeasExtra?: (form: Record<string, string>) => Record<string, any>;
+  buildScriptExtra?: (form: Record<string, string>) => Record<string, any>;
+}
+
+const TSP_CONFIGS: Record<string, TspConfig> = {
+  "podcast-clip": {
+    ideasJobType: "podcast-ideas",
+    ideasEndpoint: "/api/portal/script-writer/podcast-ideas",
+    step1Label: "STEP 1 — PICK AN ANGLE",
+    step1Desc: () => "Generate 10 contrarian / polarising / truth-bomb ideas pulled straight from your brain. Click one to load it into the writer below.",
+    contextLabel: "WHAT'S ON YOUR MIND? (OPTIONAL — FEEDS BOTH IDEAS + THE SCRIPT)",
+    contextPlaceholder: "e.g. I want to talk about why most people building AI agencies are wasting time on the wrong stack. OR leave blank and let the brain generate ideas.",
+    generateLabel: () => "Write Clip from My Context",
+    ideaPrimary: (i) => i.title,
+    ideaSecondary: (i) => i.angle,
+    ideaBadge: (i) => HOOK_LABELS[i.hookType] ?? i.hookType,
+    ideaToContext: (i) => `${i.title}${i.angle ? `\n\n${i.angle}` : ""}`,
+    pillField: { key: "targetSeconds", label: "TARGET LENGTH", options: ["30", "45", "60", "90"] },
+    dropdowns: [
+      { key: "hookType", label: "HOOK STYLE", options: ["any", "contrarian", "truthBomb", "polarising", "iRealised"], labelMap: HOOK_LABELS },
+      { key: "ctaMode", label: "CTA", options: ["soft", "comment", "none"], labelMap: { soft: "Soft conversational close", comment: "Comment X below", none: "Ends on punchline" } },
+    ],
+    hasCommentWord: true,
+    buildIdeasExtra: (f) => ({ hookType: f.hookType || "any" }),
+    buildScriptExtra: (f) => ({ targetSeconds: Number(f.targetSeconds || 60), hookType: f.hookType || "any", ctaMode: f.ctaMode || "soft", ...(f.ctaMode === "comment" && f.commentWord ? { commentWord: f.commentWord.toUpperCase() } : {}) }),
+  },
+  "speaking-clip": {
+    ideasJobType: "speaking-ideas",
+    ideasEndpoint: "/api/portal/script-writer/speaking-ideas",
+    step1Label: "STEP 1 — PICK A STAGE ANGLE",
+    step1Desc: () => "Generate 10 authority angles pulled straight from your brain. Click one to load it into the writer below.",
+    contextLabel: "WHAT'S THE TALK ABOUT? (OPTIONAL — FEEDS BOTH IDEAS + THE SCRIPT)",
+    contextPlaceholder: "e.g. The future belongs to operators, not strategists. OR leave blank and let the brain generate ideas.",
+    generateLabel: () => "Write Clip from My Context",
+    ideaPrimary: (i) => i.title,
+    ideaSecondary: (i) => i.angle,
+    ideaBadge: (i) => HOOK_LABELS[i.hookType] ?? i.hookType,
+    ideaToContext: (i) => `${i.title}${i.angle ? `\n\n${i.angle}` : ""}`,
+    pillField: { key: "targetSeconds", label: "TARGET LENGTH", options: ["15", "30", "45", "60", "90"] },
+    dropdowns: [
+      { key: "hookType", label: "HOOK STYLE", options: ["any", "strongStatement", "contrarian", "audienceChallenge", "futureBased", "truthBomb"], labelMap: HOOK_LABELS },
+      { key: "ctaMode", label: "CTA", options: ["soft", "none"], labelMap: { soft: "Soft authoritative close", none: "No punchline" } },
+    ],
+    ctaModeNote: 'No "comment X" — breaks the stage frame.',
+    buildIdeasExtra: (f) => ({ hookType: f.hookType || "any" }),
+    buildScriptExtra: (f) => ({ targetSeconds: Number(f.targetSeconds || 60), hookType: f.hookType || "any", ctaMode: f.ctaMode || "soft" }),
+  },
+  "selfie-clip": {
+    ideasJobType: "selfie-ideas",
+    ideasEndpoint: "/api/portal/script-writer/selfie-ideas",
+    step1Label: "STEP 1 — PICK A RANT ANGLE",
+    step1Desc: () => "Generate 10 selfie-yapping angles — each comes with the on-screen hook (visual text overlay) AND the spoken opening.",
+    contextLabel: "WHAT DO YOU NEED TO RANT ABOUT? (OPTIONAL — FEEDS BOTH IDEAS + THE SCRIPT)",
+    contextPlaceholder: "e.g. I'm so over creators pretending the algorithm is broken when they post once a week. OR leave blank and let the brain generate ideas.",
+    generateLabel: () => "Write Clip from My Context",
+    ideaPrimary: (i) => i.title,
+    ideaSecondary: (i) => i.angle,
+    ideaBadge: (i) => HOOK_LABELS[i.hookType] ?? i.hookType,
+    ideaExtra: (i) => i.onScreenHook ? `ON-SCREEN: "${i.onScreenHook}"` : null,
+    ideaToContext: (i) => `${i.title}${i.angle ? `\n\n${i.angle}` : ""}`,
+    pillField: { key: "targetSeconds", label: "TARGET LENGTH", options: ["15", "30", "45", "60", "90"] },
+    dropdowns: [
+      { key: "hookType", label: "HOOK STYLE", options: ["any", "contrarian", "emotionalTruth", "futureBased", "curiosityBased", "polarising"], labelMap: HOOK_LABELS },
+      { key: "formula", label: "RANT FORMULA", options: ["any", "realisation", "contrarianOpinion", "storyBased"], labelMap: FORMULA_LABELS },
+      { key: "ctaMode", label: "CTA", options: ["soft", "comment", "none"], labelMap: { soft: "Soft reflective close", comment: "Comment X below", none: "Ends on punchline" } },
+    ],
+    hasCommentWord: true,
+    buildIdeasExtra: (f) => ({ hookType: f.hookType || "any", formula: f.formula || "any" }),
+    buildScriptExtra: (f) => ({ targetSeconds: Number(f.targetSeconds || 45), hookType: f.hookType || "any", formula: f.formula || "any", ctaMode: f.ctaMode || "soft", ...(f.ctaMode === "comment" && f.commentWord ? { commentWord: f.commentWord.toUpperCase() } : {}) }),
+  },
+  "slideshow": {
+    ideasJobType: "slideshow-ideas",
+    ideasEndpoint: "/api/portal/script-writer/slideshow-ideas",
+    step1Label: "STEP 1 — PICK A SLIDESHOW CONCEPT",
+    step1Desc: () => "Generate 10 cover-hook concepts. Click one to load it into the slideshow writer below.",
+    contextLabel: "WHAT'S THE SLIDESHOW ABOUT? (OPTIONAL — FEEDS BOTH IDEAS + THE SLIDES)",
+    contextPlaceholder: "e.g. The 5 morning habits I built when I went from broke to running my own AI agency. OR leave blank and let the brain generate ideas.",
+    generateLabel: (f) => `Build ${f.slideCount || "7"}-Slide Deck from My Context`,
+    ideaPrimary: (i) => i.coverHook,
+    ideaSecondary: (i) => i.angle,
+    ideaBadge: (i) => HOOK_LABELS[i.hookType] ?? i.hookType,
+    ideaExtra: (i) => i.subHook || null,
+    ideaToContext: (i) => `${i.coverHook}${i.subHook ? `\n${i.subHook}` : ""}${i.angle ? `\n\n${i.angle}` : ""}`,
+    pillField: { key: "slideCount", label: "SLIDE COUNT", options: ["5", "7", "9", "12"] },
+    dropdowns: [
+      { key: "hookType", label: "COVER HOOK STYLE", options: ["any", "xThings", "contrarian", "emotionalTruth", "curiosityBased", "futureBased"], labelMap: HOOK_LABELS },
+      { key: "visualStyle", label: "VISUAL STYLE", options: ["cinematic", "minimal", "moody", "luxury", "documentary", "retro"], labelMap: VISUAL_STYLE_LABELS },
+      { key: "ctaMode", label: "CTA", options: ["soft", "comment", "none"], labelMap: { soft: "Soft (Follow / Save / Send / Part 2?)", comment: "Comment X below", none: "Ends on punchline" } },
+    ],
+    hasCommentWord: true,
+    buildIdeasExtra: (f) => ({ hookType: f.hookType || "any", visualStyle: f.visualStyle || "cinematic" }),
+    buildScriptExtra: (f) => ({ slideCount: Number(f.slideCount || 7), hookType: f.hookType || "any", visualStyle: f.visualStyle || "cinematic", ctaMode: f.ctaMode || "soft", ...(f.ctaMode === "comment" && f.commentWord ? { commentWord: f.commentWord.toUpperCase() } : {}) }),
+  },
+  "carousel": {
+    ideasJobType: "carousel-ideas",
+    ideasEndpoint: "/api/portal/script-writer/carousel-ideas",
+    step1Label: "STEP 1 — PICK A CAROUSEL CONCEPT",
+    step1Desc: (f) => `Generate 10 cover-hook concepts shaped for the ${f.carouselType || "tips"} carousel persona.`,
+    contextLabel: "WHAT'S THIS CAROUSEL ABOUT? (OPTIONAL — FEEDS BOTH IDEAS + THE SLIDES)",
+    contextPlaceholder: "e.g. The 5 client signals I learned to walk away from. OR leave blank and let the brain generate ideas.",
+    generateLabel: (f) => `Build ${f.slideCount || "7"}-Slide Carousel from My Context`,
+    ideaPrimary: (i) => i.coverHook,
+    ideaSecondary: (i) => i.angle,
+    ideaExtra: (i) => i.subHook || null,
+    ideaToContext: (i) => `${i.coverHook}${i.subHook ? `\n${i.subHook}` : ""}${i.angle ? `\n\n${i.angle}` : ""}`,
+    pillField: { key: "slideCount", label: "SLIDE COUNT", options: ["5", "7", "8", "10"] },
+    dropdowns: [
+      { key: "ctaMode", label: "CTA", options: ["soft", "comment", "none"], labelMap: { soft: "Soft (Follow / Save / Send / Part 2?)", comment: "Comment X below", none: "Ends on punchline" } },
+    ],
+    hasCommentWord: true,
+    carouselTypes: [
+      { value: "creative", label: "Creative", description: "Bold, art-directed, single-line per slide" },
+      { value: "tips", label: "Tips", description: "Numbered, screenshot-worthy, actionable" },
+      { value: "education", label: "Education", description: "Teaches one concept across the deck" },
+      { value: "spotlight", label: "Spotlight", description: "Profile-style. Features one subject in depth" },
+      { value: "personal", label: "Personal · B&W", description: "Reflective, intimate, black and white" },
+    ],
+    buildIdeasExtra: (f) => ({ carouselType: f.carouselType || "tips" }),
+    buildScriptExtra: (f) => ({ carouselType: f.carouselType || "tips", slideCount: Number(f.slideCount || 7), ctaMode: f.ctaMode || "soft", ...(f.ctaMode === "comment" && f.commentWord ? { commentWord: f.commentWord.toUpperCase() } : {}) }),
+  },
+  "overlay": {
+    ideasJobType: "overlay-ideas",
+    ideasEndpoint: "/api/portal/script-writer/overlay-ideas",
+    step1Label: "STEP 1 — PICK AN OVERLAY CLIP CONCEPT",
+    step1Desc: () => "Generate 10 on-screen hook concepts. Click one to load it into the writer below.",
+    contextLabel: "WHAT'S THE CLIP ABOUT? (OPTIONAL — FEEDS BOTH IDEAS + THE CLIP)",
+    contextPlaceholder: "e.g. The moment I realised motivation was the wrong target and discipline was the trainable one. OR leave blank and let the brain generate ideas.",
+    generateLabel: () => "Build the Overlay Clip from My Context",
+    ideaPrimary: (i) => i.onScreenHook,
+    ideaSecondary: (i) => i.captionAngle,
+    ideaBadge: (i) => HOOK_LABELS[i.hookType] ?? i.hookType,
+    ideaToContext: (i) => i.onScreenHook,
+    dropdowns: [
+      { key: "hookType", label: "ON-SCREEN HOOK STYLE", options: ["any", "howI", "contrarian", "socialProof", "emotionalCuriosity", "futureBased"], labelMap: HOOK_LABELS },
+      { key: "brollStyle", label: "B-ROLL STYLE", options: ["auto", "walking", "gym", "lifestyle", "laptop", "driving", "cinematic", "city"], labelMap: BROLL_LABELS },
+      { key: "ctaType", label: "CAPTION CTA", options: ["engagement", "keyword", "identity", "save"], labelMap: OVERLAY_CTA_LABELS },
+    ],
+    hasCommentWord: true,
+    overlayCheckbox: true,
+    overlayCtaKey: "ctaType",
+    buildIdeasExtra: (f) => ({ hookType: f.hookType || "any", brollStyle: f.brollStyle || "auto" }),
+    buildScriptExtra: (f) => ({ hookType: f.hookType || "any", brollStyle: f.brollStyle || "auto", ctaType: f.ctaType || "engagement", readCaption: f.readCaption !== "false", ...(f.ctaType === "keyword" && f.commentWord ? { commentWord: f.commentWord.toUpperCase() } : {}) }),
+  },
+};
+
+const CAROUSEL_TYPE_DEFAULTS: Record<string, string> = {
+  "podcast-clip": "soft", "speaking-clip": "soft", "selfie-clip": "soft",
+  "slideshow": "soft", "carousel": "soft", "overlay": "engagement",
+};
+
+function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
+  const cfg = TSP_CONFIGS[def.slug];
+  if (!cfg) return null;
+
+  const [influencers, setInfluencers] = useState<Array<{ id: number; name: string }>>([]);
+  const [prebuiltBrains, setPrebuiltBrains] = useState<Array<{ id: string; name: string }>>([]);
+  const [form, setForm] = useState<Record<string, string>>({
+    influencerId: "", offerBrainId: "own", context: "", commentWord: "",
+    targetSeconds: "60", slideCount: "7", hookType: "any", formula: "any",
+    visualStyle: "cinematic", brollStyle: "auto", readCaption: "true",
+    ctaMode: "soft", ctaType: CAROUSEL_TYPE_DEFAULTS[def.slug] || "soft",
+    carouselType: "tips",
+  });
+  const [ideas, setIdeas] = useState<any[]>([]);
+  const [result, setResult] = useState<any>(null);
+  const [history, setHistory] = useState<ScriptJobRow[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(true);
+  const [submittingIdeas, setSubmittingIdeas] = useState(false);
+  const [submittingScript, setSubmittingScript] = useState(false);
+  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const loadHistory = useCallback(() => {
+    setLoadingHistory(true);
+    listJobs(def.jobType, 10).then((rows) => {
+      setHistory(rows);
+    }).finally(() => setLoadingHistory(false));
+  }, [def.jobType]);
+
+  const ideasJob = useScriptJob(
+    cfg.ideasJobType,
+    (j) => { setIdeas((j.result?.ideas || []).map((idea: any, i: number) => ({ ...idea, _idx: i }))); },
+    () => { toast({ title: "Ideas generation failed", variant: "destructive" }); },
+    { autoResume: false }
+  );
+
+  const scriptJob = useScriptJob(
+    def.jobType,
+    (j) => { setResult(j.result); loadHistory(); },
+    () => { toast({ title: "Script generation failed", description: "Something went wrong. Try again.", variant: "destructive" }); },
+    { autoResume: true }
+  );
+
+  useEffect(() => {
+    loadHistory();
+    getAuthHeaders().then((headers) => {
+      fetch("/api/influencers", { headers })
+        .then((r) => r.json())
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (Array.isArray(data?.influencers) ? data.influencers : []);
+          setInfluencers(list);
+        }).catch(() => {});
+    });
+    api.getPrebuiltBrains()
+      .then(({ brains }) => setPrebuiltBrains(brains.filter((b: any) => b.isActive !== false && !b.comingSoon)))
+      .catch(() => {});
+  }, [loadHistory]);
+
+  const handleGenerateIdeas = async () => {
+    setSubmittingIdeas(true);
+    setIdeas([]);
+    try {
+      const payload: any = {};
+      if (form.context.trim()) payload.context = form.context.trim();
+      if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+      if (form.influencerId) payload.influencerId = Number(form.influencerId);
+      Object.assign(payload, cfg.buildIdeasExtra?.(form) ?? {});
+      const jobId = await startScriptJobJson(cfg.ideasEndpoint, payload);
+      ideasJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to start", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingIdeas(false);
+    }
+  };
+
+  const handleGenerateScript = async () => {
+    setSubmittingScript(true);
+    setResult(null);
+    try {
+      const payload: any = { context: form.context.trim() };
+      if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+      if (form.influencerId) payload.influencerId = Number(form.influencerId);
+      Object.assign(payload, cfg.buildScriptExtra?.(form) ?? {});
+      const jobId = await startScriptJobJson(def.endpoint, payload);
+      scriptJob.start(jobId);
+    } catch (e: any) {
+      toast({ title: "Failed to start script", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingScript(false);
+    }
+  };
+
+  const ideasActive = ideasJob.isActive || submittingIdeas;
+  const scriptActive = scriptJob.isActive || submittingScript;
+  const anyActive = ideasActive || scriptActive;
+  const ctaKey = cfg.overlayCtaKey || "ctaMode";
+  const needsCommentWord = cfg.hasCommentWord && (form[ctaKey] === "comment" || form[ctaKey] === "keyword");
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Active job banner ── */}
+      {scriptActive && (
+        <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] px-5 py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: GOLD }} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">Working — You can leave this tab and come back</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-[13px] font-bold" style={{ color: GOLD }}>{scriptJob.progressPct}%</span>
+              <button onClick={() => { scriptJob.cancel(); setSubmittingScript(false); }}
+                className="text-[11px] font-bold uppercase tracking-wider text-white/30 hover:text-white/60 transition-colors">Reset</button>
+            </div>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${scriptJob.progressPct}%`, background: GOLD }} />
+          </div>
+          <div className="flex justify-between text-[11px] text-white/30">
+            <span>{scriptJob.stage || "Processing…"}</span>
+            <span>Elapsed {fmtElapsed(scriptJob.elapsedMs)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Recent Scripts (collapsible) ── */}
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+        <button
+          onClick={() => setHistoryOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3.5 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <FileStack className="w-3.5 h-3.5" style={{ color: GOLD }} />
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/60">Recent Scripts</span>
+            {history.length > 0 && <span className="text-[11px] text-white/25">({history.length})</span>}
+          </div>
+          <div className="flex items-center gap-3">
+            {historyOpen && (
+              <button onClick={(e) => { e.stopPropagation(); loadHistory(); }}
+                className="text-[11px] text-white/30 hover:text-white/60 uppercase tracking-wider transition-colors">Refresh</button>
+            )}
+            <ChevronDown className={`w-4 h-4 text-white/30 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+          </div>
+        </button>
+
+        {historyOpen && (
+          <div className="px-4 pb-4 border-t border-white/[0.05]">
+            {loadingHistory ? (
+              <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-white/30 animate-spin" /></div>
+            ) : history.length === 0 ? (
+              <p className="text-[12px] text-white/25 pt-3">No scripts yet for this SOP.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-3">
+                {history.map((h) => (
+                  <button key={h.id} onClick={() => h.result && setResult(h.result)} disabled={!h.result}
+                    className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors disabled:opacity-50 disabled:cursor-default">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[12px] text-white/80 truncate flex-1">{h.label || def.label}</p>
+                      <span className={`text-[10px] font-bold flex-shrink-0 ${h.status === "succeeded" ? "text-emerald-400" : h.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
+                        {h.status === "succeeded" ? "SUCCEEDED" : h.status === "failed" ? "FAILED" : "RUNNING"}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-white/30 mt-0.5">{fmtRelative(h.createdAt)}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── AI Influencer + Offer/Brain ── */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Users className="w-3 h-3" /> AI Influencer (Optional)
+          </label>
+          <FmSelect value={form.influencerId} onChange={(v) => setF("influencerId", v)} disabled={anyActive}
+            options={[{ value: "", label: "— Owner's main brand —" }, ...influencers.map((inf) => ({ value: String(inf.id), label: inf.name }))]} />
+        </div>
+        <div>
+          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            <Cpu className="w-3 h-3" /> Offer / Brain
+          </label>
+          <FmSelect value={form.offerBrainId} onChange={(v) => setF("offerBrainId", v)} disabled={anyActive}
+            options={[{ value: "own", label: "— Your brain (default) —" }, ...prebuiltBrains.map((b) => ({ value: b.id, label: b.name }))]} />
+        </div>
+      </div>
+
+      {/* ── Carousel type card picker ── */}
+      {cfg.carouselTypes && (
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Carousel Type</label>
+          <div className="grid grid-cols-5 gap-2">
+            {cfg.carouselTypes.map((ct) => (
+              <button key={ct.value} disabled={anyActive}
+                onClick={() => setF("carouselType", ct.value)}
+                className={`p-3 rounded-xl border text-left transition-all disabled:opacity-40 ${form.carouselType === ct.value ? "border-[#C9A44C]/60 bg-[#C9A44C]/[0.08]" : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]"}`}
+              >
+                <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${form.carouselType === ct.value ? "text-white" : "text-white/50"}`}>{ct.label}</p>
+                <p className="text-[10px] text-white/30 leading-snug">{ct.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Pill field (target length / slide count) ── */}
+      {cfg.pillField && (
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+            {cfg.pillField.label}
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {cfg.pillField.options.map((opt) => (
+              <button key={opt} disabled={anyActive}
+                onClick={() => setF(cfg.pillField!.key, opt)}
+                className={`px-5 py-2 rounded-xl text-[13px] font-bold tracking-wide transition-all disabled:opacity-40 ${form[cfg.pillField!.key] === opt ? "text-black" : "text-white/40 border border-white/[0.1] hover:text-white/60"}`}
+                style={form[cfg.pillField!.key] === opt ? { background: GOLD } : {}}
+              >
+                {opt}{cfg.pillField!.key === "targetSeconds" ? "S" : ""}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Dropdowns ── */}
+      {cfg.dropdowns.length > 0 && (
+        <div className={`grid gap-3 ${cfg.dropdowns.length === 1 ? "grid-cols-1" : cfg.dropdowns.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+          {cfg.dropdowns.map((dd) => (
+            <div key={dd.key}>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-1.5">{dd.label}</label>
+              <div className="relative">
+                <select disabled={anyActive} value={form[dd.key] || dd.options[0] || ""}
+                  onChange={(e) => setF(dd.key, e.target.value)}
+                  className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
+                  style={{ background: "#111", color: "white" }}
+                >
+                  {dd.options.map((o) => (
+                    <option key={o} value={o} style={{ background: "#111" }}>
+                      {dd.labelMap?.[o] ?? o}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+              </div>
+              {dd.key === (cfg.overlayCtaKey || "ctaMode") && cfg.ctaModeNote && (
+                <p className="text-[11px] text-white/30 mt-1">{cfg.ctaModeNote}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── "Read caption" checkbox (overlay only) ── */}
+      {cfg.overlayCheckbox && (
+        <label className="flex items-center gap-2.5 cursor-pointer group">
+          <input type="checkbox" checked={form.readCaption !== "false"}
+            onChange={(e) => setF("readCaption", e.target.checked ? "true" : "false")}
+            className="w-4 h-4 rounded accent-[#C9A44C]" disabled={anyActive}
+          />
+          <span className="text-[12px] text-white/60 group-hover:text-white/80 transition-colors select-none">
+            Include "Read caption" bridge text
+          </span>
+        </label>
+      )}
+
+      {/* ── Comment word (shown when ctaMode=comment or ctaType=keyword) ── */}
+      {needsCommentWord && (
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Comment Word</label>
+          <input type="text" disabled={anyActive} value={form.commentWord}
+            onChange={(e) => setF("commentWord", e.target.value.toUpperCase().replace(/[^\w\-]/g, "").slice(0, 24))}
+            placeholder="GO"
+            className="w-48 rounded-xl border border-white/[0.08] text-[14px] font-bold text-white placeholder-white/20 px-4 py-2.5 focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40 tracking-widest"
+            style={{ background: "#111" }} />
+        </div>
+      )}
+
+      {/* ── Context textarea ── */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+          {cfg.contextLabel}
+        </label>
+        <textarea disabled={anyActive} value={form.context}
+          onChange={(e) => setF("context", e.target.value)}
+          rows={3} placeholder={cfg.contextPlaceholder}
+          className="w-full rounded-xl border border-white/[0.08] text-[13px] text-white placeholder-white/25 px-4 py-3 resize-none focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40"
+          style={{ background: "#111" }} />
+      </div>
+
+      {/* ── Step 1 ideas bar ── */}
+      <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: GOLD }}>{cfg.step1Label}</p>
+          <p className="text-[12px] text-white/40 mt-0.5">{cfg.step1Desc(form)}</p>
+        </div>
+        <button onClick={handleGenerateIdeas} disabled={anyActive}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl text-[13px] font-semibold text-black transition-all disabled:opacity-50 flex-shrink-0"
+          style={{ background: GOLD }}>
+          {ideasActive
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+            : <><Sparkles className="w-4 h-4" /> Generate 10 Ideas</>}
+        </button>
+      </div>
+
+      {/* Ideas progress */}
+      {ideasActive && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-[11px] text-white/40">
+            <span>{ideasJob.stage || "Brainstorming ideas…"}</span>
+            <span>{fmtEta(ideasJob.etaMs)}</span>
+          </div>
+          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${ideasJob.progressPct}%`, background: GOLD }} />
+          </div>
+        </div>
+      )}
+
+      {/* Ideas list */}
+      {ideas.length > 0 && (
+        <div className="grid grid-cols-2 gap-2">
+          {ideas.map((idea, idx) => {
+            const primary = cfg.ideaPrimary(idea);
+            const secondary = cfg.ideaSecondary?.(idea);
+            const badge = cfg.ideaBadge?.(idea);
+            const extra = cfg.ideaExtra?.(idea);
+            return (
+              <button key={idx}
+                onClick={() => { setF("context", cfg.ideaToContext(idea)); }}
+                className="text-left px-3.5 py-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#C9A44C]/30 transition-all group"
+              >
+                <div className="flex items-start gap-2">
+                  <span className="text-[11px] font-bold text-white/20 flex-shrink-0 mt-0.5">{idx + 1}.</span>
+                  <div className="min-w-0">
+                    {badge && <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: `${GOLD}99` }}>{badge}</p>}
+                    <p className="text-[13px] font-semibold text-white/90 leading-snug group-hover:text-white transition-colors">{primary}</p>
+                    {secondary && <p className="text-[11px] text-white/40 mt-1 leading-relaxed">{secondary}</p>}
+                    {extra && <p className="text-[11px] mt-1.5 italic" style={{ color: `${GOLD}88` }}>{extra}</p>}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Generate Script button ── */}
+      <button onClick={handleGenerateScript} disabled={anyActive}
+        className="w-full py-4 rounded-2xl text-[13px] font-semibold text-black transition-all disabled:opacity-50"
+        style={{ background: GOLD }}>
+        {scriptActive
+          ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Generating…</span>
+          : <span className="flex items-center justify-center gap-2"><Sparkles className="w-4 h-4" />{cfg.generateLabel(form)}</span>}
+      </button>
+
+      {/* ── Result ── */}
+      {result && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-white/30">Generated Script</p>
+            <button onClick={handleGenerateScript} disabled={anyActive}
+              className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-40">
+              <RefreshCw className="w-3.5 h-3.5" /> Regenerate
+            </button>
+          </div>
+          <ScriptResult result={result} def={def} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── FastMotion Result ────────────────────────────────────────────────────────
 
 function FastMotionResult({ result }: { result: any }) {
@@ -2689,6 +3263,8 @@ export default function ScriptWriterPage() {
           <GreenScreenPanel key="green-screen" />
         ) : activeDef.slug === "hook-demo" ? (
           <HookDemoPanel key="hook-demo" />
+        ) : TSP_CONFIGS[activeDef.slug] ? (
+          <TextScriptPanel key={activeDef.slug} def={activeDef} />
         ) : (
           /* key forces re-mount on type change so each type gets its own isolated state */
           <ScriptPanel
