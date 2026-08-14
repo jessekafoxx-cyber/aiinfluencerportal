@@ -265,6 +265,10 @@ const generateBody = z.object({
   notes: z.string().trim().max(800).optional().nullable(),
   facialHair: z.enum(PREF_FACIAL_HAIR_VALUES).optional().nullable(),
   hairstyle: z.enum(PREF_HAIRSTYLE_VALUES).optional().nullable(),
+  // Optional reference image object paths uploaded by the buyer via
+  // /storage/uploads/request-url. Persisted in prefs.referenceImagePaths
+  // so the ops team can view them when crafting the influencer.
+  referenceImagePaths: z.array(z.string()).max(5).optional().nullable(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -411,7 +415,13 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
         .insert(aiInfluencerJobsTable)
         .values({
           clientId: userId,
-          prefs: { ...basePrefs, characterProfile },
+          prefs: {
+            ...basePrefs,
+            characterProfile,
+            referenceImagePaths: parsed.data.referenceImagePaths?.length
+              ? parsed.data.referenceImagePaths
+              : undefined,
+          },
           etaAt,
           isFreeTier: true,
           status: "queued",

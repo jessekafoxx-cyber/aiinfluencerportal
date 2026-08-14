@@ -33,6 +33,7 @@ import AssetsDocs from "@/pages/assets-docs";
 import Support from "@/pages/support";
 import Settings from "@/pages/settings";
 import YourInfluencers from "@/pages/your-influencers";
+import GenerateInfluencer from "@/pages/generate-influencer";
 import AnnouncementsFeed from "@/pages/announcements";
 import Onboarding from "@/pages/onboarding";
 import YourBuild from "@/pages/your-build";
@@ -276,6 +277,9 @@ function AppRoutes() {
           </Route>
           <Route path="/your-influencers">
             <ProtectedRoute><YourInfluencers /></ProtectedRoute>
+          </Route>
+          <Route path="/generate-influencer">
+            <ProtectedRoute><GenerateInfluencer /></ProtectedRoute>
           </Route>
           <Route path="/masterclass">
             <ProtectedRoute><Masterclass /></ProtectedRoute>

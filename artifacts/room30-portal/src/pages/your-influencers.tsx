@@ -148,15 +148,13 @@ export default function YourInfluencers() {
     function maybeOpenFromUrl() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("open") === "generate") {
-        setShowGenerate(true);
         params.delete("open");
-        const rest = params.toString();
-        const next = window.location.pathname + (rest ? `?${rest}` : "");
-        window.history.replaceState({}, "", next);
+        window.history.replaceState({}, "", window.location.pathname);
+        setLocation("/generate-influencer");
       }
     }
     function onCustom() {
-      setShowGenerate(true);
+      setLocation("/generate-influencer");
     }
     maybeOpenFromUrl();
     window.addEventListener("popstate", maybeOpenFromUrl);
@@ -509,7 +507,7 @@ export default function YourInfluencers() {
           <div className="flex items-center gap-2">
             {canGenerate ? (
               <button
-                onClick={() => setShowGenerate(true)}
+                onClick={() => setLocation("/generate-influencer")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-black font-bold uppercase text-[12px] tracking-wider"
                 style={{ background: GOLD }}
                 data-testid="button-generate-free-influencer"
