@@ -13,14 +13,12 @@
 // hookDemo, doneForYouPack, platinum. If any of those start promising
 // extras, sum them here so the cap stays in one place.
 export function computeBonusInfluencerQuota(flags: {
-  isAdmin?: boolean;
   upsell2Paid?: boolean;
   portfolioPaid?: boolean;
   bonusInfluencerQuota?: number | null;
 }): number {
-  const isAdmin = !!flags.isAdmin;
-  const upsell2 = isAdmin || !!flags.upsell2Paid ? 5 : 0;
-  const portfolio = isAdmin || !!flags.portfolioPaid ? 5 : 0;
+  const upsell2 = !!flags.upsell2Paid ? 5 : 0;
+  const portfolio = !!flags.portfolioPaid ? 5 : 0;
   const override = Math.max(0, Number(flags.bonusInfluencerQuota ?? 0));
   return upsell2 + portfolio + override;
 }

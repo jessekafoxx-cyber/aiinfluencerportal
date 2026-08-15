@@ -593,7 +593,6 @@ export async function computePurchaseEntitlements(user: any): Promise<{
     // bump1/bump2/bump3, upsell1, upsell3, downsell1, tiktokSlideshow,
     // hookDemo, doneForYouPack, platinum. Re-audit before changing.
     bonusInfluencerQuota: computeBonusInfluencerQuota({
-      isAdmin,
       bonusInfluencerQuota: user?.bonusInfluencerQuota,
     }),
     whopUserId: null as string | null,
@@ -694,7 +693,6 @@ export async function computePurchaseEntitlements(user: any): Promise<{
     // hookDemo, doneForYouPack, platinum. If any of those start
     // promising extras, sum them here so the cap stays in one place.
     bonusInfluencerQuota: computeBonusInfluencerQuota({
-      isAdmin,
       upsell2Paid: any("upsell2Paid"),
       portfolioPaid: any("portfolioPaid"),
       bonusInfluencerQuota: user?.bonusInfluencerQuota,
