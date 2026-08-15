@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/members/"
-title = "Room30 Portal"
+title = "AI Influencer Publishing Portal"
 description = "Members portal for Room30 AI influencer masterclass — course player, dashboard, onboarding, roadmap, admin console, and DFY resource pages."
 version = "1.0.0"
 id = "artifacts/room30-portal"
