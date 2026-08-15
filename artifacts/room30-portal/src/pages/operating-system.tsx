@@ -187,6 +187,7 @@ const TOOLS: ToolDef[] = [
     phase: "ads-scaling",
     color: "#10b981",
     fields: [],
+    navigateTo: "/direct-offer-ad-generator",
   },
   {
     slug: "kpi-generator",
