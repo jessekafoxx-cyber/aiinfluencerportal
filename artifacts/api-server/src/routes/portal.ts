@@ -4907,12 +4907,20 @@ portalRouter.get("/portal/me/credits-status", requireAuth, async (req: any, res)
   });
 
   const aiUsageCents = user.aiUsageCents || 0;
+  const researchEnt = computeResearchEntitlement(user);
   res.json({
     aiUsageCents,
     freeCents: AI_USAGE_FREE_CENTS,
     overLimit: aiUsageCents >= AI_USAGE_FREE_CENTS,
     notifiedAt: user.aiOverlimitNotifiedAt,
     dismissedAt: user.aiOverlimitDismissedAt,
+    research: {
+      freeTotal: researchEnt.freeRunsTotal,
+      freeRemaining: researchEnt.freeRunsRemaining,
+      paidCredits: researchEnt.paidCredits,
+      completedCount: researchEnt.completedCount,
+      canGenerate: researchEnt.canGenerate,
+    },
     paidPacks: {
       research: user.researchPaidCredits || 0,
       osTool: user.osToolPaidCredits || 0,

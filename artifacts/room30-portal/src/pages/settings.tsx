@@ -24,6 +24,13 @@ type CreditsStatus = {
   overLimit: boolean;
   notifiedAt: string | null;
   dismissedAt: string | null;
+  research: {
+    freeTotal: number;
+    freeRemaining: number;
+    paidCredits: number;
+    completedCount: number;
+    canGenerate: boolean;
+  };
   paidPacks: {
     research: number;
     osTool: number;
@@ -407,144 +414,126 @@ function AccountSection() {
   );
 }
 
-type Pack = {
-  id: string;
-  credits: number;
-  amountCents: number;
-  label: string;
-  tagline: string;
-};
+// Market research credit packs with direct Stripe payment links.
+const RESEARCH_CREDIT_PACKS = [
+  {
+    id: "starter",
+    label: "Starter",
+    tagline: "Top-up",
+    stripeUrl: "https://buy.stripe.com/9B6dR881G2rbgzAdd6cV200",
+    highlighted: false,
+  },
+  {
+    id: "standard",
+    label: "Standard",
+    tagline: "Most popular",
+    stripeUrl: "https://buy.stripe.com/00wcN44Pud5PersgpicV201",
+    highlighted: true,
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tagline: "More credits",
+    stripeUrl: "https://buy.stripe.com/6oUcN42Hm8Pz4QS2yscV202",
+    highlighted: false,
+  },
+  {
+    id: "max",
+    label: "Max",
+    tagline: "Best value",
+    stripeUrl: "https://buy.stripe.com/5kQ4gy1Di3vf5UWc92cV203",
+    highlighted: false,
+  },
+];
 
 function CreditsSection({
   status,
-  onChange,
 }: {
   status: CreditsStatus;
   onChange: () => void;
 }) {
-  const [buying, setBuying] = useState<string | null>(null);
-  const [packs, setPacks] = useState<Pack[]>([]);
+  const research = status.research ?? {
+    freeTotal: 2,
+    freeRemaining: 0,
+    paidCredits: status.paidPacks.research,
+    completedCount: 0,
+    canGenerate: false,
+  };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.getOSToolCreditPacks();
-        setPacks(res?.packs || []);
-      } catch {
-        setPacks([]);
-      }
-    })();
-  }, []);
-
-  const usage = status.aiUsageCents || 0;
-  const overByCents = Math.max(0, usage - status.freeCents);
-
-  async function buyPack(packId: string) {
-    if (buying) return;
-    setBuying(packId);
-    try {
-      // Use the actual runtime path so the redirect preserves the portal base
-      // mount (e.g. /portal/settings in production).
-      const returnPath = window.location.pathname + window.location.search;
-      const res = await api.purchaseOSToolCredits(packId, returnPath);
-      if (res?.url) {
-        window.location.href = res.url;
-        return;
-      }
-      throw new Error("Could not start checkout");
-    } catch (e: any) {
-      toast({
-        title: "Could not start checkout",
-        description: e?.message || "Please try again or contact support.",
-        variant: "destructive",
-      });
-      setBuying(null);
-    }
-  }
+  const totalAvailable = research.freeRemaining + research.paidCredits;
 
   return (
-    <div className={SECTION_CARD}>
-      <SectionTitle
-        eyebrow="AI credits"
-        title="Top up your usage"
-        subtitle={
-          status.overLimit
-            ? "You have used your included AI credits. Top up below to keep generating research, ad copy, and offers."
-            : "Purchase additional AI credits to keep generating research, ad copy, and offers."
-        }
-      />
+    <div className="space-y-6">
+      {/* Balance card */}
+      <div className={SECTION_CARD}>
+        <SectionTitle
+          eyebrow="Market research"
+          title="Your credits"
+          subtitle="Each generation uses one credit. You start with 2 free credits — top up any time to keep running."
+        />
 
-      {status.overLimit ? (
-        <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-5 mb-6 flex items-start gap-3">
-          <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
-          <div className="text-[13px] text-amber-100/90 leading-relaxed">
-            You have used {formatAmount(usage)} of AI generation. Your existing
-            work stays where it is. Top-ups unlock new generations.
-          </div>
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold">
-            Usage to date
-          </div>
-          <div className="text-[22px] font-bold text-white mt-1.5">
-            {formatAmount(usage)}
-          </div>
-          {overByCents > 0 ? (
-            <div className="text-[12px] text-amber-300 mt-1">
-              {formatAmount(overByCents)} past included
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
+          <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+            <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+              Available
             </div>
-          ) : null}
-        </div>
-        <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold">
-            Research credits
+            <div
+              className={`text-[28px] font-bold ${
+                totalAvailable > 0 ? "text-emerald-300" : "text-white/40"
+              }`}
+            >
+              {totalAvailable}
+            </div>
+            <div className="text-[11px] text-white/40 mt-1">
+              {research.freeRemaining > 0
+                ? `${research.freeRemaining} free · ${research.paidCredits} purchased`
+                : research.paidCredits > 0
+                  ? `${research.paidCredits} purchased`
+                  : "No credits remaining"}
+            </div>
           </div>
-          <div className="text-[22px] font-bold text-emerald-300 mt-1.5">
-            {status.paidPacks.research}
+          <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+            <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+              Free included
+            </div>
+            <div className="text-[28px] font-bold text-white/70">
+              {research.freeTotal}
+            </div>
+            <div className="text-[11px] text-white/40 mt-1">
+              {research.freeRemaining} remaining
+            </div>
           </div>
-        </div>
-        <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold">
-            OS Tool credits
-          </div>
-          <div className="text-[22px] font-bold text-emerald-300 mt-1.5">
-            {status.paidPacks.osTool}
+          <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+            <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+              Total runs
+            </div>
+            <div className="text-[28px] font-bold text-white/70">
+              {research.completedCount}
+            </div>
+            <div className="text-[11px] text-white/40 mt-1">completed</div>
           </div>
         </div>
       </div>
 
-      <div className="text-[12px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-3">
-        Choose a top up
+      {/* Pack cards */}
+      <div className={SECTION_CARD}>
+        <SectionTitle
+          eyebrow="Top up"
+          title="Credit packs"
+          subtitle="Buy credits to run additional market research generations. Credits are applied to your account automatically after purchase."
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {RESEARCH_CREDIT_PACKS.map((pack) => (
+            <ResearchPackCard key={pack.id} pack={pack} />
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-        {packs.length === 0 ? (
-          <div className="col-span-full text-center text-white/45 text-[13px] py-6">
-            Loading packs.
-          </div>
-        ) : (
-          packs.map((p, i) => (
-            <PackCard
-              key={p.id}
-              slug={p.id}
-              label={p.label}
-              tagline={p.tagline}
-              amount={p.amountCents}
-              credits={p.credits}
-              onBuy={buyPack}
-              buying={buying === p.id}
-              highlighted={i === 1}
-            />
-          ))
-        )}
-      </div>
-
+      {/* Purchase history */}
       {status.paidPacks.history.length > 0 ? (
-        <div>
-          <div className="text-[12px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-3">
+        <div className={SECTION_CARD}>
+          <div className="text-[12px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-4">
             Purchase history
           </div>
           <div className="rounded-lg border border-white/[0.06] overflow-hidden">
@@ -593,7 +582,7 @@ function CreditsSection({
                           View <ExternalLink size={12} />
                         </a>
                       ) : (
-                        <span className="text-white/45">.</span>
+                        <span className="text-white/45">—</span>
                       )}
                     </td>
                   </tr>
@@ -604,6 +593,51 @@ function CreditsSection({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function ResearchPackCard({
+  pack,
+}: {
+  pack: (typeof RESEARCH_CREDIT_PACKS)[number];
+}) {
+  return (
+    <a
+      href={pack.stripeUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`block rounded-xl border p-5 transition hover:scale-[1.01] active:scale-[0.99] ${
+        pack.highlighted
+          ? "border-[#C9A44C]/40 bg-gradient-to-br from-[#1a1410] to-[#161616] shadow-[0_0_0_1px_rgba(201,164,76,0.1)_inset]"
+          : "border-white/[0.07] bg-[#161616] hover:border-white/[0.14]"
+      }`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <div
+            className="text-[16px] font-bold uppercase tracking-[0.06em] text-white"
+            style={{ fontFamily: "var(--app-font-display)" }}
+          >
+            {pack.label}
+          </div>
+          <div className="text-[12px] text-white/55 mt-0.5">{pack.tagline}</div>
+        </div>
+        {pack.highlighted ? (
+          <span className="inline-flex items-center rounded-full bg-[#C9A44C]/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9A44C]">
+            <Sparkles size={10} className="mr-1" /> Popular
+          </span>
+        ) : null}
+      </div>
+      <div
+        className={`w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-[12px] font-bold uppercase tracking-[0.14em] mt-2 transition ${
+          pack.highlighted
+            ? "bg-gradient-to-br from-[#7c3aed] via-[#a855f7] to-[#c026d3] text-white shadow-[0_8px_24px_rgba(124,58,237,0.32)]"
+            : "border border-white/[0.12] bg-white/[0.04] text-white"
+        }`}
+      >
+        <CreditCard size={14} /> Buy credits
+      </div>
+    </a>
   );
 }
 
