@@ -467,16 +467,22 @@ function CreditsSection({
       <SectionTitle
         eyebrow="AI credits"
         title="Top up your usage"
-        subtitle="You have used your included AI credits. Top up below to keep generating research, ad copy, and offers."
+        subtitle={
+          status.overLimit
+            ? "You have used your included AI credits. Top up below to keep generating research, ad copy, and offers."
+            : "Purchase additional AI credits to keep generating research, ad copy, and offers."
+        }
       />
 
-      <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-5 mb-6 flex items-start gap-3">
-        <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
-        <div className="text-[13px] text-amber-100/90 leading-relaxed">
-          You have used {formatAmount(usage)} of AI generation. Your existing
-          work stays where it is. Top-ups unlock new generations.
+      {status.overLimit ? (
+        <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-5 mb-6 flex items-start gap-3">
+          <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="text-[13px] text-amber-100/90 leading-relaxed">
+            You have used {formatAmount(usage)} of AI generation. Your existing
+            work stays where it is. Top-ups unlock new generations.
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
@@ -722,8 +728,6 @@ export default function Settings() {
     loadCredits();
   }, []);
 
-  const showCreditsTab = !!credits?.overLimit;
-
   return (
     <PortalLayout>
       <div className={PORTAL_PAGE_CLASS}>
@@ -738,7 +742,7 @@ export default function Settings() {
             Settings
           </h1>
           <p className="text-[14px] text-white/60 mt-3 max-w-[560px]">
-            Manage your profile and account.
+            Manage your profile, sign-in security, and account.
           </p>
         </div>
 
@@ -752,34 +756,46 @@ export default function Settings() {
                 label="Profile"
               />
               <TabButton
+                active={tab === "security"}
+                onClick={() => setTab("security")}
+                icon={Lock}
+                label="Security"
+              />
+              <TabButton
                 active={tab === "account"}
                 onClick={() => setTab("account")}
                 icon={Mail}
                 label="Account"
               />
-              {showCreditsTab ? (
-                <TabButton
-                  active={tab === "credits"}
-                  onClick={() => setTab("credits")}
-                  icon={CreditCard}
-                  label="Credits"
-                />
-              ) : null}
+              <TabButton
+                active={tab === "credits"}
+                onClick={() => setTab("credits")}
+                icon={CreditCard}
+                label="Credits"
+              />
             </div>
           </aside>
 
           <div className="min-w-0">
             {tab === "profile" ? <ProfileSection /> : null}
+            {tab === "security" ? <SecuritySection /> : null}
             {tab === "account" ? <AccountSection /> : null}
-            {tab === "credits" && credits?.overLimit ? (
-              <CreditsSection status={credits} onChange={loadCredits} />
-            ) : null}
-            {tab === "credits" && !credits?.overLimit && !creditsLoading ? (
-              <div className={SECTION_CARD}>
-                <div className="text-white/60 text-[14px]">
-                  Nothing to manage here yet.
+            {tab === "credits" ? (
+              creditsLoading ? (
+                <div className={SECTION_CARD}>
+                  <div className="flex items-center gap-2 text-white/50 text-[13px]">
+                    <Loader2 size={14} className="animate-spin" /> Loading credits…
+                  </div>
                 </div>
-              </div>
+              ) : credits ? (
+                <CreditsSection status={credits} onChange={loadCredits} />
+              ) : (
+                <div className={SECTION_CARD}>
+                  <div className="text-white/60 text-[14px]">
+                    Could not load credits. Please refresh.
+                  </div>
+                </div>
+              )
             ) : null}
           </div>
         </div>
