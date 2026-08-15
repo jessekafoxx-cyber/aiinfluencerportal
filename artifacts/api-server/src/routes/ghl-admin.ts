@@ -231,6 +231,10 @@ const productSchema = z.object({
       (v) => (typeof v === "string" && v.trim() === "" ? null : v),
       z.string().trim().url().max(2000).refine((u) => /^https?:\/\//i.test(u), "must be http(s)").optional().nullable(),
     ),
+  // How many bonus influencer generation credits this product grants on purchase.
+  // 0 (default) means no influencer credit grant. When > 0, grantProductToUser
+  // increments portal_users.bonus_influencer_quota by this amount atomically.
+  bonusInfluencerQty: z.number().int().min(0).max(1000).default(0),
 });
 
 router.post("/products", async (req: Request, res: Response) => {
@@ -257,6 +261,7 @@ router.post("/products", async (req: Request, res: Response) => {
       active: d.active,
       ghlProductId: d.ghlProductId || null,
       purchaseUrl: d.purchaseUrl ?? null,
+      bonusInfluencerQty: d.bonusInfluencerQty ?? 0,
     })
     .returning();
   return res.status(201).json({ product });
@@ -288,6 +293,7 @@ router.put("/products/:id", async (req: Request, res: Response) => {
       active: d.active,
       ghlProductId: d.ghlProductId || null,
       purchaseUrl: d.purchaseUrl ?? null,
+      bonusInfluencerQty: d.bonusInfluencerQty ?? 0,
       updatedAt: new Date(),
     })
     .where(eq(productsTable.id, id))

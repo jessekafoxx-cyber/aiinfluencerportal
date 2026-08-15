@@ -50,6 +50,11 @@ export const productsTable = pgTable("products", {
   // the "purchasing has moved" contact notice. Entitlements still land via
   // the GHL purchase webhook after the buyer completes checkout there.
   purchaseUrl: text("purchase_url"),
+  // How many bonus influencer generations this product grants on purchase.
+  // When > 0, grantProductToUser increments portal_users.bonus_influencer_quota
+  // atomically. On revoke, unused credits are clawed back (mirroring the
+  // revokeInfluencerCreditsForPaymentIntent behaviour). Default 0 = no grant.
+  bonusInfluencerQty: integer("bonus_influencer_qty").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

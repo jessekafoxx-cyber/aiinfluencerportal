@@ -257,6 +257,28 @@ async function applyGrantSideEffects(
 ): Promise<string[]> {
   const granted: string[] = [];
 
+  // Bonus influencer generation credits. Idempotency is carried by the
+  // purchases row unique index (userId + productId WHERE revokedAt IS NULL):
+  // applyGrantSideEffects is only called after a successful insert (or on a
+  // confirmed-existing active purchase row), so the increment runs at most
+  // once per active purchase. A revoke + re-grant creates a new purchase row
+  // and therefore a new increment — which is the correct behaviour.
+  const bonusQty = Number(product.bonusInfluencerQty ?? 0);
+  if (bonusQty > 0) {
+    await db
+      .update(portalUsersTable)
+      .set({
+        bonusInfluencerQuota: sql`${portalUsersTable.bonusInfluencerQuota} + ${bonusQty}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(portalUsersTable.id, user.id));
+    granted.push(`influencer_credits:+${bonusQty}`);
+    logger.info(
+      { portalUserId: user.id, email: user.email, qty: bonusQty, productSlug: product.slug },
+      "[ghl-entitlements] influencer bonus credits granted",
+    );
+  }
+
   if (product.grantsFullPortal) {
     await db
       .update(portalUsersTable)
@@ -378,6 +400,33 @@ export async function revokeProductFromUser(
       revoked.push(key);
     }
     await db.update(ordersTable).set(updates).where(ghlRowsOnly);
+  }
+
+  // Claw back unused influencer bonus credits. Only revoke what's still
+  // in the pool (the user may have consumed some already — those stay).
+  const bonusQty = Number(product.bonusInfluencerQty ?? 0);
+  if (bonusQty > 0) {
+    const [userRow] = await db
+      .select({ bonus: portalUsersTable.bonusInfluencerQuota })
+      .from(portalUsersTable)
+      .where(eq(portalUsersTable.id, user.id))
+      .limit(1);
+    const currentBonus = Math.max(0, Number(userRow?.bonus ?? 0));
+    const toRevoke = Math.min(bonusQty, currentBonus);
+    if (toRevoke > 0) {
+      await db
+        .update(portalUsersTable)
+        .set({
+          bonusInfluencerQuota: sql`GREATEST(0, ${portalUsersTable.bonusInfluencerQuota} - ${toRevoke})`,
+          updatedAt: new Date(),
+        })
+        .where(eq(portalUsersTable.id, user.id));
+      revoked.push(`influencer_credits:-${toRevoke}`);
+      logger.info(
+        { portalUserId: user.id, email: user.email, toRevoke, productSlug: product.slug },
+        "[ghl-entitlements] influencer bonus credits revoked",
+      );
+    }
   }
 
   return revoked;

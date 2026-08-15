@@ -26,6 +26,7 @@ type Product = {
   active: boolean;
   ghlProductId: string | null;
   purchaseUrl: string | null;
+  bonusInfluencerQty: number;
   activePurchases: number;
 };
 
@@ -62,6 +63,7 @@ type FormState = {
   active: boolean;
   ghlProductId: string;
   purchaseUrl: string;
+  bonusInfluencerQty: number;
 };
 
 const emptyForm: FormState = {
@@ -75,6 +77,7 @@ const emptyForm: FormState = {
   active: true,
   ghlProductId: "",
   purchaseUrl: "",
+  bonusInfluencerQty: 0,
 };
 
 function slugify(name: string) {
@@ -105,6 +108,7 @@ export function AdminGhlProducts() {
         active: f.active,
         ghlProductId: f.ghlProductId.trim() || null,
         purchaseUrl: f.purchaseUrl.trim() || null,
+        bonusInfluencerQty: Math.max(0, Math.trunc(f.bonusInfluencerQty || 0)),
       };
       return f.id == null ? API.create(body) : API.update(f.id, body);
     },
@@ -266,6 +270,23 @@ export function AdminGhlProducts() {
                   className="mt-1 w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 font-mono"
                 />
               </label>
+              <label className="text-sm text-white/60">
+                Bonus influencer generations on purchase
+                <input
+                  type="number"
+                  min={0}
+                  max={1000}
+                  step={1}
+                  value={form.bonusInfluencerQty}
+                  onChange={(e) =>
+                    setForm((f) => f && { ...f, bonusInfluencerQty: Math.max(0, Math.trunc(Number(e.target.value) || 0)) })
+                  }
+                  className="mt-1 w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80"
+                />
+                <span className="text-[11px] text-white/35 mt-0.5 block">
+                  0 = no grant. Set to 5 for a "5 influencer credits" top-up.
+                </span>
+              </label>
               <label className="text-sm text-white/60 sm:col-span-2">
                 Description
                 <textarea
@@ -375,7 +396,11 @@ export function AdminGhlProducts() {
                   </td>
                   <td className="py-3 pr-4 font-mono text-xs">{p.slug}</td>
                   <td className="py-3 pr-4 text-xs text-white/60">
-                    {[p.grantsFullPortal ? "full portal" : null, ...p.entitlements].filter(Boolean).join(", ") || "—"}
+                    {[
+                      p.grantsFullPortal ? "full portal" : null,
+                      ...p.entitlements,
+                      p.bonusInfluencerQty > 0 ? `+${p.bonusInfluencerQty} influencer credits` : null,
+                    ].filter(Boolean).join(", ") || "—"}
                   </td>
                   <td className="py-3 pr-4">
                     <span
@@ -409,6 +434,7 @@ export function AdminGhlProducts() {
                             active: p.active,
                             ghlProductId: p.ghlProductId ?? "",
                             purchaseUrl: p.purchaseUrl ?? "",
+                            bonusInfluencerQty: p.bonusInfluencerQty ?? 0,
                           })
                         }
                         className="p-2 rounded-lg bg-white/5 hover:bg-white/15 text-white/70"
