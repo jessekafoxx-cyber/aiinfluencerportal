@@ -44,7 +44,7 @@ const adminNavItems: AdminNavItem[] = [
   { href: "/admin/users", label: "Users", icon: Users, cap: "users.view" },
   { href: "/admin/logs", label: "Access Logs", icon: FileText, cap: "logs.view" },
   { href: "/admin/invites", label: "Invites", icon: Mail, cap: "users.invite" },
-  { href: "/admin/support-knowledge", label: "Steph Support Knowledge", icon: LifeBuoy },
+  { href: "/admin/support-knowledge", label: "Alana Support Knowledge", icon: LifeBuoy },
   { href: "/admin/announcements", label: "Announcements", icon: Bell },
   { href: "/admin/api-webhooks", label: "API & Webhooks", icon: KeyRound },
   { href: "/admin/products", label: "Products", icon: Package },

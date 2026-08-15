@@ -430,7 +430,7 @@ startWebinarSessionScheduler();
 import { startDailyHealthCheckScheduler } from "./lib/daily-health-check-scheduler";
 startDailyHealthCheckScheduler();
 
-// Steph (AI support bot) daily Slack digest. Once a day (default 07:00
+// Alana (AI support bot) daily Slack digest. Once a day (default 07:00
 // UTC, SUPPORT_BOT_SUMMARY_HOUR_UTC to change) the worker summarizes the
 // last 24h of support bot conversations - major issues, what the bot
 // sorted, what needed a human, improvement ideas - and posts it to

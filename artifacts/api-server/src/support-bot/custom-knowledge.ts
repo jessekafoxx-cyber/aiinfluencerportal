@@ -3,7 +3,7 @@ import { upsertSupportDoc } from "./knowledge-ingest";
 import { fetchYoutubeChannel } from "../lib/knowledge/youtube";
 import { logger } from "../lib/logger";
 
-// Admin-added custom knowledge for Steph: pasted docs and YouTube
+// Admin-added custom knowledge for Alana: pasted docs and YouTube
 // videos/channels. Stored in the same support_knowledge_* tables as the
 // masterclass content, under sourceType 'manual' | 'youtube', so retrieval
 // picks everything up with zero extra plumbing.

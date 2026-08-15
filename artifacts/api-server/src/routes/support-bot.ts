@@ -500,7 +500,7 @@ router.post("/support-bot/chat", async (req: Request, res: Response) => {
         `\n\nFIRST MESSAGE OF THIS CONVERSATION: This is the customer's very first message. Open your reply with a short, warm acknowledgement along these lines (use your own words, keep it natural and brief): "Hey, thanks for your message! Just so you know, there's a real human team behind me - if you ever need them, I'll show you how to reach them. But I can usually sort things for you right here." Then answer their actual question in the same message. Never repeat this reassurance in later replies unless they ask how to reach the team.`;
     }
     // RAG: pull the most relevant masterclass content (lesson notes +
-    // video transcripts) for this question so Steph answers with real,
+    // video transcripts) for this question so Alana answers with real,
     // specific course material instead of signposting. Fail-open: any
     // error and she answers from the static knowledge base alone.
     // Short follow-ups ("ok but what tool should I use") carry no topic on

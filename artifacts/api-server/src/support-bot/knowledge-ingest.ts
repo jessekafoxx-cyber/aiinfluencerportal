@@ -10,7 +10,7 @@ import {
 import { chunkText, embedBatch } from "../lib/knowledge/embeddings";
 import { logger } from "../lib/logger";
 
-// Builds Steph's masterclass knowledge store from two sources per lesson:
+// Builds Alana's masterclass knowledge store from two sources per lesson:
 //  - 'lesson_notes': title + brief + AI lesson notes (always available)
 //  - 'lesson_transcript': Wistia video captions (requires WISTIA_API_KEY)
 // Hash-guarded so unchanged lessons cost nothing on re-runs.
@@ -190,7 +190,7 @@ export interface IngestSummary {
   wistiaPruned: number;
 }
 
-// Extra Wistia folders (projects) + individual videos that Steph should
+// Extra Wistia folders (projects) + individual videos that Alana should
 // learn from, beyond the course lessons. Scanned on every scheduler run
 // (every 6h) so newly uploaded videos are picked up within the week.
 const WISTIA_EXTRA_FOLDERS = ["i0sbnf4a41", "1vshjeymfr", "qw8c3fk3qk"];

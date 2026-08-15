@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 
 /**
- * StephChatWidget - floating support chat bubble backed by the in-house
+ * AlanaChatWidget - floating support chat bubble backed by the in-house
  * AI support bot (POST /api/support-bot/chat). Replaces Intercom.
  *
  * The session id is persisted in localStorage so the conversation
@@ -10,8 +10,8 @@ import { MessageCircle, Send, X } from "lucide-react";
  * API is stateless from the client's point of view.
  */
 
-const SESSION_KEY = "steph_session_id";
-const MESSAGES_KEY = "steph_messages";
+const SESSION_KEY = "alana_session_id";
+const MESSAGES_KEY = "alana_messages";
 const MAX_CACHED_MESSAGES = 50;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -44,7 +44,7 @@ function saveCachedMessages(messages: ChatMessage[]): void {
   }
 }
 
-export function StephChatWidget() {
+export function AlanaChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
@@ -190,7 +190,7 @@ export function StephChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999]" data-testid="steph-chat-widget">
+    <div className="fixed bottom-4 right-4 z-[9999]" data-testid="alana-chat-widget">
       {open && (
         <div
           className="mb-3 w-[min(92vw,380px)] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
@@ -220,7 +220,7 @@ export function StephChatWidget() {
                   AI Influencer Portfolio Support
                 </p>
                 <p className="text-[11px] text-white/55 leading-tight">
-                  Steph - here 24/7
+                  Alana - here 24/7
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export function StephChatWidget() {
               onClick={() => setOpen(false)}
               aria-label="Close chat"
               className="w-8 h-8 rounded-lg flex items-center justify-center text-white/55 hover:text-white hover:bg-white/[0.06] transition-colors"
-              data-testid="steph-chat-close"
+              data-testid="alana-chat-close"
             >
               <X className="w-4 h-4" />
             </button>
@@ -241,7 +241,7 @@ export function StephChatWidget() {
                   <MessageCircle className="w-5 h-5 text-[#C9A44C]" />
                 </div>
                 <p className="text-[14px] font-semibold text-white mb-1">
-                  Hey, I'm Steph :)
+                  Hey, I'm Alana :)
                 </p>
                 <p className="text-[12.5px] text-white/60 leading-relaxed">
                   Ask me anything about your purchase, the portal, billing or
@@ -271,7 +271,7 @@ export function StephChatWidget() {
               <div className="flex justify-start">
                 <div
                   className="bg-white/[0.07] rounded-2xl px-3.5 py-3 flex items-center gap-1"
-                  aria-label="Steph is typing"
+                  aria-label="Alana is typing"
                 >
                   {[0, 150, 300].map((delay) => (
                     <span
@@ -287,7 +287,7 @@ export function StephChatWidget() {
               <div className="flex justify-start">
                 <div
                   className="w-full max-w-[90%] rounded-2xl px-3.5 py-3 bg-white/[0.07]"
-                  data-testid="steph-escalate-form"
+                  data-testid="alana-escalate-form"
                 >
                   <p className="text-[12.5px] text-white/75 leading-relaxed mb-2">
                     Want the team to pick this up? Drop your email and I'll
@@ -306,7 +306,7 @@ export function StephChatWidget() {
                       }}
                       placeholder="you@email.com"
                       className="flex-1 min-w-0 bg-white/[0.05] border border-white/[0.12] rounded-lg px-3 py-2 text-[12.5px] text-white placeholder-white/30 focus:border-[#C9A44C]/45 focus:outline-none"
-                      data-testid="steph-escalate-email"
+                      data-testid="alana-escalate-email"
                     />
                     <button
                       onClick={() => void sendEscalation()}
@@ -315,7 +315,7 @@ export function StephChatWidget() {
                         escalateEmail.trim().indexOf("@") < 1
                       }
                       className="rounded-lg bg-[#C9A44C] hover:bg-[#B8902F] text-black text-[12.5px] font-semibold px-3.5 py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
-                      data-testid="steph-escalate-send"
+                      data-testid="alana-escalate-send"
                     >
                       {escalateSending ? "..." : "Send"}
                     </button>
@@ -349,14 +349,14 @@ export function StephChatWidget() {
                 rows={1}
                 className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-[13.5px] text-white placeholder-white/30 focus:border-[#C9A44C]/45 focus:outline-none resize-none"
                 style={{ minHeight: "42px", maxHeight: "110px" }}
-                data-testid="steph-chat-input"
+                data-testid="alana-chat-input"
               />
               <button
                 onClick={() => void send()}
                 disabled={!input.trim() || sending}
                 aria-label="Send message"
                 className="w-10 h-10 rounded-xl bg-[#C9A44C] hover:bg-[#B8902F] text-black flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
-                data-testid="steph-chat-send"
+                data-testid="alana-chat-send"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -374,7 +374,7 @@ export function StephChatWidget() {
             background: "linear-gradient(135deg, #D7B45C 0%, #C9A44C 55%, #A9853B 100%)",
             border: "1px solid rgba(255,255,255,0.15)",
           }}
-          data-testid="steph-chat-toggle"
+          data-testid="alana-chat-toggle"
         >
           {open ? (
             <X className="w-6 h-6 text-black" />

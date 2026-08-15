@@ -929,7 +929,7 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
               );
             })}
 
-            {/* Support - in-portal help center (articles + Steph chat) */}
+            {/* Support - in-portal help center (articles + Alana chat) */}
             <Link
               href="/support"
               onClick={() => setSidebarOpen(false)}

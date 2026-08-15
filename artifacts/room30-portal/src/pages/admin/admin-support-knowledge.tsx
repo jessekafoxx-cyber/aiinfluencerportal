@@ -148,7 +148,7 @@ export function AdminSupportKnowledge() {
         body: JSON.stringify({ title: docTitle, content: docContent }),
       });
       setDocTitle(""); setDocContent(""); setShowAddDoc(false);
-      setNotice("Doc added - Steph can use it immediately.");
+      setNotice("Doc added - Alana can use it immediately.");
       await load(true);
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "Failed to add doc");
@@ -176,7 +176,7 @@ export function AdminSupportKnowledge() {
   };
 
   const deleteDoc = async (doc: KnowledgeDoc) => {
-    if (!confirm(`Remove "${doc.title}" from Steph's knowledge?`)) return;
+    if (!confirm(`Remove "${doc.title}" from Alana's knowledge?`)) return;
     try {
       await fetchWithAuth(`/portal/admin/support-knowledge/docs/${doc.id}`, { method: "DELETE" });
       await load(true);
@@ -213,7 +213,7 @@ export function AdminSupportKnowledge() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-[#D4AF37]" /> Steph Support Knowledge
+              <BookOpen className="w-6 h-6 text-[#D4AF37]" /> Alana Support Knowledge
             </h1>
             <p className="text-white/55 text-sm mt-1">
               Everything the support bot can draw on when answering customers. The masterclass syncs automatically - add extra docs and YouTube content here.
@@ -311,7 +311,7 @@ export function AdminSupportKnowledge() {
                 <textarea
                   value={docContent}
                   onChange={(e) => setDocContent(e.target.value)}
-                  placeholder="Paste the content Steph should learn - docs, FAQs, SOPs, transcripts, anything text."
+                  placeholder="Paste the content Alana should learn - docs, FAQs, SOPs, transcripts, anything text."
                   rows={8}
                   className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 mb-3"
                 />
@@ -320,7 +320,7 @@ export function AdminSupportKnowledge() {
                   disabled={savingDoc || !docTitle.trim() || docContent.trim().length < 40}
                   className="flex items-center gap-1.5 text-sm bg-[#D4AF37] hover:bg-[#c8a22e] text-black font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
                 >
-                  {savingDoc ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Teach Steph this doc
+                  {savingDoc ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Teach Alana this doc
                 </button>
               </div>
             )}
@@ -402,7 +402,7 @@ export function AdminSupportKnowledge() {
                           <td className="px-4 py-2.5 text-white/45 hidden lg:table-cell">{relTime(d.updatedAt)}</td>
                           <td className="px-4 py-2.5 text-right">
                             {custom && (
-                              <button onClick={() => void deleteDoc(d)} className="text-white/30 hover:text-red-400" title="Remove from Steph's knowledge">
+                              <button onClick={() => void deleteDoc(d)} className="text-white/30 hover:text-red-400" title="Remove from Alana's knowledge">
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             )}

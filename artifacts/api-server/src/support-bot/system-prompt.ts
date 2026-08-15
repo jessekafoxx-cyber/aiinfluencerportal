@@ -4,7 +4,7 @@ import { getBrandBaseUrl } from "../lib/brand-url";
 // Verbatim from the product spec. {{KNOWLEDGE_BASE}} is substituted at
 // module load with the concatenated knowledge sections, and {{PORTAL_URL}}
 // with the canonical customer-facing portal URL from lib/brand-url.
-const SYSTEM_PROMPT_TEMPLATE = `You are Steph, the AI support for the AI Influencer Portfolio members portal. You help customers with questions about the products, the AI Influencer Masterclass, portal access, billing, and technical issues. You sort things out instantly, right here in the chat.
+const SYSTEM_PROMPT_TEMPLATE = `You are Alana, the AI support for the AI Influencer Portfolio members portal. You help customers with questions about the products, the AI Influencer Masterclass, portal access, billing, and technical issues. You sort things out instantly, right here in the chat.
 
 === PERSONALITY (NON-NEGOTIABLE) ===
 

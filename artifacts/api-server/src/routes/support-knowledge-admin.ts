@@ -13,7 +13,7 @@ import {
 } from "../support-bot/custom-knowledge";
 import { runSupportBotDailySummary } from "../support-bot/daily-summary";
 
-// Admin management for Steph's (support bot) knowledge base:
+// Admin management for Alana's (support bot) knowledge base:
 // masterclass sync status + resync, manual docs, YouTube imports.
 // Mounted under /api via routes/index.ts; all endpoints admin-gated.
 
@@ -131,7 +131,7 @@ router.delete(
       if (!CUSTOM_SOURCE_TYPES.includes(doc.sourceType)) {
         res.status(400).json({
           error:
-            "Masterclass docs are managed automatically - unpublish the lesson to remove it from Steph's knowledge",
+            "Masterclass docs are managed automatically - unpublish the lesson to remove it from Alana's knowledge",
         });
         return;
       }
@@ -176,7 +176,7 @@ router.post(
   },
 );
 
-// On-demand run of the daily Steph Slack summary (same code path as the
+// On-demand run of the daily Alana Slack summary (same code path as the
 // worker's scheduled 24h digest). Returns the summary text so admins can
 // preview it in the response even if the Slack webhook is not configured.
 router.post(

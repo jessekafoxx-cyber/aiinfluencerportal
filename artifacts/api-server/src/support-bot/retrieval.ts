@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { embedText } from "../lib/knowledge/embeddings";
 
-// Retrieval for Steph: pull the most relevant masterclass chunks for the
+// Retrieval for Alana: pull the most relevant masterclass chunks for the
 // customer's question and format them as a system-prompt block. Fail-open:
 // callers must treat errors / empty results as "answer without it".
 

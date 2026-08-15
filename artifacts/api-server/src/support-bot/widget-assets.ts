@@ -39,14 +39,14 @@ export const WIDGET_JS = `(function() {
                 '<div id="r30-header-info">' +
                     '<div id="r30-avatar">S</div>' +
                     '<div>' +
-                        '<div id="r30-title">Steph</div>' +
+                        '<div id="r30-title">Alana</div>' +
                         '<div id="r30-subtitle">AI Influencer Portfolio Support</div>' +
                     '</div>' +
                 '</div>' +
                 '<button id="r30-close" onclick="R30Support.toggle()">&times;</button>' +
             '</div>' +
             '<div id="r30-messages">' +
-                '<div class="r30-msg r30-bot"><div class="r30-bubble">Hey, I\\'m Steph, the AI support here. I can do everything you need. If at any point you do want to escalate this to the team, I\\'ll pass the whole chat straight over to them, but most things I can sort out here instantly for you.</div></div>' +
+                '<div class="r30-msg r30-bot"><div class="r30-bubble">Hey, I\\'m Alana, the AI support here. I can do everything you need. If at any point you do want to escalate this to the team, I\\'ll pass the whole chat straight over to them, but most things I can sort out here instantly for you.</div></div>' +
             '</div>' +
             '<div id="r30-input-area">' +
                 '<textarea id="r30-input" placeholder="Type a message..." rows="1"></textarea>' +

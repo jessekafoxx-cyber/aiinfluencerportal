@@ -12,7 +12,7 @@ import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Dashboard } from "./pages/dashboard";
 import { Masterclass } from "./pages/masterclass";
-import { StephChatWidget } from "./components/steph-chat-widget";
+import { AlanaChatWidget } from "./components/alana-chat-widget";
 import { CoursePlayer } from "./pages/course-player";
 import ScreenshotLesson from "@/pages/screenshot-lesson";
 import { AdminDashboard } from "./pages/admin/admin-dashboard";
@@ -257,7 +257,7 @@ function AuthUserCacheInvalidator() {
 
 function AuthedChatWidget() {
   const { isSignedIn } = useAuth();
-  return isSignedIn ? <StephChatWidget /> : null;
+  return isSignedIn ? <AlanaChatWidget /> : null;
 }
 
 // ── Route tree ─────────────────────────────────────────────────────────────

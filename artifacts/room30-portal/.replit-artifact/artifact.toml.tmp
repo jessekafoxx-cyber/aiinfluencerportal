@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/members/"
+title = "AiIP Portal"
+description = "Members portal for Room30 AI influencer masterclass — course player, dashboard, onboarding, roadmap, admin console, and DFY resource pages."
+version = "1.0.0"
+id = "artifacts/room30-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/members/" ]
+localPort = 21021
+
+[services.development]
+run = "pnpm --filter @workspace/room30-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/room30-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/room30-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21021"
+BASE_PATH = "/members/"

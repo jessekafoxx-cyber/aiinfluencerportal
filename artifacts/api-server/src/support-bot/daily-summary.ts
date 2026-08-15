@@ -1,4 +1,4 @@
-// Daily Steph (AI support bot) summary for Slack.
+// Daily Alana (AI support bot) summary for Slack.
 //
 // Once a day the worker compiles the last 24h of support_bot_sessions
 // into a short ops digest - what customers asked about, what the bot
@@ -180,7 +180,7 @@ function formatStatsBlock(stats: SupportBotDailyStats): string {
     .map(([k, v]) => `${k} ${v}`)
     .join(", ");
   const lines = [
-    ":robot_face: *Steph daily summary* (last 24h)",
+    ":robot_face: *Alana daily summary* (last 24h)",
     `- Conversations: ${stats.activeSessions} (${stats.newSessions} new), ${stats.userMessages} customer messages, ${stats.emailsCaptured} emails captured`,
     `- Handled by bot: ${stats.refundsIssued} refunds issued, ${stats.bugReportsFiled} bug reports filed, ${stats.influencerEscalations} influencer jobs escalated`,
     `- Handed to humans: ${stats.escalationsToHuman} escalation emails sent`,
@@ -212,7 +212,7 @@ async function generateAiSection(digests: SessionDigest[]): Promise<string> {
       {
         role: "system",
         content: [
-          "You are an ops analyst reviewing one day of conversations from Steph, the AI Influencer Portfolio support bot.",
+          "You are an ops analyst reviewing one day of conversations from Alana, the AI Influencer Portfolio support bot.",
           "You only see what CUSTOMERS wrote plus per-session flags (refund-issued, bug-report-filed, escalated-to-human, influencer-escalated mean the bot completed that action).",
           "Write a short Slack digest with exactly these four sections, each a bolded heading (*Heading*) followed by 1-4 short bullets starting with '- ':",
           "*Major issues* - the main problems/themes customers raised, with rough counts when a theme repeats.",
