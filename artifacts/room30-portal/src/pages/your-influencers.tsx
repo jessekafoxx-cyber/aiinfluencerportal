@@ -124,7 +124,6 @@ const VIBE_PRESETS = [
 export default function YourInfluencers() {
   const [, setLocation] = useLocation();
   const [q, setQ] = useState("");
-  const [showGenerate, setShowGenerate] = useState(false);
   const [showManualUpload, setShowManualUpload] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const { links: purchaseLinks } = usePurchaseLinks();
@@ -608,13 +607,13 @@ export default function YourInfluencers() {
                 setLocation(`/influencer/${inFlightJob.influencerId}`);
               }
             }}
-            onRetry={() => setShowGenerate(true)}
+            onRetry={() => setLocation("/generate-influencer")}
           />
         ) : orphanFailedJob ? (
           <QueueCard
             job={orphanFailedJob}
             onOpen={() => {}}
-            onRetry={() => setShowGenerate(true)}
+            onRetry={() => setLocation("/generate-influencer")}
           />
         ) : null}
 
@@ -639,7 +638,7 @@ export default function YourInfluencers() {
               It only takes a minute to start.
             </p>
             <button
-              onClick={() => setShowGenerate(true)}
+              onClick={() => setLocation("/generate-influencer")}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-black text-base font-bold uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform"
               style={{ background: GOLD, boxShadow: `0 10px 30px -8px ${GOLD}80` }}
               data-testid="button-generate-empty"
@@ -965,28 +964,12 @@ export default function YourInfluencers() {
         </div>
       )}
 
-      {showGenerate && (
-        <GenerateModal
-          onClose={() => setShowGenerate(false)}
-          onCreated={() => {
-            // Restored DFY queue UX: stay on My Influencers and let the
-            // QueueCard at the top of the list show the live pipeline
-            // state. The user can manually click into the workspace when
-            // they're ready - no auto-routing.
-            setShowGenerate(false);
-            queryClient.invalidateQueries({ queryKey: ["influencer-jobs"] });
-            queryClient.invalidateQueries({ queryKey: ["influencer-quota"] });
-            queryClient.invalidateQueries({ queryKey: ["my-influencers"] });
-          }}
-        />
-      )}
-
       {showUnlockPopup && (
         <UnlockPopup
           onDismiss={dismissUnlockPopup}
           onGenerate={() => {
             dismissUnlockPopup();
-            setShowGenerate(true);
+            setLocation("/generate-influencer");
           }}
         />
       )}
