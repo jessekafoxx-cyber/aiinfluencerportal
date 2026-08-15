@@ -48,6 +48,7 @@ const TOOLS: ToolDef[] = [
     icon: FileText,
     phase: "bridge-page",
     color: "#C9A44C",
+    navigateTo: "/bridge-page-headline-generator",
     fields: [],
   },
   {

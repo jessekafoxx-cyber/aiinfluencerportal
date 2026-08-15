@@ -13305,8 +13305,8 @@ portalRouter.post("/portal/os-tools/:slug/generate", requireAuth, requireActive,
 
     // Standard phase tools are always free — unlimited for every active user.
     // These are the Room30 OS core tools that require no credits.
+    // Note: bridge-page-headlines is NOT here — it uses the default 3-free-run quota.
     const OS_TOOL_ALWAYS_UNLIMITED = new Set([
-      "bridge-page-headlines",
       "kpi-generator",
       "direct-offer-ad-generator",
     ]);
@@ -13656,8 +13656,8 @@ portalRouter.get("/portal/os-tools/:slug/quota", requireAuth, async (req: any, r
   }
 
   // Standard phase tools are always free — unlimited for every active user.
+  // Note: bridge-page-headlines uses the default 3-free-run quota instead.
   const OS_TOOL_ALWAYS_UNLIMITED = new Set([
-    "bridge-page-headlines",
     "kpi-generator",
     "direct-offer-ad-generator",
   ]);
