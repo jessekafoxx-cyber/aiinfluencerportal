@@ -4908,6 +4908,28 @@ portalRouter.get("/portal/me/credits-status", requireAuth, async (req: any, res)
 
   const aiUsageCents = user.aiUsageCents || 0;
   const researchEnt = computeResearchEntitlement(user);
+
+  // AI Avatar generation quota: 1 free + bonus from purchased SKUs / admin grants.
+  const appUserId = (req as any).appUser?.id ?? null;
+  let generationsUsed = 0;
+  if (appUserId) {
+    const [row] = await db
+      .select({ c: count() })
+      .from(aiInfluencerJobsTable)
+      .where(
+        and(
+          eq(aiInfluencerJobsTable.clientId, appUserId),
+          eq(aiInfluencerJobsTable.isFreeTier, true),
+          sql`${aiInfluencerJobsTable.status} <> 'failed'`,
+        ),
+      );
+    generationsUsed = Number(row?.c ?? 0);
+  }
+  const genEntitlements = await computePurchaseEntitlements(user);
+  const bonusQuota = genEntitlements.bonusInfluencerQuota ?? 0;
+  const generationsTotal = 1 + bonusQuota;
+  const generationsRemaining = Math.max(0, generationsTotal - generationsUsed);
+
   res.json({
     aiUsageCents,
     freeCents: AI_USAGE_FREE_CENTS,
@@ -4920,6 +4942,11 @@ portalRouter.get("/portal/me/credits-status", requireAuth, async (req: any, res)
       paidCredits: researchEnt.paidCredits,
       completedCount: researchEnt.completedCount,
       canGenerate: researchEnt.canGenerate,
+    },
+    generations: {
+      total: generationsTotal,
+      used: generationsUsed,
+      remaining: generationsRemaining,
     },
     paidPacks: {
       research: user.researchPaidCredits || 0,

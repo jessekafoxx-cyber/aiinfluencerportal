@@ -31,6 +31,11 @@ type CreditsStatus = {
     completedCount: number;
     canGenerate: boolean;
   };
+  generations?: {
+    total: number;
+    used: number;
+    remaining: number;
+  };
   paidPacks: {
     research: number;
     osTool: number;
@@ -415,6 +420,9 @@ function AccountSection() {
 }
 
 // Market research credit packs with direct Stripe payment links.
+const AVATAR_GENERATION_STRIPE_URL =
+  "https://buy.stripe.com/6oU7sKeq40j3gzA5KEcV205";
+
 const RESEARCH_CREDIT_PACKS = [
   {
     id: "starter",
@@ -528,6 +536,77 @@ function CreditsSection({
             <ResearchPackCard key={pack.id} pack={pack} />
           ))}
         </div>
+      </div>
+
+      {/* AI Avatar generations */}
+      <div className={SECTION_CARD}>
+        <SectionTitle
+          eyebrow="AI Avatar"
+          title="Generation credits"
+          subtitle="Each AI Avatar build uses one generation credit. Everyone starts with 1 free generation — buy more any time."
+        />
+
+        {status.generations ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+            <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+              <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+                Remaining
+              </div>
+              <div
+                className={`text-[28px] font-bold ${
+                  status.generations.remaining > 0
+                    ? "text-emerald-300"
+                    : "text-white/40"
+                }`}
+              >
+                {status.generations.remaining}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">
+                of {status.generations.total} total
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+              <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+                Used
+              </div>
+              <div className="text-[28px] font-bold text-white/70">
+                {status.generations.used}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">generations run</div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#161616] p-4">
+              <div className="text-[11px] uppercase tracking-[0.12em] text-white/50 font-semibold mb-1.5">
+                Total
+              </div>
+              <div className="text-[28px] font-bold text-white/70">
+                {status.generations.total}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">unlocked</div>
+            </div>
+          </div>
+        ) : null}
+
+        <a
+          href={AVATAR_GENERATION_STRIPE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between rounded-xl border border-[#C9A44C]/30 bg-gradient-to-br from-[#1a1410] to-[#161616] p-5 hover:border-[#C9A44C]/50 hover:scale-[1.005] transition active:scale-[0.99]"
+        >
+          <div>
+            <div
+              className="text-[15px] font-bold text-white"
+              style={{ fontFamily: "var(--app-font-display)" }}
+            >
+              +1 AI Avatar Generation
+            </div>
+            <div className="text-[12px] text-white/55 mt-0.5">
+              One additional generation credit added to your account
+            </div>
+          </div>
+          <div className="ml-4 flex-shrink-0 inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-[#7c3aed] via-[#a855f7] to-[#c026d3] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_24px_rgba(124,58,237,0.28)]">
+            <Sparkles size={13} /> Buy
+          </div>
+        </a>
       </div>
 
       {/* Purchase history */}
