@@ -143,6 +143,12 @@ app.get("/", (_req, res) => {
     );
 });
 
+// Clerk dashboard has /login and /sign-in configured as sign-in paths.
+// Redirect them to the real portal sign-in page so auth always lands correctly.
+app.get(["/login", "/sign-in", "/signin"], (_req, res) => {
+  res.redirect(302, "/members/sign-in");
+});
+
 app.use("/api", router);
 
 // Catch-all JSON error handler for /api/* so the frontend never receives
