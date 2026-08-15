@@ -7119,7 +7119,7 @@ async function runStaleFailureTerminalizationSweep(): Promise<void> {
     const result: { rowCount?: number | null } = await db.execute(sql`
       UPDATE ${adResearchBoardItems}
       SET ${sql.identifier("media_status")} = 'failed_permanent',
-          ${sql.identifier("media_outcome_changed_at")} = NOW(),
+          ${sql.identifier("media_outcome_changed_at_t309")} = NOW(),
           ${sql.identifier("dismissed")} = true,
           ${sql.identifier("dismissed_reason")} = COALESCE(${sql.identifier("dismissed_reason")}, 'media_retry_exhausted'),
           ${sql.identifier("dismissed_at")} = COALESCE(${sql.identifier("dismissed_at")}, NOW())

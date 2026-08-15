@@ -135,6 +135,15 @@ export const adResearchBoardItems = pgTable(
     // view, the admin "Needs Fixing" list, and the failed counter so the
     // "Retry Failed (N)" badge can actually drop to zero.
     dismissed: boolean("dismissed").default(false).notNull(),
+    // Short machine-readable tag describing why the row was dismissed.
+    // Set by the stale-failure sweep ('media_retry_exhausted') or by the
+    // admin skip action ('admin_skip'). Nullable so existing dismissed rows
+    // (written before this column existed) don't require a backfill.
+    dismissedReason: text("dismissed_reason"),
+    // Wall-clock timestamp of when the row was first dismissed. COALESCE'd
+    // in the sweep so the original dismissal time is preserved if the row
+    // is re-swept after a partial write.
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
     // Task #134: non-destructive sync. When a row that was once in the Google
     // Sheet stops appearing, we set this flag instead of deleting the row.
     // Hidden rows still own their cached object-storage media and can be
