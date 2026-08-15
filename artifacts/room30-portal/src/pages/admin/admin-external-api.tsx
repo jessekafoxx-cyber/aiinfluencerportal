@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchApi } from "@/lib/api";
 import { AdminLayout } from "@/components/admin-layout";
@@ -104,6 +104,7 @@ export function AdminExternalApi() {
   const [newName, setNewName] = useState("");
   const [createdPlaintext, setCreatedPlaintext] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const plaintextInputRef = useRef<HTMLInputElement>(null);
   const createMut = useMutation({
     mutationFn: (name: string) => API.createKey(name),
     onSuccess: (data) => {
@@ -256,23 +257,33 @@ export function AdminExternalApi() {
                 </p>
                 <div className="flex gap-2 items-center mb-2">
                   <input
+                    ref={plaintextInputRef}
                     type="text"
                     readOnly
                     value={createdPlaintext}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="flex-1 px-2 py-1.5 rounded bg-black/60 text-emerald-200 text-[12px] font-mono border border-emerald-500/20 select-all cursor-text"
+                    onClick={(e) => e.currentTarget.select()}
+                    className="flex-1 px-2 py-1.5 rounded bg-black/60 text-emerald-200 text-[12px] font-mono border border-emerald-500/20 cursor-text"
                   />
                   <button
                     onClick={() => {
+                      const el = plaintextInputRef.current;
                       const doCopy = async () => {
+                        let success = false;
                         try {
                           await navigator.clipboard.writeText(createdPlaintext);
+                          success = true;
                         } catch {
-                          // Fallback: select the input text so the user can Ctrl+C
-                          const input = document.querySelector<HTMLInputElement>(
-                            "input[value='" + createdPlaintext.slice(0, 8) + "']"
-                          ) ?? document.querySelector<HTMLInputElement>(".api-key-plaintext-input");
-                          if (input) { input.focus(); input.select(); }
+                          // clipboard API blocked — fall back to execCommand
+                        }
+                        if (!success && el) {
+                          el.focus();
+                          el.select();
+                          try {
+                            success = document.execCommand("copy");
+                          } catch {
+                            // execCommand also failed — user can manually Ctrl+C
+                          }
                         }
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
@@ -292,7 +303,7 @@ export function AdminExternalApi() {
                   </button>
                 </div>
                 <p className="text-emerald-400/60 text-[11px]">
-                  Click the field and press Ctrl+A / Cmd+A to select all, or use the Copy button.
+                  Click the field to select all, then Ctrl+C / Cmd+C if the Copy button doesn't work.
                 </p>
               </div>
             )}
