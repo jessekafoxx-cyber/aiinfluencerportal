@@ -12,6 +12,7 @@ import {
   useScriptJob,
   startScriptJobJson,
   startScriptJobFormData,
+  runScriptJobToCompletion,
   listJobs,
   type ScriptJobRow,
   type ScriptJobType,
@@ -2201,7 +2202,21 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
   const [historyOpen, setHistoryOpen] = useState(true);
   const [submittingIdeas, setSubmittingIdeas] = useState(false);
   const [submittingScript, setSubmittingScript] = useState(false);
+  const [selectedIdeas, setSelectedIdeas] = useState<any[]>([]);
+  const [batchResults, setBatchResults] = useState<{ idea: any; result: any; error?: string }[]>([]);
+  const [batchActive, setBatchActive] = useState(false);
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, pct: 0, stage: "" });
+  const batchCancelRef = useRef(false);
   const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const toggleIdea = (idea: any) => {
+    setSelectedIdeas((prev) => {
+      const already = prev.some((i) => i._idx === idea._idx);
+      if (already) return prev.filter((i) => i._idx !== idea._idx);
+      if (prev.length >= 10) return prev; // max 10
+      return [...prev, idea];
+    });
+  };
 
   const loadHistory = useCallback(() => {
     setLoadingHistory(true);
@@ -2274,6 +2289,40 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
     }
   };
 
+  const handleBatchGenerate = async () => {
+    if (selectedIdeas.length === 0) return;
+    setBatchActive(true);
+    setBatchResults([]);
+    setResult(null);
+    batchCancelRef.current = false;
+    setBatchProgress({ current: 0, total: selectedIdeas.length, pct: 0, stage: "Starting…" });
+    const results: { idea: any; result: any; error?: string }[] = [];
+    for (let i = 0; i < selectedIdeas.length; i++) {
+      if (batchCancelRef.current) break;
+      const idea = selectedIdeas[i];
+      setBatchProgress({ current: i + 1, total: selectedIdeas.length, pct: 0, stage: "Starting script…" });
+      try {
+        const payload: any = { context: cfg.ideaToContext(idea) };
+        if (form.offerBrainId && form.offerBrainId !== "own") payload.offerBrainId = form.offerBrainId;
+        if (form.influencerId) payload.influencerId = Number(form.influencerId);
+        Object.assign(payload, cfg.buildScriptExtra?.(form) ?? {});
+        const job = await runScriptJobToCompletion(def.endpoint, payload, {
+          isCancelled: () => batchCancelRef.current,
+          onProgress: (pct, stage) => {
+            setBatchProgress({ current: i + 1, total: selectedIdeas.length, pct, stage });
+          },
+        });
+        results.push({ idea, result: job.result });
+      } catch (e: any) {
+        if (e.message === "Cancelled") break;
+        results.push({ idea, result: null, error: e.message });
+      }
+      setBatchResults([...results]);
+      loadHistory();
+    }
+    setBatchActive(false);
+  };
+
   const ideasActive = ideasJob.isActive || submittingIdeas;
   const scriptActive = scriptJob.isActive || submittingScript;
   const anyActive = ideasActive || scriptActive;
@@ -2309,23 +2358,25 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
 
       {/* ── Recent Scripts (collapsible) ── */}
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02]">
-        <button
-          onClick={() => setHistoryOpen((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-3.5 text-left"
-        >
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 py-3.5">
+          <button
+            onClick={() => setHistoryOpen((v) => !v)}
+            className="flex items-center gap-2 flex-1 text-left"
+          >
             <FileStack className="w-3.5 h-3.5" style={{ color: GOLD }} />
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/60">Recent Scripts</span>
             {history.length > 0 && <span className="text-[11px] text-white/25">({history.length})</span>}
-          </div>
+          </button>
           <div className="flex items-center gap-3">
             {historyOpen && (
-              <button onClick={(e) => { e.stopPropagation(); loadHistory(); }}
+              <button onClick={loadHistory}
                 className="text-[11px] text-white/30 hover:text-white/60 uppercase tracking-wider transition-colors">Refresh</button>
             )}
-            <ChevronDown className={`w-4 h-4 text-white/30 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+            <button onClick={() => setHistoryOpen((v) => !v)}>
+              <ChevronDown className={`w-4 h-4 text-white/30 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+            </button>
           </div>
-        </button>
+        </div>
 
         {historyOpen && (
           <div className="px-4 pb-4 border-t border-white/[0.05]">
@@ -2477,14 +2528,23 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
       <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 gap-4">
         <div className="min-w-0">
           <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: GOLD }}>{cfg.step1Label}</p>
-          <p className="text-[12px] text-white/40 mt-0.5">{cfg.step1Desc(form)}</p>
+          <p className="text-[12px] text-white/40 mt-0.5">
+            {ideas.length > 0
+              ? `${selectedIdeas.length} of 10 selected — click cards to toggle, then click Write Scripts below.`
+              : cfg.step1Desc(form)}
+          </p>
         </div>
-        <button onClick={handleGenerateIdeas} disabled={anyActive}
+        <button
+          onClick={() => { setSelectedIdeas([]); handleGenerateIdeas(); }}
+          disabled={anyActive || batchActive}
           className="flex items-center gap-2 px-5 py-3 rounded-xl text-[13px] font-semibold text-black transition-all disabled:opacity-50 flex-shrink-0"
-          style={{ background: GOLD }}>
+          style={{ background: GOLD }}
+        >
           {ideasActive
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
-            : <><Sparkles className="w-4 h-4" /> Generate 10 Ideas</>}
+            : ideas.length > 0
+              ? <><RefreshCw className="w-4 h-4" /> Re-roll 10 Ideas</>
+              : <><Sparkles className="w-4 h-4" /> Generate 10 Ideas</>}
         </button>
       </div>
 
@@ -2503,47 +2563,149 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
 
       {/* Ideas list */}
       {ideas.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {ideas.map((idea, idx) => {
-            const primary = cfg.ideaPrimary(idea);
-            const secondary = cfg.ideaSecondary?.(idea);
-            const badge = cfg.ideaBadge?.(idea);
-            const extra = cfg.ideaExtra?.(idea);
-            return (
-              <button key={idx}
-                onClick={() => { setF("context", cfg.ideaToContext(idea)); }}
-                className="text-left px-3.5 py-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#C9A44C]/30 transition-all group"
+        <div className="space-y-2">
+          {selectedIdeas.length > 0 && (
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] text-white/40">
+                <span className="font-bold" style={{ color: GOLD }}>{selectedIdeas.length}</span> of 10 ideas selected
+              </span>
+              <button
+                onClick={() => setSelectedIdeas([])}
+                className="text-[11px] text-white/30 hover:text-white/60 transition-colors"
               >
-                <div className="flex items-start gap-2">
-                  <span className="text-[11px] font-bold text-white/20 flex-shrink-0 mt-0.5">{idx + 1}.</span>
-                  <div className="min-w-0">
-                    {badge && <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: `${GOLD}99` }}>{badge}</p>}
-                    <p className="text-[13px] font-semibold text-white/90 leading-snug group-hover:text-white transition-colors">{primary}</p>
-                    {secondary && <p className="text-[11px] text-white/40 mt-1 leading-relaxed">{secondary}</p>}
-                    {extra && <p className="text-[11px] mt-1.5 italic" style={{ color: `${GOLD}88` }}>{extra}</p>}
-                  </div>
-                </div>
+                Clear All
               </button>
-            );
-          })}
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            {ideas.map((idea, idx) => {
+              const primary = cfg.ideaPrimary(idea);
+              const secondary = cfg.ideaSecondary?.(idea);
+              const badge = cfg.ideaBadge?.(idea);
+              const extra = cfg.ideaExtra?.(idea);
+              const isSelected = selectedIdeas.some((i) => i._idx === idea._idx);
+              const isMaxed = selectedIdeas.length >= 10 && !isSelected;
+              return (
+                <button key={idx}
+                  onClick={() => !batchActive && toggleIdea(idea)}
+                  disabled={batchActive || isMaxed}
+                  className={`text-left px-3.5 py-3 rounded-xl border transition-all group relative ${
+                    isSelected
+                      ? "border-[#C9A44C]/60 bg-[#C9A44C]/[0.08]"
+                      : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#C9A44C]/30"
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                  {/* Selection indicator */}
+                  <div className={`absolute top-2.5 right-2.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
+                    isSelected ? "border-[#C9A44C] bg-[#C9A44C]" : "border-white/20"
+                  }`}>
+                    {isSelected && <Check className="w-2.5 h-2.5 text-black" strokeWidth={3} />}
+                  </div>
+                  <div className="flex items-start gap-2 pr-6">
+                    <span className="text-[11px] font-bold text-white/20 flex-shrink-0 mt-0.5">{idx + 1}.</span>
+                    <div className="min-w-0">
+                      {badge && <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: `${GOLD}99` }}>{badge}</p>}
+                      <p className={`text-[13px] font-semibold leading-snug transition-colors ${isSelected ? "text-white" : "text-white/90 group-hover:text-white"}`}>{primary}</p>
+                      {secondary && <p className="text-[11px] text-white/40 mt-1 leading-relaxed">{secondary}</p>}
+                      {extra && <p className="text-[11px] mt-1.5 italic" style={{ color: `${GOLD}88` }}>{extra}</p>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Batch progress bar ── */}
+      {batchActive && (
+        <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] px-5 py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: GOLD }} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">
+                Writing script {batchProgress.current} of {batchProgress.total}…
+              </span>
+            </div>
+            <button
+              onClick={() => { batchCancelRef.current = true; }}
+              className="text-[11px] font-bold uppercase tracking-wider text-white/30 hover:text-white/60 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${Math.round(((batchProgress.current - 1 + (batchProgress.pct / 100)) / batchProgress.total) * 100)}%`,
+                background: GOLD,
+              }}
+            />
+          </div>
+          {batchProgress.stage && (
+            <p className="text-[11px] text-white/30">{batchProgress.stage}</p>
+          )}
         </div>
       )}
 
       {/* ── Generate Script button ── */}
-      <button onClick={handleGenerateScript} disabled={anyActive}
-        className="w-full py-4 rounded-2xl text-[13px] font-semibold text-black transition-all disabled:opacity-50"
-        style={{ background: GOLD }}>
-        {scriptActive
-          ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Generating…</span>
-          : <span className="flex items-center justify-center gap-2"><Sparkles className="w-4 h-4" />{cfg.generateLabel(form)}</span>}
-      </button>
+      {selectedIdeas.length > 0 ? (
+        <button
+          onClick={handleBatchGenerate}
+          disabled={anyActive || batchActive}
+          className="w-full py-4 rounded-2xl text-[13px] font-semibold text-black transition-all disabled:opacity-50"
+          style={{ background: GOLD }}
+        >
+          <span className="flex items-center justify-center gap-2">
+            {batchActive
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Writing Scripts…</>
+              : <><Sparkles className="w-4 h-4" /> Write {selectedIdeas.length} Script{selectedIdeas.length !== 1 ? "s" : ""}</>}
+          </span>
+        </button>
+      ) : (
+        <button onClick={handleGenerateScript} disabled={anyActive || batchActive}
+          className="w-full py-4 rounded-2xl text-[13px] font-semibold text-black transition-all disabled:opacity-50"
+          style={{ background: GOLD }}>
+          {scriptActive
+            ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Generating…</span>
+            : <span className="flex items-center justify-center gap-2"><Sparkles className="w-4 h-4" />{cfg.generateLabel(form)}</span>}
+        </button>
+      )}
 
-      {/* ── Result ── */}
-      {result && (
+      {/* ── Batch results ── */}
+      {batchResults.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-white/30">
+              Generated Scripts ({batchResults.filter(r => r.result).length} of {batchResults.length})
+            </p>
+          </div>
+          {batchResults.map((br, i) => (
+            <div key={i} className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/25">{i + 1}.</span>
+                <p className="text-[12px] font-semibold text-white/60 truncate">{cfg.ideaPrimary(br.idea)}</p>
+                {br.error && (
+                  <span className="ml-auto text-[10px] font-bold text-red-400 uppercase tracking-wide">Failed</span>
+                )}
+              </div>
+              {br.result ? (
+                <ScriptResult result={br.result} def={def} />
+              ) : br.error ? (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[12px]">{br.error}</div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Single result (context-only mode) ── */}
+      {result && batchResults.length === 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-[12px] font-bold uppercase tracking-wider text-white/30">Generated Script</p>
-            <button onClick={handleGenerateScript} disabled={anyActive}
+            <button onClick={handleGenerateScript} disabled={anyActive || batchActive}
               className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-40">
               <RefreshCw className="w-3.5 h-3.5" /> Regenerate
             </button>

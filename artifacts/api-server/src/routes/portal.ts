@@ -19126,6 +19126,7 @@ portalRouter.get(
         progressPct: j.progressPct,
         stage: j.stage,
         label: j.label,
+        result: j.status === "succeeded" ? j.result : null,
         errorMessage: j.errorMessage,
         createdAt: j.createdAt,
         updatedAt: j.updatedAt,
