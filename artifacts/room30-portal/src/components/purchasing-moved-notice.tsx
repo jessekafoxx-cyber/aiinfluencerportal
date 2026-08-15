@@ -1,27 +1,29 @@
 // Shared purchase CTA shown where the retired on-site checkout widgets used
-// to mount. All purchasing now flows through GoHighLevel: when the admin has
-// configured a purchase link for the product (admin Products page →
-// "Purchase URL"), this renders an upgrade button that opens the GHL-hosted
-// sales page in a new tab — the GHL purchase webhook grants the entitlement
-// after checkout. When no link is configured yet, it falls back to the
-// contact prompt.
+// to mount. When a purchaseUrl is provided this renders an upgrade button
+// that opens the checkout page in a new tab. An optional tagline replaces
+// the generic "Upgrade to unlock {label}." sentence with a product-specific
+// one-liner pulled from the upsell definition. When no link is configured
+// yet, it falls back to the contact prompt.
 
 import { ExternalLink } from "lucide-react";
 
 export function PurchasingMovedNotice(props: {
   /** What the buyer was trying to purchase, e.g. "Our Portfolio". */
   label: string;
-  /** GHL-hosted sales page. When set, renders the upgrade CTA. */
+  /** Checkout page (Stripe or custom). When set, renders the upgrade CTA. */
   purchaseUrl?: string | null;
+  /** Product-specific one-liner shown instead of the generic description. */
+  tagline?: string | null;
   onCancel?: () => void;
 }) {
   if (props.purchaseUrl) {
     return (
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center">
-        <p className="text-sm text-white/80">Upgrade to unlock {props.label}.</p>
-        <p className="mt-2 text-xs text-white/55">
-          You'll complete your purchase on our secure checkout page. Access
-          unlocks automatically after payment.
+        <p className="text-sm text-white/80 leading-[1.55]">
+          {props.tagline ?? `Upgrade to unlock ${props.label}.`}
+        </p>
+        <p className="mt-2 text-xs text-white/45">
+          Access unlocks automatically after payment.
         </p>
         <a
           href={props.purchaseUrl}
@@ -30,7 +32,7 @@ export function PurchasingMovedNotice(props: {
           className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#C9A44C] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-[#0A0A0A] hover:bg-[#D9B45C] transition-colors"
           data-testid="link-upgrade-purchase"
         >
-          Upgrade now <ExternalLink className="w-3.5 h-3.5" />
+          Get Instant Access <ExternalLink className="w-3.5 h-3.5" />
         </a>
         {props.onCancel ? (
           <div>

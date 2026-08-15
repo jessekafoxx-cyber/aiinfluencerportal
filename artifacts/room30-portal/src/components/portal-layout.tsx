@@ -120,12 +120,14 @@ type PortalUpsell = {
   // honour legacy `tiktokSlideshowPaid` comps in addition to the new
   // bump3Paid bundle path.
   extraPaidKeys?: PortalUpsellPaidKey[];
-  // Default external purchase URL (standalone funnel page) opened in a
-  // new tab when a locked row is clicked. An admin-configured link for
-  // the same product slug (admin Products page → "Purchase URL",
-  // surfaced via usePurchaseLinks) always takes precedence, so template
-  // installs can point each row at their own GHL sales page.
+  // Default external purchase URL (Stripe or custom checkout). Opened
+  // inside the buy modal when a locked row is clicked. An admin-configured
+  // link for the same product slug (admin Products page → "Purchase URL",
+  // surfaced via usePurchaseLinks) always takes precedence.
   purchaseUrl?: string;
+  // Product-specific one-liner shown in the buy modal instead of the
+  // generic "Upgrade to unlock {label}." sentence.
+  tagline?: string;
 };
 
 // Sidebar ordering: 5 new "Coming soon" placeholders first, then the
@@ -143,8 +145,9 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     paidKey: "bump2Paid",
     description:
       "Every proven hook formula my team and I use - 2,000+ openers across Educational, Curiosity, Alex Hormozi (bonus) and 7 more categories.",
-    // No default purchaseUrl: the old Stripe Checkout link is retired.
-    // Configure a GHL sales page on the admin Products page instead.
+    purchaseUrl: "https://buy.stripe.com/5kQ8wO81G7Lvfvwb4YcV206",
+    tagline:
+      "We diagnosed over 25,000 posts and give you our top 2,000 hooks we used from our videos + other creators.",
   },
   {
     href: "/done-for-you-pack",
@@ -160,8 +163,8 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     extraPaidKeys: ["upsell1Paid", "downsell1Paid"],
     description:
       "Plug-and-play creative pack - scripts, hooks, and assets ready to launch.",
-    // No default purchaseUrl: configure a sales page on the admin
-    // Products page instead.
+    purchaseUrl: "https://checkout.aiinfluencerpublishing.com/dfypack-premium-addon",
+    tagline: "10,000+ done-for-you elements to help you get set up and making money faster.",
   },
   {
     href: "/our-portfolio",
@@ -177,8 +180,9 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     extraPaidKeys: ["upsell2Paid"],
     description:
       "47 digital products and 5 unique AI influencers - the full behind-the-scenes portfolio of offers, funnels and ads we've built and run.",
-    // No default purchaseUrl: configure a sales page on the admin
-    // Products page instead.
+    purchaseUrl: "https://checkout.aiinfluencerpublishing.com/portfolioexpansion-premium-addon",
+    tagline:
+      "47 ready-to-sell digital products and 5 more unique AI Influencers — our full behind-the-scenes portfolio.",
   },
   {
     // Platinum Club is rendered as its own standalone, premium-styled
@@ -200,15 +204,16 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     extraPaidKeys: ["upsell3Paid"],
     description:
       "Inner-circle group with the highest-touch coaching and direct access to our team. $97/month - card details confirmed on Stripe's secure checkout.",
-    // No default purchaseUrl: configure a sales page on the admin
-    // Products page instead.
+    purchaseUrl: "https://checkout.aiinfluencerpublishing.com/platinumclub-premium-addon",
+    tagline:
+      "Join us for 2 hours every month and get a fully done-for-you monthly custom product + Greg AI (plus a ton more).",
   },
   // The two rows below are deliberately the last entries in the
-   // upgrades list so they sit visually next to each other. Both are
-   // unlocked by a single $37 purchase of the bump3 order bump - the
-   // TikTok row's `chargeSlug` redirects its buy click to the same
-   // `order-bump-3` charge so either row triggers the same one-time
-   // charge and flips both rows to "paid" via `bump3Paid`.
+  // upgrades list so they sit visually next to each other. Both are
+  // unlocked by a single $37 purchase of the bump3 order bump - the
+  // TikTok row's `chargeSlug` redirects its buy click to the same
+  // `order-bump-3` charge so either row triggers the same one-time
+  // charge and flips both rows to "paid" via `bump3Paid`.
   {
     href: "/tiktok-slideshow-masterclass",
     label: "TikTok AI Slideshow Masterclass",
@@ -220,7 +225,9 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     extraPaidKeys: ["tiktokSlideshowPaid"],
     description:
       "Step-by-step masterclass on the slideshow ad format running on TikTok right now. Bundled with IG Follower Hijack for a single $37 unlock.",
-    // No default purchaseUrl: the old Stripe Checkout link is retired.
+    purchaseUrl: "https://buy.stripe.com/4gM9AS2Hmgi1fvwdd6cV207",
+    tagline:
+      "Watch and implement the templates on how we hijack other Instagram account competitors and run viral TikTok slideshows on auto pilot.",
   },
   {
     href: "/follower-hijack",
@@ -232,7 +239,9 @@ const PORTAL_UPSELLS: PortalUpsell[] = [
     extraPaidKeys: ["tiktokSlideshowPaid"],
     description:
       "Ethically pull your competitors' warmest IG followers into your world, then hit them with your organic content and paid ads on autopilot.",
-    // No default purchaseUrl: the old Stripe Checkout link is retired.
+    purchaseUrl: "https://buy.stripe.com/4gM9AS2Hmgi1fvwdd6cV207",
+    tagline:
+      "Watch and implement the templates on how we hijack other Instagram account competitors and run viral TikTok slideshows on auto pilot.",
   },
   // Note: the Daily Ad Research Board sidebar entry was removed when bump2
   // was repointed to the 2,000 Hook Library. The /ad-research-board route is
@@ -664,9 +673,11 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
                     if (paid) {
                       setLocation("/platinum-club");
                       setSidebarOpen(false);
-                    } else {
-                      window.open("https://checkout.aiinfluencerpublishing.com/join-platinum-club", "_blank", "noopener,noreferrer");
-                      setSidebarOpen(false);
+                    } else if (platinumUpsell) {
+                      // Show the buy modal with the Platinum one-liner + checkout CTA,
+                      // consistent with every other locked upgrade row.
+                      setBuyError("");
+                      setBuyModal(platinumUpsell);
                     }
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
@@ -905,12 +916,10 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
                         setSidebarOpen(false);
                         return;
                       }
-                      const url = purchaseUrlFor(u);
-                      if (url) {
-                        window.open(url, "_blank", "noopener,noreferrer");
-                        setSidebarOpen(false);
-                        return;
-                      }
+                      // Always open the buy modal so members see the
+                      // product-specific one-liner + CTA button before
+                      // navigating to checkout. (Previously a non-null
+                      // purchaseUrl would bypass the modal entirely.)
                       setBuyError("");
                       setBuyModal(u);
                     }}
@@ -1153,7 +1162,8 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
             ) : (
               <PurchasingMovedNotice
                 label={buyModal.label}
-                purchaseUrl={purchaseUrlFor(buyModal)}
+                purchaseUrl={purchaseUrlFor(buyModal) ?? buyModal.purchaseUrl}
+                tagline={buyModal.tagline}
                 onCancel={() => {
                   setBuyModal(null);
                   setBuyError("");
