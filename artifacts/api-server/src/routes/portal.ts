@@ -348,8 +348,17 @@ registerAdminGrantDfyRoutes(portalRouter, { requireAuth, requireAdmin });
 
 portalRouter.get("/portal/me", requireAuth, async (req: any, res) => {
   const user = req.portalUser;
-  const [progressCount] = await db.select({ count: count() }).from(lessonProgressTable).where(and(eq(lessonProgressTable.userId, user.id), eq(lessonProgressTable.completed, true)));
-  const [totalLessons] = await db.select({ count: count() }).from(lessonsTable);
+  const [progressCount] = await db.select({ count: count() })
+    .from(lessonProgressTable)
+    .innerJoin(lessonsTable, eq(lessonProgressTable.lessonId, lessonsTable.id))
+    .where(and(
+      eq(lessonProgressTable.userId, user.id),
+      eq(lessonProgressTable.completed, true),
+      eq(lessonsTable.portalKey, user.portalKey),
+      ne(lessonsTable.status, "draft"),
+    ));
+  const [totalLessons] = await db.select({ count: count() }).from(lessonsTable)
+    .where(and(eq(lessonsTable.portalKey, user.portalKey), ne(lessonsTable.status, "draft")));
   const entitlements = await computePurchaseEntitlements(user);
   // isSuperAdmin is the env-pinned ADMIN_EMAILS owner flag (currently
   // greg@cookemedia.io). The portal "admin" role can be granted to
@@ -1539,7 +1548,7 @@ portalRouter.get("/portal/admin/users", requireAuth, requireCapability("users.vi
   })
     .from(lessonProgressTable)
     .innerJoin(lessonsTable, eq(lessonProgressTable.lessonId, lessonsTable.id))
-    .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey)))
+    .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft")))
     .groupBy(lessonProgressTable.userId);
 
   // Coerce Drizzle's count() (bigint, returned as string by node-postgres)
@@ -1551,7 +1560,7 @@ portalRouter.get("/portal/admin/users", requireAuth, requireCapability("users.vi
   const progressMap = new Map(allProgress.map(p => [p.userId, Number(p.completedCount) || 0]));
   const [totalLessons] = await db.select({ count: count() })
     .from(lessonsTable)
-    .where(eq(lessonsTable.portalKey, portalKey));
+    .where(and(eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft")));
 
   const total = Number(totalLessons?.count) || 0;
   const usersWithProgress = users.map(u => {
@@ -1663,11 +1672,11 @@ portalRouter.get("/portal/admin/analytics", requireAuth, requireAdmin, async (re
     db.select({ count: count() }).from(portalUsersTable).where(eq(portalUsersTable.portalKey, portalKey)),
     db.select({ count: count() })
       .from(lessonsTable)
-      .where(eq(lessonsTable.portalKey, portalKey)),
+      .where(and(eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft"))),
     db.select({ count: count() })
       .from(lessonProgressTable)
       .innerJoin(lessonsTable, eq(lessonProgressTable.lessonId, lessonsTable.id))
-      .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey))),
+      .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft"))),
     // Recent activity: scope to users in the current portal so a Room30
     // admin never sees Apex Offers customers' activity rows (and vice
     // versa). access_logs has no portal_key column, so we join through
@@ -1695,7 +1704,7 @@ portalRouter.get("/portal/admin/analytics", requireAuth, requireAdmin, async (re
     })
       .from(lessonProgressTable)
       .innerJoin(lessonsTable, eq(lessonProgressTable.lessonId, lessonsTable.id))
-      .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey)))
+      .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft")))
       .groupBy(lessonProgressTable.lessonId),
     db
       .select({
@@ -1709,7 +1718,7 @@ portalRouter.get("/portal/admin/analytics", requireAuth, requireAdmin, async (re
       })
       .from(lessonsTable)
       .innerJoin(coursePhasesTable, eq(lessonsTable.phaseId, coursePhasesTable.id))
-      .where(eq(lessonsTable.portalKey, portalKey))
+      .where(and(eq(lessonsTable.portalKey, portalKey), ne(lessonsTable.status, "draft")))
       .orderBy(asc(coursePhasesTable.sortOrder), asc(lessonsTable.sortOrder)),
   ]);
 
@@ -4348,7 +4357,7 @@ portalRouter.get("/portal/admin/users/:userId/profile", requireAuth, requireCapa
   const [lessonsTotalRow] = await db
     .select({ count: count() })
     .from(lessonsTable)
-    .where(eq(lessonsTable.portalKey, userPortalKey));
+    .where(and(eq(lessonsTable.portalKey, userPortalKey), ne(lessonsTable.status, "draft")));
   const [lessonsDoneRow] = await db
     .select({ count: count() })
     .from(lessonProgressTable)
@@ -4357,6 +4366,7 @@ portalRouter.get("/portal/admin/users/:userId/profile", requireAuth, requireCapa
       eq(lessonProgressTable.userId, userId),
       eq(lessonProgressTable.completed, true),
       eq(lessonsTable.portalKey, userPortalKey),
+      ne(lessonsTable.status, "draft"),
     ));
   const lessonsTotal = Number(lessonsTotalRow?.count || 0);
   const lessonsCompleted = Number(lessonsDoneRow?.count || 0);
