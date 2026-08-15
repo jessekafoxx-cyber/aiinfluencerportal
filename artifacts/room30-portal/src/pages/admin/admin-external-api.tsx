@@ -251,31 +251,49 @@ export function AdminExternalApi() {
             </div>
             {createdPlaintext && (
               <div className="mt-4 p-3 rounded-md bg-emerald-950/40 border border-emerald-500/30">
-                <p className="text-emerald-300 text-[12px] font-semibold mb-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Copy this key now - it will not be shown again
+                <p className="text-emerald-300 text-[12px] font-semibold mb-2 flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Copy this key now — it will not be shown again
                 </p>
-                <div className="flex gap-2 items-center">
-                  <code className="flex-1 px-2 py-1.5 rounded bg-black/60 text-emerald-200 text-[12px] break-all font-mono">
-                    {createdPlaintext}
-                  </code>
+                <div className="flex gap-2 items-center mb-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={createdPlaintext}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="flex-1 px-2 py-1.5 rounded bg-black/60 text-emerald-200 text-[12px] font-mono border border-emerald-500/20 select-all cursor-text"
+                  />
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(createdPlaintext);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
+                      const doCopy = async () => {
+                        try {
+                          await navigator.clipboard.writeText(createdPlaintext);
+                        } catch {
+                          // Fallback: select the input text so the user can Ctrl+C
+                          const input = document.querySelector<HTMLInputElement>(
+                            "input[value='" + createdPlaintext.slice(0, 8) + "']"
+                          ) ?? document.querySelector<HTMLInputElement>(".api-key-plaintext-input");
+                          if (input) { input.focus(); input.select(); }
+                        }
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      };
+                      void doCopy();
                     }}
-                    className="px-3 py-1.5 rounded bg-emerald-500 text-black text-[12px] font-semibold hover:bg-emerald-400 flex items-center gap-1"
+                    className="px-3 py-1.5 rounded bg-emerald-500 text-black text-[12px] font-semibold hover:bg-emerald-400 flex items-center gap-1 shrink-0"
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? "Copied" : "Copy"}
+                    {copied ? "Copied!" : "Copy"}
                   </button>
                   <button
                     onClick={() => setCreatedPlaintext(null)}
-                    className="px-3 py-1.5 rounded bg-white/10 text-white text-[12px] hover:bg-white/15"
+                    className="px-3 py-1.5 rounded bg-white/10 text-white text-[12px] hover:bg-white/15 shrink-0"
                   >
                     Done
                   </button>
                 </div>
+                <p className="text-emerald-400/60 text-[11px]">
+                  Click the field and press Ctrl+A / Cmd+A to select all, or use the Copy button.
+                </p>
               </div>
             )}
           </div>
