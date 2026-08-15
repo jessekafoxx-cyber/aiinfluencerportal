@@ -361,7 +361,7 @@ export default function BridgePageHeadlineGenerator() {
               <div className="flex items-center gap-3 mt-3 flex-wrap">
                 <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/[0.05] border border-white/[0.08]" style={{ color: GOLD }}>
                   <Brain className="w-3 h-3" />
-                  Brain Connector: Room30 / Prompt &amp; Build
+                  Brain Connector: AI Influencer Publishing / Prompt &amp; Build
                 </span>
                 {q && <QuotaBadge quota={quota} />}
               </div>
