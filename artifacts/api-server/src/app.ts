@@ -143,11 +143,11 @@ app.get("/", (_req, res) => {
     );
 });
 
-// Clerk dashboard has /login and /sign-in configured as sign-in paths.
-// Redirect them to the real portal sign-in page so auth always lands correctly.
-app.get(["/login", "/sign-in", "/signin"], (_req, res) => {
-  res.redirect(302, "/members/sign-in");
-});
+// Clerk dashboard has /login configured as the post-sign-in redirect.
+// Send it to the members dashboard so auth lands in the right place.
+// /sign-in and /signin are also caught here in case Clerk redirects there.
+app.get("/login", (_req, res) => res.redirect(302, "/members/dashboard"));
+app.get(["/sign-in", "/signin"], (_req, res) => res.redirect(302, "/members/sign-in"));
 
 app.use("/api", router);
 
