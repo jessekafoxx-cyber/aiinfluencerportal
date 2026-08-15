@@ -4,6 +4,104 @@ import { AdminLayout } from "@/components/admin-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
 import { Users, BookOpen, Activity, TrendingUp, ShieldCheck, AlertTriangle, XCircle, Loader2 } from "lucide-react";
 
+// ── Lesson completion panel grouped by phase ────────────────────────────────
+
+type LessonCompletion = {
+  lessonId: number;
+  title: string;
+  completions: number;
+  phaseTitle?: string;
+  phaseSlug?: string;
+  phaseSortOrder?: number;
+};
+
+function LessonCompletionPanel({
+  lessonCompletions,
+  totalUsers,
+}: {
+  lessonCompletions: LessonCompletion[];
+  totalUsers: number;
+}) {
+  // Group lessons by phase, preserving phase sort order.
+  const phaseMap = new Map<
+    string,
+    { title: string; sortOrder: number; lessons: LessonCompletion[] }
+  >();
+
+  for (const lc of lessonCompletions) {
+    const key = lc.phaseSlug ?? "__ungrouped__";
+    if (!phaseMap.has(key)) {
+      phaseMap.set(key, {
+        title: lc.phaseTitle ?? "Lessons",
+        sortOrder: lc.phaseSortOrder ?? 999,
+        lessons: [],
+      });
+    }
+    phaseMap.get(key)!.lessons.push(lc);
+  }
+
+  const phases = Array.from(phaseMap.entries()).sort(
+    ([, a], [, b]) => a.sortOrder - b.sortOrder,
+  );
+
+  return (
+    <div className="bg-[#0f0f0f] border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-6 py-4 border-b border-white/[0.06]">
+        <h3
+          className="text-[16px] font-bold uppercase text-white"
+          style={{ fontFamily: "var(--app-font-display)" }}
+        >
+          Lesson Completion Rates
+        </h3>
+      </div>
+      {phases.map(([phaseKey, phase], phaseIdx) => (
+        <div key={phaseKey}>
+          {/* Phase sub-header */}
+          <div
+            className={`px-6 py-2 flex items-center gap-2 bg-white/[0.025] ${
+              phaseIdx > 0 ? "border-t border-white/[0.06]" : ""
+            }`}
+          >
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9A44C]">
+              Step {phaseIdx + 1}
+            </span>
+            <span className="text-[11px] font-semibold text-white/55">
+              {phase.title}
+            </span>
+          </div>
+          {/* Lesson rows */}
+          <div className="divide-y divide-white/[0.04]">
+            {phase.lessons.map((lc) => {
+              const pct = Math.min(100, (lc.completions / totalUsers) * 100);
+              return (
+                <div
+                  key={lc.lessonId}
+                  className="px-6 py-3 flex items-center justify-between"
+                >
+                  <span className="text-[13px] text-white/70 truncate pr-4">
+                    {lc.title}
+                  </span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="w-24 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#C9A44C] rounded-full transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-[12px] text-white/65 w-8 text-right">
+                      {lc.completions}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function AdminDashboard() {
   const { data: analytics, isLoading } = useQuery({
     queryKey: ["admin-analytics"],
@@ -148,34 +246,10 @@ export function AdminDashboard() {
             </div>
 
             {analytics?.lessonCompletions && analytics.lessonCompletions.length > 0 && (
-              <div className="bg-[#0f0f0f] border border-white/[0.06] rounded-xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/[0.06]">
-                  <h3
-                    className="text-[16px] font-bold uppercase text-white"
-                    style={{ fontFamily: "var(--app-font-display)" }}
-                  >
-                    Lesson Completion Rates
-                  </h3>
-                </div>
-                <div className="divide-y divide-white/[0.04]">
-                  {analytics.lessonCompletions.map((lc: any) => (
-                    <div key={lc.lessonId} className="px-6 py-3 flex items-center justify-between">
-                      <span className="text-[13px] text-white/70">{lc.title}</span>
-                      <div className="flex items-center gap-3">
-                        <div className="w-24 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#C9A44C] rounded-full"
-                            style={{ width: `${Math.min(100, (lc.completions / (analytics.totalUsers || 1)) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-[12px] text-white/65 w-8 text-right">
-                          {lc.completions}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <LessonCompletionPanel
+                lessonCompletions={analytics.lessonCompletions}
+                totalUsers={analytics.totalUsers || 1}
+              />
             )}
           </>
         )}

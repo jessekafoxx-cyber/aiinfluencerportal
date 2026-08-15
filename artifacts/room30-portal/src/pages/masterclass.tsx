@@ -74,7 +74,7 @@ function PhaseSection({
           className="flex-1 text-[13px] font-bold uppercase tracking-[0.1em] text-white"
           style={{ fontFamily: "var(--app-font-display)" }}
         >
-          Phase {phaseIndex + 1}: {phase.title}
+          Step {phaseIndex + 1}: {phase.title}
         </span>
 
         {/* Completion chip */}

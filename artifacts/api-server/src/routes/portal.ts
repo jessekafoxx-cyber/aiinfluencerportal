@@ -1691,9 +1691,20 @@ portalRouter.get("/portal/admin/analytics", requireAuth, requireAdmin, async (re
       .innerJoin(lessonsTable, eq(lessonProgressTable.lessonId, lessonsTable.id))
       .where(and(eq(lessonProgressTable.completed, true), eq(lessonsTable.portalKey, portalKey)))
       .groupBy(lessonProgressTable.lessonId),
-    db.select().from(lessonsTable)
+    db
+      .select({
+        id: lessonsTable.id,
+        title: lessonsTable.title,
+        sortOrder: lessonsTable.sortOrder,
+        phaseId: lessonsTable.phaseId,
+        phaseTitle: coursePhasesTable.title,
+        phaseSlug: coursePhasesTable.slug,
+        phaseSortOrder: coursePhasesTable.sortOrder,
+      })
+      .from(lessonsTable)
+      .innerJoin(coursePhasesTable, eq(lessonsTable.phaseId, coursePhasesTable.id))
       .where(eq(lessonsTable.portalKey, portalKey))
-      .orderBy(asc(lessonsTable.sortOrder)),
+      .orderBy(asc(coursePhasesTable.sortOrder), asc(lessonsTable.sortOrder)),
   ]);
 
   const completionMap = new Map(lessonCompletionRates.map(r => [r.lessonId, Number(r.completions)]));
@@ -1701,6 +1712,9 @@ portalRouter.get("/portal/admin/analytics", requireAuth, requireAdmin, async (re
     lessonId: l.id,
     title: l.title,
     completions: completionMap.get(l.id) || 0,
+    phaseTitle: l.phaseTitle,
+    phaseSlug: l.phaseSlug,
+    phaseSortOrder: l.phaseSortOrder,
   }));
 
   const totalU = Number(totalUsers?.count || 0);

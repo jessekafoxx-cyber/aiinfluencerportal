@@ -1,23 +1,40 @@
-// Generated from the attached "AI Influencer Masterclass" course doc
-// (attached_assets/AI_Influencer_Masterclass_MALE_VOICE_PROMPT_*.md — 8 lessons,
-// male-voice recordings with Wistia embeds). Seeded at boot by
-// ensure-main-masterclass.ts. Notes are TipTap-compatible HTML rendered by
-// RichTextViewer in the portal (h2/h3 headings, paragraphs, lists).
+// AiIP Masterclass — 6-step course structure.
+// Seeded at boot by ensure-main-masterclass.ts.
+// Carry-over lessons (with existing Wistia video IDs and learner progress)
+// keep their original slugs. New lessons use aiip- prefixed slugs and have
+// no wistia_video_id (null → shown as "Coming Soon" in the portal UI).
+// Notes are TipTap-compatible HTML rendered by RichTextViewer.
 
-export const MASTERCLASS_PHASE = { slug: "masterclass", title: "Masterclass", sort_order: 1 } as const;
-
-export const MASTERCLASS_LESSONS: Array<{
+export const MASTERCLASS_PHASES: Array<{
   slug: string;
   title: string;
   sort_order: number;
-  wistia_video_id: string;
-  notes: string;
 }> = [
+  { slug: "step-1-start-here", title: "Start Here", sort_order: 1 },
+  { slug: "step-2-select-offer", title: "Select Your Offer + Build the Bridge", sort_order: 2 },
+  { slug: "step-3-create-influencer", title: "Create Your AI Influencer", sort_order: 3 },
+  { slug: "step-4-create-content", title: "Create Your Content", sort_order: 4 },
+  { slug: "step-5-traffic-ads", title: "Traffic + Ads", sort_order: 5 },
+  { slug: "step-6-next-steps", title: "Next Steps", sort_order: 6 },
+];
+
+export type MasterclassLesson = {
+  slug: string;
+  title: string;
+  sort_order: number;
+  phase_slug: string;
+  wistia_video_id: string | null;
+  notes: string | null;
+};
+
+export const MASTERCLASS_LESSONS: MasterclassLesson[] = [
+  // ── STEP 1: START HERE ─────────────────────────────────────────────────────
   {
     slug: "masterclass-l01-intro-how-this-course-works",
     title: "Intro & How This Course Works",
     sort_order: 1,
-    wistia_video_id: "klyy0qatuw",
+    phase_slug: "step-1-start-here",
+    wistia_video_id: "klyy0qatuw", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>How to build a profitable AI influencer business from scratch — <strong>no face, no complicated tech, zero experience needed</strong>.</p>
 <p>This lesson maps the full path:</p>
@@ -47,10 +64,51 @@ export const MASTERCLASS_LESSONS: Array<{
 <p>Every lesson gives you copy-and-paste prompts — you just fill in your details and let the AI do the heavy lifting. All you need to begin is a laptop with internet and a Claude account.</p>`,
   },
   {
+    slug: "aiip-tool-stack",
+    title: "Tool Stack",
+    sort_order: 2,
+    phase_slug: "step-1-start-here",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "masterclass-l03-research-and-audience",
+    title: "Research & Audience",
+    sort_order: 3,
+    phase_slug: "step-1-start-here",
+    wistia_video_id: "lgjb996s8y", // carry-over
+    notes: `<h2>🎯 What You'll Learn</h2>
+<p>How to deeply research the <strong>audience behind your offer</strong> — who they are, what keeps them up at night, and the exact language they use — so every later step (your influencer's persona, bridge page copy and video scripts) speaks directly to them.</p>
+<h2>💡 Why It Matters</h2>
+<ul>
+<li>Content that mirrors the audience's own words <strong>stops the scroll and converts</strong>; generic content gets ignored.</li>
+<li>This research doc becomes the fuel for everything downstream — you'll paste it into Claude when building your character, your bridge page and every script.</li>
+<li>Do it once, properly, and you never have to guess what to say again.</li>
+</ul>
+<h2>🛠️ How to Do It</h2>
+<ol>
+<li>Take the offer you committed to in Lesson 2 and its sales page URL.</li>
+<li>In Claude, run the audience-research prompt: ask it to profile the ideal buyer for your offer — <strong>demographics, pain points, desires, fears, objections, and the phrases they actually use</strong>.</li>
+<li>Ask Claude to study the sales page too, so the research matches the promise and mechanism the offer already sells.</li>
+<li>Dig into where the audience hangs out — the hooks, comments and complaints they respond to on Instagram and TikTok.</li>
+<li>Have Claude condense everything into a single <strong>audience research doc</strong>.</li>
+<li>Download it as a PDF and keep it in your project folder — you'll re-attach it in later lessons.</li>
+</ol>
+<h2>📝 Good to Know</h2>
+<ul>
+<li>The quality of this doc decides the quality of every script — <strong>don't rush it</strong>.</li>
+<li>Real audience language beats clever copywriting: steal the phrases people actually type in comments.</li>
+<li>One offer, one audience, one research doc — keep them together so you can reuse them in every later lesson.</li>
+</ul>`,
+  },
+
+  // ── STEP 2: SELECT YOUR OFFER + BUILD THE BRIDGE ────────────────────────────
+  {
     slug: "masterclass-l02-find-a-winning-clickbank-offer",
     title: "Find a Winning ClickBank Affiliate Offer",
-    sort_order: 2,
-    wistia_video_id: "88sxf2aetx",
+    sort_order: 1,
+    phase_slug: "step-2-select-offer",
+    wistia_video_id: "88sxf2aetx", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>How to pick a <strong>proven affiliate offer</strong> to promote on ClickBank — the world's biggest affiliate marketplace — instead of creating your own product.</p>
 <h2>💡 Why It Matters</h2>
@@ -85,39 +143,11 @@ export const MASTERCLASS_LESSONS: Array<{
 </ul>`,
   },
   {
-    slug: "masterclass-l03-research-and-audience",
-    title: "Research & Audience",
-    sort_order: 3,
-    wistia_video_id: "lgjb996s8y",
-    notes: `<h2>🎯 What You'll Learn</h2>
-<p>How to deeply research the <strong>audience behind your offer</strong> — who they are, what keeps them up at night, and the exact language they use — so every later step (your influencer's persona, bridge page copy and video scripts) speaks directly to them.</p>
-<h2>💡 Why It Matters</h2>
-<ul>
-<li>Content that mirrors the audience's own words <strong>stops the scroll and converts</strong>; generic content gets ignored.</li>
-<li>This research doc becomes the fuel for everything downstream — you'll paste it into Claude when building your character, your bridge page and every script.</li>
-<li>Do it once, properly, and you never have to guess what to say again.</li>
-</ul>
-<h2>🛠️ How to Do It</h2>
-<ol>
-<li>Take the offer you committed to in Lesson 2 and its sales page URL.</li>
-<li>In Claude, run the audience-research prompt: ask it to profile the ideal buyer for your offer — <strong>demographics, pain points, desires, fears, objections, and the phrases they actually use</strong>.</li>
-<li>Ask Claude to study the sales page too, so the research matches the promise and mechanism the offer already sells.</li>
-<li>Dig into where the audience hangs out — the hooks, comments and complaints they respond to on Instagram and TikTok.</li>
-<li>Have Claude condense everything into a single <strong>audience research doc</strong>.</li>
-<li>Download it as a PDF and keep it in your project folder — you'll re-attach it in Lessons 4, 6, 7 and 8.</li>
-</ol>
-<h2>📝 Good to Know</h2>
-<ul>
-<li>The quality of this doc decides the quality of every script — <strong>don't rush it</strong>.</li>
-<li>Real audience language beats clever copywriting: steal the phrases people actually type in comments.</li>
-<li>One offer, one audience, one research doc — keep them together so you can reuse them in every later lesson.</li>
-</ul>`,
-  },
-  {
     slug: "masterclass-l04-building-your-bridge-page",
     title: "Building Your Bridge Page",
-    sort_order: 4,
-    wistia_video_id: "w3f0agt235",
+    sort_order: 2,
+    phase_slug: "step-2-select-offer",
+    wistia_video_id: "w3f0agt235", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>How to build a simple <strong>bridge page</strong> in GoHighLevel that sits between your content/ads and the affiliate sales page.</p>
 <h2>💡 Why It Matters</h2>
@@ -145,10 +175,37 @@ export const MASTERCLASS_LESSONS: Array<{
 </ul>`,
   },
   {
+    slug: "aiip-bridge-page-copy",
+    title: "Writing Your Bridge Page Copy",
+    sort_order: 3,
+    phase_slug: "step-2-select-offer",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-bridge-page-images",
+    title: "Add Images to Your Bridge Page",
+    sort_order: 4,
+    phase_slug: "step-2-select-offer",
+    wistia_video_id: null,
+    notes: null,
+  },
+
+  // ── STEP 3: CREATE YOUR AI INFLUENCER ────────────────────────────────────────
+  {
+    slug: "aiip-finding-reference-image",
+    title: "Finding Your Reference Image",
+    sort_order: 1,
+    phase_slug: "step-3-create-influencer",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
     slug: "masterclass-l05-creating-your-ai-influencer",
     title: "Creating Your AI Influencer (Claude + Higgsfield)",
-    sort_order: 5,
-    wistia_video_id: "eeehfkrj0i",
+    sort_order: 2,
+    phase_slug: "step-3-create-influencer",
+    wistia_video_id: "eeehfkrj0i", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>How to build a <strong>photorealistic AI character</strong> that looks like a real person and stays consistent across every piece of content — podcast clips, selfie videos, vintage clips and more — all driven from Claude with the Higgsfield MCP.</p>
 <h2>💡 Why It Matters</h2>
@@ -175,98 +232,37 @@ export const MASTERCLASS_LESSONS: Array<{
 </ul>`,
   },
   {
-    slug: "masterclass-l06-podcast-clips",
-    title: "Podcast Clips",
-    sort_order: 6,
-    wistia_video_id: "4lgwwodr19",
-    notes: `<h2>🎯 What You'll Learn</h2>
-<p>How to produce <strong>podcast-style clips</strong> with your AI influencer — scripted in Claude, generated in Higgsfield, optionally rendered in HeyGen, then captioned and posted.</p>
-<h2>💡 Why It Matters</h2>
-<ul>
-<li>Podcast clips are one of the <strong>highest-performing formats</strong>: instant authority, long watch time, heavy trust.</li>
-<li>They let you educate and give real value instead of pitching.</li>
-<li>They're fast and cheap to make.</li>
-</ul>
-<h2>🛠️ How to Do It</h2>
-<ol>
-<li>Copy the podcast-script master prompt into Claude and fill the blanks: <em>"Make this about [TOPIC] for [AUDIENCE]. Use my research above/attached."</em></li>
-<li><strong>Re-attach your offer research</strong> (download the earlier Claude research as PDF and upload it) so the script stays on-message.</li>
-<li>Review the script and direct it like an editor. Example: <em>"Good, but cut the CTA at the end. Make it more educational. Keep the data point, open with a shocking personal story hook, then education, then CTA. 60 seconds."</em></li>
-<li>Once happy, paste the video-generation prompt: <em>"Use Higgsfield MCP and my avatar [PERSONA NAME]"</em> + the approved script. Click <strong>Always allow</strong> when the MCP permission prompt appears.</li>
-<li>Higgsfield renders the clip. Long scripts may come back in 4 parts — that's fine. Ask: <em>"Please generate the rest of the clip."</em></li>
-<li>For a studio podcast look: in Higgsfield → Image → Nano Banana Pro (or GPT Image 2) → grab a podcast-set reference image from Pinterest/Google → use <strong>Character Swap</strong> to place your avatar into the podcast set → output <strong>16:9</strong>.</li>
-<li>Alternative tool: <strong>heygen.com</strong> — create a free account, upload your avatar look, paste the script and render there instead.</li>
-<li>Stitch the parts, add captions in the Instagram edit app, then post to Instagram and TikTok.</li>
-</ol>
-<h2>📝 Good to Know</h2>
-<ul>
-<li>Always re-attach research before scripting — <strong>accuracy is what earns trust</strong>.</li>
-<li>Voice consistency can drift across parts; ask Claude to fix that specific clip and it re-renders instantly.</li>
-<li>Direct the AI like a client giving feedback: hook first, data second, education third.</li>
-</ul>`,
+    slug: "aiip-influencer-scenarios",
+    title: "Putting Your Influencer in Different Scenarios",
+    sort_order: 3,
+    phase_slug: "step-3-create-influencer",
+    wistia_video_id: null,
+    notes: null,
   },
   {
-    slug: "masterclass-l07-selfie-yapping-videos",
-    title: 'Selfie / "Yapping" Videos',
-    sort_order: 7,
-    wistia_video_id: "sx32e61fe5",
-    notes: `<h2>🎯 What You'll Learn</h2>
-<p>How to recreate the natural <strong>talking-to-camera selfie video</strong> — the most native format on Instagram and TikTok — using your AI influencer.</p>
-<h2>💡 Why It Matters</h2>
-<ul>
-<li>Selfie yapping videos look like a real person filmed them on their phone — which is exactly why they <strong>blend into the feed and get watched</strong>.</li>
-<li>They're the fastest format to produce once your avatar exists.</li>
-</ul>
-<h2>🛠️ How to Do It</h2>
-<ol>
-<li>In Higgsfield → Image → <strong>Nano Banana Pro</strong> → select one of your avatar images as the reference → prompt a selfie/phone-camera setting in vertical <strong>9:16</strong> → Generate.</li>
-<li>Download the generated selfie image.</li>
-<li>In HeyGen → <strong>Avatars → Upload look</strong> → upload that image → Create look.</li>
-<li>Paste the selfie-script prompt into Claude: <em>"Please make this about my [OFFER] and [PAIN POINT]."</em> Take the script it produces.</li>
-<li>In HeyGen: create video → build scene → paste the script → set delivery style (<strong>Enhanced</strong> works well) → Generate. Choose the selfie video format.</li>
-<li>Download the video, add captions in the Instagram edit app, and post.</li>
-</ol>
-<h2>📝 Good to Know</h2>
-<ul>
-<li>You can render this entirely in Higgsfield instead — HeyGen is just a personal preference for this format.</li>
-<li>HeyGen's newer prompt mode lets you say things like <em>"make her walk down the street yapping"</em> and it builds the full storyboard for you.</li>
-</ul>`,
+    slug: "aiip-influencer-voice",
+    title: "Creating Your Influencer Voice",
+    sort_order: 4,
+    phase_slug: "step-3-create-influencer",
+    wistia_video_id: null,
+    notes: null,
   },
+
+  // ── STEP 4: CREATE YOUR CONTENT ──────────────────────────────────────────────
   {
-    slug: "masterclass-l08-vintage-old-school-clips",
-    title: "Vintage / Old-School Clips",
-    sort_order: 8,
-    wistia_video_id: "n0mmims3xm",
-    notes: `<h2>🎯 What You'll Learn</h2>
-<p>How to create <strong>vintage, old-school-styled AI character clips</strong> — the format currently pulling the most attention — using one master prompt in Claude plus the Higgsfield MCP.</p>
-<h2>💡 Why It Matters</h2>
-<ul>
-<li>Old-school framing (a retired nurse, a 1990s-looking set) instantly signals <strong>experience and authority</strong>.</li>
-<li>It stands out hard in a feed full of modern content — the same reason vintage supplement ads still work.</li>
-<li>Full 7-clip batches take about <strong>15 minutes</strong> end to end.</li>
-</ul>
-<h2>🛠️ How to Do It</h2>
-<ol>
-<li>Copy the vintage master prompt into Claude and add: <em>"Please do this for the offer and research above for my [YOUR OFFER]."</em></li>
-<li>Claude fills the blanks and proposes a character concept (e.g. a retired nurse). Approve it: <em>"Approved."</em></li>
-<li>Claude generates a batch of scripts. Pick one to test: <em>"Please use number 1."</em></li>
-<li>Render in <strong>16:9</strong> — vintage footage wasn't shot vertical, and you'll be adding text over the top, so landscape reads as more authentic.</li>
-<li>Check the first clip. If happy: <em>"Approved, please do the rest of the video scripts"</em> — it generates the whole batch in one go.</li>
-<li>Watch for voice inconsistency between clips. If one drifts, ask Claude to fix that clip only; it re-renders immediately.</li>
-<li>Ask Claude: <em>"Please stitch them all together."</em></li>
-<li>Download, add captions in the Instagram edit app, then post.</li>
-</ol>
-<h2>📝 Good to Know</h2>
-<ul>
-<li>Lead with a credibility-heavy first line (<em>"I spent 32 years as a nurse, and I can tell you the thing women lie to their doctors about most…"</em>) — that's what stops the scroll.</li>
-<li>End on a follow hook (<em>"Follow for more, because next time I'll tell you what actually helps"</em>) rather than a hard pitch.</li>
-</ul>`,
+    slug: "aiip-content-types",
+    title: "Content Types & What to Make",
+    sort_order: 1,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
   },
   {
     slug: "masterclass-l09-setting-up-social-media-accounts",
     title: "Setting Up Social Media Accounts",
-    sort_order: 9,
-    wistia_video_id: "8ane4g5cmj",
+    sort_order: 2,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: "8ane4g5cmj", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>A short, practical walkthrough of setting up the social media accounts your AI avatar will actually post from — which platforms to prioritise, the dedicated Gmail address trick, what to put in the avatar's profile, how to attach your bridge page as the link in bio, and how to post to Facebook, Instagram and TikTok in a single click using Buffer.</p>
 <h2>💡 Why It Matters</h2>
@@ -295,10 +291,153 @@ export const MASTERCLASS_LESSONS: Array<{
 </ul>`,
   },
   {
+    slug: "aiip-setup-manychat",
+    title: "Setting Up ManyChat",
+    sort_order: 3,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-green-screen-clips",
+    title: "Green Screen Clips",
+    sort_order: 4,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-hook-demo-clips",
+    title: "Hook + Demo Clips",
+    sort_order: 5,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "masterclass-l06-podcast-clips",
+    title: "Podcast Clips",
+    sort_order: 6,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: "4lgwwodr19", // carry-over
+    notes: `<h2>🎯 What You'll Learn</h2>
+<p>How to produce <strong>podcast-style clips</strong> with your AI influencer — scripted in Claude, generated in Higgsfield, optionally rendered in HeyGen, then captioned and posted.</p>
+<h2>💡 Why It Matters</h2>
+<ul>
+<li>Podcast clips are one of the <strong>highest-performing formats</strong>: instant authority, long watch time, heavy trust.</li>
+<li>They let you educate and give real value instead of pitching.</li>
+<li>They're fast and cheap to make.</li>
+</ul>
+<h2>🛠️ How to Do It</h2>
+<ol>
+<li>Copy the podcast-script master prompt into Claude and fill the blanks: <em>"Make this about [TOPIC] for [AUDIENCE]. Use my research above/attached."</em></li>
+<li><strong>Re-attach your offer research</strong> (download the earlier Claude research as PDF and upload it) so the script stays on-message.</li>
+<li>Review the script and direct it like an editor. Example: <em>"Good, but cut the CTA at the end. Make it more educational. Keep the data point, open with a shocking personal story hook, then education, then CTA. 60 seconds."</em></li>
+<li>Once happy, paste the video-generation prompt: <em>"Use Higgsfield MCP and my avatar [PERSONA NAME]"</em> + the approved script. Click <strong>Always allow</strong> when the MCP permission prompt appears.</li>
+<li>Higgsfield renders the clip. Long scripts may come back in 4 parts — that's fine. Ask: <em>"Please generate the rest of the clip."</em></li>
+<li>For a studio podcast look: in Higgsfield → Image → Nano Banana Pro (or GPT Image 2) → grab a podcast-set reference image from Pinterest/Google → use <strong>Character Swap</strong> to place your avatar into the podcast set → output <strong>16:9</strong>.</li>
+<li>Alternative tool: <strong>heygen.com</strong> — create a free account, upload your avatar look, paste the script and render there instead.</li>
+<li>Stitch the parts, add captions in the Instagram edit app, then post to Instagram and TikTok.</li>
+</ol>
+<h2>📝 Good to Know</h2>
+<ul>
+<li>Always re-attach research before scripting — <strong>accuracy is what earns trust</strong>.</li>
+<li>Voice consistency can drift across parts; ask Claude to fix that specific clip and it re-renders instantly.</li>
+<li>Direct the AI like a client giving feedback: hook first, data second, education third.</li>
+</ul>`,
+  },
+  {
+    slug: "aiip-speaking-clips",
+    title: "Speaking Clips",
+    sort_order: 7,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "masterclass-l07-selfie-yapping-videos",
+    title: 'Selfie / Yapping Videos',
+    sort_order: 8,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: "sx32e61fe5", // carry-over
+    notes: `<h2>🎯 What You'll Learn</h2>
+<p>How to recreate the natural <strong>talking-to-camera selfie video</strong> — the most native format on Instagram and TikTok — using your AI influencer.</p>
+<h2>💡 Why It Matters</h2>
+<ul>
+<li>Selfie yapping videos look like a real person filmed them on their phone — which is exactly why they <strong>blend into the feed and get watched</strong>.</li>
+<li>They're the fastest format to produce once your avatar exists.</li>
+</ul>
+<h2>🛠️ How to Do It</h2>
+<ol>
+<li>In Higgsfield → Image → <strong>Nano Banana Pro</strong> → select one of your avatar images as the reference → prompt a selfie/phone-camera setting in vertical <strong>9:16</strong> → Generate.</li>
+<li>Download the generated selfie image.</li>
+<li>In HeyGen → <strong>Avatars → Upload look</strong> → upload that image → Create look.</li>
+<li>Paste the selfie-script prompt into Claude: <em>"Please make this about my [OFFER] and [PAIN POINT]."</em> Take the script it produces.</li>
+<li>In HeyGen: create video → build scene → paste the script → set delivery style (<strong>Enhanced</strong> works well) → Generate. Choose the selfie video format.</li>
+<li>Download the video, add captions in the Instagram edit app, and post.</li>
+</ol>
+<h2>📝 Good to Know</h2>
+<ul>
+<li>You can render this entirely in Higgsfield instead — HeyGen is just a personal preference for this format.</li>
+<li>HeyGen's newer prompt mode lets you say things like <em>"make her walk down the street yapping"</em> and it builds the full storyboard for you.</li>
+</ul>`,
+  },
+  {
+    slug: "aiip-viral-slideshows",
+    title: "Viral Slideshows",
+    sort_order: 9,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-viral-carousels",
+    title: "Viral Carousels",
+    sort_order: 10,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-overlay-clips",
+    title: "Overlay Clips",
+    sort_order: 11,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-fast-motion-clips",
+    title: "Fast-Motion Clips",
+    sort_order: 12,
+    phase_slug: "step-4-create-content",
+    wistia_video_id: null,
+    notes: null,
+  },
+
+  // ── STEP 5: TRAFFIC + ADS ────────────────────────────────────────────────────
+  {
+    slug: "aiip-intro-to-ads",
+    title: "Intro to Ads",
+    sort_order: 1,
+    phase_slug: "step-5-traffic-ads",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-posting-social-media",
+    title: "Posting On Social Media",
+    sort_order: 2,
+    phase_slug: "step-5-traffic-ads",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
     slug: "masterclass-l10-engagement-campaign",
     title: "Engagement Campaign",
-    sort_order: 10,
-    wistia_video_id: "nngsgikr5j",
+    sort_order: 3,
+    phase_slug: "step-5-traffic-ads",
+    wistia_video_id: "nngsgikr5j", // carry-over
     notes: `<h2>🎯 What You'll Learn</h2>
 <p>A full over-the-shoulder build of a <strong>Meta engagement ad campaign</strong> — the paid push behind your organic posts. Why almost every "organic" viral account is really running engagement ads, live proof of reaching nearly 100,000 people for under $300, then the entire campaign setup: budget, ad set structure, audience, placements, using existing posts, and turning off every enhancement Meta tries to sneak on.</p>
 <h2>💡 Why It Matters</h2>
@@ -330,5 +469,31 @@ export const MASTERCLASS_LESSONS: Array<{
 <li><strong>The lower your CPM, the better your content is.</strong> Improving content lowers cost and increases engagement at the same time.</li>
 <li>Direct sales campaigns come later and require a very different, direct style of creative. They retarget everyone this engagement campaign warms up — so run this one first.</li>
 </ul>`,
+  },
+  {
+    slug: "aiip-direct-response-ads",
+    title: "Direct Response Ads",
+    sort_order: 4,
+    phase_slug: "step-5-traffic-ads",
+    wistia_video_id: null,
+    notes: null,
+  },
+
+  // ── STEP 6: NEXT STEPS ───────────────────────────────────────────────────────
+  {
+    slug: "aiip-publishing-strategy",
+    title: "The Publishing Strategy",
+    sort_order: 1,
+    phase_slug: "step-6-next-steps",
+    wistia_video_id: null,
+    notes: null,
+  },
+  {
+    slug: "aiip-next-steps-scale",
+    title: "Next Steps to Scale",
+    sort_order: 2,
+    phase_slug: "step-6-next-steps",
+    wistia_video_id: null,
+    notes: null,
   },
 ];
