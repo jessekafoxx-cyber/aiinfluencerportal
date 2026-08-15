@@ -1561,11 +1561,11 @@ export function ActiveJobCard({
     return () => clearInterval(t);
   }, [reduceMotion]);
 
-  // Re-render every 30s so the ETA countdown ticks down without
-  // requiring a network poll. The etaAt timestamp itself is server-
-  // assigned at job creation and persisted, so refreshes preserve it.
+  // Re-render every second so the countdown clock ticks in real time.
+  // The etaAt timestamp itself is server-assigned at job creation and
+  // persisted, so refreshes preserve it.
   useEffect(() => {
-    const t = setInterval(() => setNowTick((n) => n + 1), 30_000);
+    const t = setInterval(() => setNowTick((n) => n + 1), 1_000);
     return () => clearInterval(t);
   }, []);
 
@@ -1744,6 +1744,36 @@ export function ActiveJobCard({
           </div>
         </div>
       )}
+
+      {/* Countdown clock — mirrors QueueCard's 24h promise window */}
+      {!isFailed && !isReady && (() => {
+        const DISPLAY_WINDOW_MS = 24 * 60 * 60 * 1000;
+        const createdMs = new Date(job.createdAt).getTime();
+        const deadlineMs = Number.isFinite(createdMs)
+          ? createdMs + DISPLAY_WINDOW_MS
+          : Date.now() + DISPLAY_WINDOW_MS;
+        const remainingMs = Math.max(0, deadlineMs - Date.now());
+        const totalSec = Math.floor(remainingMs / 1000);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const label = remainingMs <= 0 ? "Finalizing" : `${pad(h)}:${pad(m)}:${pad(s)}`;
+        return (
+          <div
+            className="mb-5 inline-flex items-center gap-3 rounded-lg border px-3 py-2"
+            style={{ borderColor: "rgba(201,164,76,0.25)", background: "rgba(201,164,76,0.06)" }}
+            data-testid="active-job-card-countdown"
+          >
+            <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">
+              Delivery within
+            </span>
+            <span className="text-sm font-bold tabular-nums" style={{ color: GOLD, letterSpacing: "0.04em" }}>
+              {label}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Stage timeline */}
       {!isFailed && (
