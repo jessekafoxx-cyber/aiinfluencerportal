@@ -10,7 +10,7 @@ export function SignInPage() {
         routing="path"
         path={`${basePath}/sign-in`}
         signUpUrl={`${basePath}/sign-up`}
-        fallbackRedirectUrl={`${basePath}/dashboard`}
+        forceRedirectUrl={`${basePath}/dashboard`}
         appearance={{
           elements: {
             // Flush the card into the auth-shell right panel
