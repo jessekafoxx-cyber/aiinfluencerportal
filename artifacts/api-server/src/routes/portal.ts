@@ -1390,11 +1390,17 @@ portalRouter.get("/portal/course", requireAuth, requireActive, async (req: any, 
 
   const course = phases.map(phase => ({
     ...phase,
-    lessons: lessons.filter(l => l.phaseId === phase.id).map(l => ({
-      ...l,
-      progress: progressMap.get(l.id) || null,
-    })),
-  }));
+    // Exclude draft lessons from member-facing course view.
+    lessons: lessons
+      .filter(l => l.phaseId === phase.id && (l as any).status !== "draft")
+      .map(l => ({
+        ...l,
+        status: (l as any).status ?? "published",
+        progress: progressMap.get(l.id) || null,
+      })),
+  }))
+  // Drop phases that end up with no visible lessons.
+  .filter(phase => phase.lessons.length > 0);
 
   res.json(course);
 });
@@ -5086,6 +5092,64 @@ portalRouter.post("/portal/me/password-reset", requireAuth, async (_req: any, re
   });
 });
 
+
+// Admin: list all lessons grouped by phase (for the admin lessons visibility page).
+portalRouter.get("/portal/admin/lessons", requireAuth, requireAdmin, async (req: any, res) => {
+  const portalKey = getPortalKey(req);
+  const phases = await db.select().from(coursePhasesTable)
+    .where(eq(coursePhasesTable.portalKey, portalKey))
+    .orderBy(asc(coursePhasesTable.sortOrder));
+  const lessons = await db.select().from(lessonsTable)
+    .where(eq(lessonsTable.portalKey, portalKey))
+    .orderBy(asc(lessonsTable.sortOrder));
+
+  const result = phases.map((phase) => ({
+    id: phase.id,
+    slug: phase.slug,
+    title: phase.title,
+    sortOrder: phase.sortOrder,
+    lessons: lessons
+      .filter((l) => l.phaseId === phase.id)
+      .map((l) => ({
+        id: l.id,
+        slug: l.slug,
+        title: l.title,
+        status: (l as any).status ?? "published",
+        wistiaVideoId: l.wistiaVideoId ?? null,
+        sortOrder: l.sortOrder,
+        phaseId: l.phaseId,
+      })),
+  }));
+
+  res.json(result);
+});
+
+// Admin: update lesson status (draft | coming_soon | published).
+// Only allows 'published' when the lesson already has a Wistia video.
+portalRouter.put("/portal/admin/lessons/:slug/status", requireAuth, requireAdmin, async (req: any, res) => {
+  const { status } = req.body || {};
+  const valid: string[] = ["draft", "coming_soon", "published"];
+  if (!valid.includes(status)) {
+    res.status(400).json({ error: "status must be one of: draft, coming_soon, published" }); return;
+  }
+
+  const [lesson] = await db.select().from(lessonsTable).where(eq(lessonsTable.slug, req.params.slug));
+  if (!lesson) { res.status(404).json({ error: "Lesson not found" }); return; }
+
+  if (status === "published") {
+    const hasVideo = lesson.wistiaVideoId && lesson.wistiaVideoId.trim() !== "";
+    if (!hasVideo) {
+      res.status(400).json({ error: "Cannot publish a lesson without a Wistia video. Add a video first." }); return;
+    }
+  }
+
+  // Use raw SQL for the new column so the ORM type doesn't need to be rebuilt.
+  await db.execute(
+    sql`UPDATE "lessons" SET "status" = ${status} WHERE "id" = ${lesson.id}`
+  );
+
+  res.json({ ok: true, slug: req.params.slug, status });
+});
 
 portalRouter.put("/portal/admin/lessons/:slug/brief", requireAuth, requireAdmin, async (req: any, res) => {
   const { brief } = req.body;

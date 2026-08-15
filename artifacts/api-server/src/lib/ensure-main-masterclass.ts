@@ -1,5 +1,5 @@
 import { db, coursePhasesTable, lessonsTable, lessonProgressTable } from "@workspace/db";
-import { and, eq, inArray, notInArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
 import { logger } from "./logger";
 import { MASTERCLASS_PHASES, MASTERCLASS_LESSONS } from "./masterclass-course-data";
 
@@ -88,7 +88,9 @@ export async function ensureMainMasterclass(): Promise<void> {
           .where(eq(lessonsTable.id, existingId));
         updated++;
       } else {
-        // New lesson: insert with all seed data.
+        // New lesson: insert with all seed data. Status derived from video presence —
+        // never set status on UPDATE so admin changes survive restarts.
+        const seedStatus = lesson.wistia_video_id ? "published" : "coming_soon";
         await db.insert(lessonsTable).values({
           slug: lesson.slug,
           phaseId,
@@ -96,11 +98,26 @@ export async function ensureMainMasterclass(): Promise<void> {
           sortOrder: lesson.sort_order,
           wistiaVideoId: lesson.wistia_video_id ?? null,
           notes: lesson.notes ?? null,
+          status: seedStatus,
           portalKey: PORTAL_KEY,
         });
         inserted++;
       }
     }
+
+    // ── 2b. Backfill status for lessons that existed before the status column
+    //        was added. Rule: if a lesson has no video AND is currently 'published'
+    //        (the column DEFAULT), flip it to 'coming_soon'. Lessons already set
+    //        to 'draft' or explicitly 'coming_soon' by an admin are left alone.
+    await db.execute(
+      sql`
+        UPDATE "lessons"
+           SET "status" = 'coming_soon'
+         WHERE "portal_key" = ${PORTAL_KEY}
+           AND ("wistia_video_id" IS NULL OR "wistia_video_id" = '')
+           AND "status" = 'published'
+      `,
+    );
 
     // ── 3. Remove stale lessons (not in canonical list) ──────────────────────
     const stale = await db

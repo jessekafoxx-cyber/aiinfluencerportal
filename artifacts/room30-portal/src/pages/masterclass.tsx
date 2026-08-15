@@ -13,6 +13,8 @@ import {
   Clock,
 } from "lucide-react";
 
+type LessonStatus = "published" | "coming_soon" | "draft";
+
 type CourseLesson = {
   id: number;
   slug: string;
@@ -21,6 +23,7 @@ type CourseLesson = {
   sortOrder: number;
   wistiaVideoId: string | null;
   durationMinutes: number | null;
+  status: LessonStatus;
   progress: { completed: boolean } | null;
 };
 
@@ -32,6 +35,9 @@ type CoursePhase = {
 };
 
 function isComingSoon(lesson: CourseLesson) {
+  // Driven by status field; fall back to video-presence check for legacy rows.
+  if (lesson.status === "coming_soon") return true;
+  if (lesson.status === "published") return false;
   return !lesson.wistiaVideoId || lesson.wistiaVideoId.trim() === "";
 }
 

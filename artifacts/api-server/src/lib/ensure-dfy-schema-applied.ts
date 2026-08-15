@@ -88,6 +88,14 @@ const STATEMENTS: { name: string; sql: ReturnType<typeof sql> }[] = [
         WHERE "source_row_key" IS NOT NULL
     `,
   },
+  // lessons.status column (three-state visibility: published / coming_soon / draft)
+  {
+    name: "alter lessons add status col",
+    sql: sql`
+      ALTER TABLE "lessons"
+        ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'published'
+    `,
+  },
   // 0045: dfy_advertorial_pages catalog
   {
     name: "create dfy_advertorial_pages",

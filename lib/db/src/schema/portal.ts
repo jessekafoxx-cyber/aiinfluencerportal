@@ -171,6 +171,15 @@ export const lessonsTable = pgTable("lessons", {
   sortOrder: integer("sort_order").notNull(),
   durationMinutes: integer("duration_minutes"),
   isPublished: boolean("is_published").default(true),
+  // Three-state visibility for admin control.
+  //   'published'   — visible with full video access (default)
+  //   'coming_soon' — visible but shows Coming Soon badge, no playback
+  //   'draft'       — hidden from all members; admin-only
+  // Added by boot DDL (ensure-dfy-schema-applied.ts) so it self-heals on
+  // any DB (including production). Default 'published' so existing rows
+  // without the column get a safe starting point; the seeder then
+  // backfills lessons with no video to 'coming_soon' on every boot.
+  status: text("status").default("published").notNull(),
   // See coursePhasesTable.portalKey. Single-tenant since Task #491;
   // default flipped to 'room30' in Task #558 migration 0053.
   portalKey: text("portal_key").default("room30").notNull(),

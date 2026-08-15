@@ -96,6 +96,7 @@ import ResearchGeneration from "@/pages/research-generation";
 import DomainNameGenerator from "@/pages/domain-name-generator";
 import AvatarPromptGenerator from "@/pages/avatar-prompt-generator";
 import { AdminSupportKnowledge } from "./pages/admin/admin-support-knowledge";
+import { AdminLessons } from "./pages/admin/admin-lessons";
 import { Toaster } from "@/components/ui/toaster";
 import { PortalErrorBoundary } from "@/components/error-boundary";
 import { toast } from "@/hooks/use-toast";
@@ -494,6 +495,9 @@ function AppRoutes() {
           </Route>
           <Route path="/admin">
             <ProtectedRoute><AdminDashboard /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/lessons">
+            <ProtectedRoute><AdminLessons /></ProtectedRoute>
           </Route>
           <Route path="/admin/users">
             <ProtectedRoute><AdminUsers /></ProtectedRoute>

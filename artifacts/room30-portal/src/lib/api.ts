@@ -1434,6 +1434,17 @@ export const api = {
       fetchApi(`/admin/lessons/${slug}/downloads`, { method: "PUT", body: JSON.stringify({ files }) }),
     updateLessonWistia: (slug: string, wistiaVideoId: string | null) =>
       fetchApi(`/admin/lessons/${slug}/wistia`, { method: "PUT", body: JSON.stringify({ wistiaVideoId }) }),
+    updateLessonStatus: (slug: string, status: "draft" | "coming_soon" | "published") =>
+      fetchApi(`/admin/lessons/${slug}/status`, { method: "PUT", body: JSON.stringify({ status }) }),
+    getLessons: (): Promise<Array<{
+      id: number; slug: string; title: string; sortOrder: number;
+      lessons: Array<{
+        id: number; slug: string; title: string;
+        status: "draft" | "coming_soon" | "published";
+        wistiaVideoId: string | null; sortOrder: number; phaseId: number;
+      }>;
+    }>> =>
+      fetchApi(`/admin/lessons`),
     generateNotes: (slug: string, transcript: string, context?: string, style?: string) =>
       fetchApi(`/admin/lessons/${slug}/generate-notes`, { method: "POST", body: JSON.stringify({ transcript, context, style }) }),
     editNotesAi: (slug: string, currentHtml: string, editPrompt: string) =>
