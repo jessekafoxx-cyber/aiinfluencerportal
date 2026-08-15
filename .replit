@@ -28,3 +28,6 @@ channel = "stable-25_05"
 PUBLIC_APP_URL = "portal.aiinfluencerpublishing.com"
 VIKTOR_SLACK_USER_ID = "U0BNUR2161J"
 ADMIN_EMAILS = "greg@cookemedia.io,jesseka@maketruechange.org"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-36a07ead-12e4-441e-8c45-24d3922975d6"
