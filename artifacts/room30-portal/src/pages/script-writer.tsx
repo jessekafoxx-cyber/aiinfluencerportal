@@ -885,11 +885,10 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
                 value={form.influencerId || ""}
                 onChange={(e) => setForm((p) => ({ ...p, influencerId: e.target.value }))}
                 className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
-                style={{ background: "#111", color: "white" }}
               >
-                <option value="" style={{ background: "#111" }}>— Owner's main brand —</option>
+                <option value="">— Owner's main brand —</option>
                 {influencers.map((inf) => (
-                  <option key={inf.id} value={String(inf.id)} style={{ background: "#111" }}>{inf.name}</option>
+                  <option key={inf.id} value={String(inf.id)}>{inf.name}</option>
                 ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
@@ -906,11 +905,10 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
                 value={form.offerBrainId || "own"}
                 onChange={(e) => setForm((p) => ({ ...p, offerBrainId: e.target.value }))}
                 className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
-                style={{ background: "#111", color: "white" }}
               >
-                <option value="own" style={{ background: "#111" }}>— Your brain (default) —</option>
+                <option value="own">— Your brain (default) —</option>
                 {prebuiltBrains.map((b) => (
-                  <option key={b.id} value={b.id} style={{ background: "#111" }}>{b.name}</option>
+                  <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
@@ -952,10 +950,9 @@ function ScriptPanel({ def, externalResult }: { def: ScriptTypeDef; externalResu
                   value={form[field.key] || field.options?.[0] || ""}
                   onChange={(e) => setForm((p) => ({ ...p, [field.key]: e.target.value }))}
                   className="w-full rounded-xl border border-white/[0.08] text-[13px] text-white pl-4 pr-9 py-3 focus:outline-none focus:border-[#C9A44C]/40 transition-colors disabled:opacity-40 appearance-none cursor-pointer"
-                  style={{ background: "#111", color: "white" }}
                 >
                   {field.options?.map((o) => (
-                    <option key={o} value={o} style={{ background: "#111" }}>
+                    <option key={o} value={o}>
                       {o}
                     </option>
                   ))}
@@ -2422,10 +2419,9 @@ function TextScriptPanel({ def }: { def: ScriptTypeDef }) {
                 <select disabled={anyActive} value={form[dd.key] || dd.options[0] || ""}
                   onChange={(e) => setF(dd.key, e.target.value)}
                   className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-white/[0.12] text-[12px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
-                  style={{ background: "#111", color: "white" }}
                 >
                   {dd.options.map((o) => (
-                    <option key={o} value={o} style={{ background: "#111" }}>
+                    <option key={o} value={o}>
                       {dd.labelMap?.[o] ?? o}
                     </option>
                   ))}
@@ -2664,10 +2660,9 @@ function FmSelect({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className="w-full appearance-none pl-3.5 pr-9 py-3 rounded-xl border border-white/[0.12] text-[13px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors disabled:opacity-40"
-        style={{ background: "#111", color: "white" }}
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value} style={{ background: "#111" }}>
+          <option key={o.value} value={o.value}>
             {o.label}
           </option>
         ))}
@@ -3231,7 +3226,6 @@ export default function ScriptWriterPage() {
                 value={activeDef.slug}
                 onChange={(e) => handleTypeChange(e.target.value)}
                 className="w-full appearance-none pl-4 pr-10 py-3 rounded-xl bg-[#111] border border-white/[0.12] text-white text-[14px] font-medium focus:outline-none focus:border-[#C9A44C]/50 cursor-pointer transition-colors"
-                style={{ background: "#111" }}
               >
                 {SCRIPT_TYPES.map((t) => (
                   <option key={t.slug} value={t.slug}>{t.label}</option>

@@ -144,6 +144,20 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  /* Native <select> elements default to a browser white background which is
+     unreadable on this dark UI. Force a dark surface + light text globally so
+     every <select> matches the surrounding panels without needing per-element
+     inline styles. color-scheme: dark also signals to Chromium/WebKit to
+     render the OS-native dropdown list with dark chrome where supported. */
+  select {
+    color-scheme: dark;
+    background-color: hsl(var(--card));
+    color: hsl(var(--foreground));
+  }
+  select option {
+    background-color: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+  }
 }
 
 .font-display {
