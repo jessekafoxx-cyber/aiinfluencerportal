@@ -144,10 +144,15 @@ app.get("/", (_req, res) => {
 });
 
 // Clerk dashboard has /login configured as the post-sign-in redirect.
-// Send it to the members dashboard so auth lands in the right place.
-// /sign-in and /signin are also caught here in case Clerk redirects there.
-app.get("/login", (_req, res) => res.redirect(302, "/members/dashboard"));
-app.get(["/sign-in", "/signin"], (_req, res) => res.redirect(302, "/members/sign-in"));
+// In this deployment Clerk prefixes its paths with /api, so the actual
+// hit is /api/login. Handle both the bare path and the /api-prefixed form
+// so the redirect works regardless of Clerk proxy config.
+app.get(["/login", "/api/login"], (_req, res) =>
+  res.redirect(302, "/members/dashboard"),
+);
+app.get(["/sign-in", "/signin", "/api/sign-in", "/api/signin"], (_req, res) =>
+  res.redirect(302, "/members/sign-in"),
+);
 
 app.use("/api", router);
 
