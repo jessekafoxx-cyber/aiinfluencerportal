@@ -5,7 +5,7 @@ import {
   X, ChevronDown, ChevronUp, Coins, Download, ArrowRight,
   Search, Target, TrendingUp, Layers, BarChart2, Mail,
   Video, FileText, Zap, Users, Star, Youtube, Mic, Monitor,
-  BookOpen, Globe, Lock,
+  BookOpen, Globe, Lock, Instagram,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
@@ -73,6 +73,17 @@ const TOOLS: ToolDef[] = [
     phase: "avatar",
     color: "#8b5cf6",
     navigateTo: "/avatar-prompt-generator",
+    fields: [],
+  },
+  {
+    slug: "ig-bio-generator",
+    label: "IG Bio Generator",
+    description: "5 scroll-stopping Instagram & TikTok bio variations pulled straight from Your Brain — one per proven framework (I help X, founder story, proof stack, credential resume, bullet manifesto). Copy the one you like, line breaks included, straight into your profile.",
+    credits: 0,
+    icon: Instagram,
+    phase: "avatar",
+    color: "#e1306c",
+    navigateTo: "/ig-bio-generator",
     fields: [],
   },
 

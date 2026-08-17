@@ -97,6 +97,7 @@ import DomainNameGenerator from "@/pages/domain-name-generator";
 import AvatarPromptGenerator from "@/pages/avatar-prompt-generator";
 import BridgePageHeadlineGenerator from "@/pages/bridge-page-headline-generator";
 import DirectOfferAdGenerator from "@/pages/direct-offer-ad-generator";
+import IgBioGenerator from "@/pages/ig-bio-generator";
 import { AdminSupportKnowledge } from "./pages/admin/admin-support-knowledge";
 import { AdminLessons } from "./pages/admin/admin-lessons";
 import { Toaster } from "@/components/ui/toaster";
@@ -370,6 +371,9 @@ function AppRoutes() {
           </Route>
           <Route path="/direct-offer-ad-generator">
             <ProtectedRoute><DirectOfferAdGenerator /></ProtectedRoute>
+          </Route>
+          <Route path="/ig-bio-generator">
+            <ProtectedRoute><IgBioGenerator /></ProtectedRoute>
           </Route>
           <Route path="/a-list">
             <ProtectedRoute><AList /></ProtectedRoute>
