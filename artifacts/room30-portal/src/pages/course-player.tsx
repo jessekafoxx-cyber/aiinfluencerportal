@@ -182,6 +182,16 @@ const LESSON_OS_LINKS: Record<string, LessonOsLink> = {
     ctaLabel: "Open IG Bio Generator",
     route: "/ig-bio-generator",
   },
+  // Canonical backend slug for "Setting Up Social Media Accounts" — must
+  // mirror the entry above so the IG Bio Generator tab appears whether
+  // the lesson is reached via the r30- shorthand or the full slug.
+  "masterclass-l09-setting-up-social-media-accounts": {
+    tabLabel: "IG Bio Generator",
+    panelTitle: "Instagram Bio Generator",
+    panelDescription: "Pulled straight from Your Brain and the offer you select, we'll write 5 scroll-stopping Instagram bios using the proven 3-4 line frameworks (founder story, big-number proof, manifesto, credential stack, and 'I help X without Y'). Each one ends with a CTA pointing at the offer you picked. Copy your favourite, line breaks included, straight into your profile.",
+    ctaLabel: "Open IG Bio Generator",
+    route: "/ig-bio-generator",
+  },
   "r30-p3-creating-unique-avatar": {
     tabLabel: "Avatar Prompt Generator",
     panelTitle: "Avatar Prompt Generator",

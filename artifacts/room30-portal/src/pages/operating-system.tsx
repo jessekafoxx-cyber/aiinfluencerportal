@@ -75,13 +75,15 @@ const TOOLS: ToolDef[] = [
     navigateTo: "/avatar-prompt-generator",
     fields: [],
   },
+
+  // ── Phase 4 — Content: Profile & Bio ─────────────────────────────────────
   {
     slug: "ig-bio-generator",
     label: "IG Bio Generator",
     description: "5 scroll-stopping Instagram & TikTok bio variations pulled straight from Your Brain — one per proven framework (I help X, founder story, proof stack, credential resume, bullet manifesto). Copy the one you like, line breaks included, straight into your profile.",
     credits: 0,
     icon: Instagram,
-    phase: "avatar",
+    phase: "content",
     color: "#e1306c",
     navigateTo: "/ig-bio-generator",
     fields: [],
