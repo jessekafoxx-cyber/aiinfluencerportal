@@ -14,6 +14,7 @@ import {
   useRefetchOnRefocus,
 } from "@/hooks/use-unlock-celebration";
 import { usePurchaseLinks } from "@/hooks/use-purchase-links";
+import { useInfluencerQuota } from "@/hooks/use-influencer-quota";
 
 const GOLD = "#C9A44C";
 
@@ -68,13 +69,6 @@ export interface InfluencerJob {
 
 interface JobsResponse {
   jobs: InfluencerJob[];
-}
-
-interface InfluencerQuota {
-  used: number;
-  total: number;
-  bonusUnlocked: boolean;
-  unlockSeen: boolean;
 }
 
 const AGE_OPTIONS = [
@@ -260,22 +254,14 @@ export default function YourInfluencers() {
   // Task #283: quota state for the bonus AR influencer pack. Drives the
   // quota indicator near the top of the page, the Generate button enable
   // state, and the one-time celebratory unlock popup for Upsell 2 buyers.
-  const { data: quota } = useQuery<InfluencerQuota>({
-    queryKey: ["influencer-quota"],
-    queryFn: async () => {
-      try {
-        return (await fetchApi("/influencer-jobs/quota")) as InfluencerQuota;
-      } catch {
-        return { used: 0, total: 1, bonusUnlocked: false, unlockSeen: true };
-      }
-    },
-  });
+  const { data: quota, isPending: quotaLoading, isError: quotaError, refetch: refetchQuota } = useInfluencerQuota();
 
   const total = quota?.total ?? 1;
   const used = quota?.used ?? (jobsData?.jobs ?? []).length;
   const bonusUnlocked = !!quota?.bonusUnlocked;
   const remaining = Math.max(0, total - used);
-  const canGenerate = remaining > 0 && !inFlightJob;
+  const canGenerate = !!quota && !quotaLoading && !quotaError && remaining > 0;
+  const atCap = !!quota && !quotaLoading && !quotaError && remaining === 0;
 
   // Task #9: the buy-credits overlay sends the buyer to the external GHL
   // sales page in a new tab. When they tab back after paying, force-refresh
@@ -523,20 +509,20 @@ export default function YourInfluencers() {
             <button
               onClick={() => setShowBuyCredits(true)}
               className={
-                remaining === 0
+                atCap
                   ? "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-black font-bold uppercase text-[12px] tracking-wider"
                   : "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white border border-[#C9A44C]/40 hover:bg-[#C9A44C]/10 text-[12px] font-bold uppercase tracking-wider"
               }
-              style={remaining === 0 ? { background: GOLD } : { color: GOLD }}
+              style={atCap ? { background: GOLD } : { color: GOLD }}
               data-testid="button-buy-influencer-credits"
               title="Buy more influencer generations ($29 each)"
             >
               <Sparkles className="w-4 h-4" />
-              {remaining === 0 ? "Buy a Generation - $29" : "Buy More - $29 each"}
+              {atCap ? "Buy a Generation - $29" : "Buy More - $29 each"}
             </button>
             {canGenerate ? (
               <button
-                onClick={() => setLocation("/buy-influencer")}
+                onClick={() => setLocation("/generate-influencer")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white border border-white/15 hover:bg-white/[0.04] text-[12px] font-bold uppercase tracking-wider"
                 data-testid="button-new-influencer"
                 title={`${remaining} of ${total} generations remaining`}
@@ -580,12 +566,18 @@ export default function YourInfluencers() {
           </div>
         )}
 
-        {quota && quota.total > 0 ? (
+        {quotaError && (
+          <div role="alert" className="mb-5 text-sm text-amber-300">
+            Unable to check your generations. No purchase is required until your balance is confirmed.{" "}
+            <button onClick={() => void refetchQuota()} className="underline">Retry</button>
+          </div>
+        )}
+        {quota && !quotaError && quota.total > 0 ? (
           <QuotaIndicator
             used={used}
             total={total}
             bonusUnlocked={bonusUnlocked}
-            atCap={remaining === 0}
+            atCap={atCap}
           />
         ) : null}
 
@@ -932,10 +924,10 @@ export default function YourInfluencers() {
             })}
             <button
               type="button"
-              onClick={() => setShowBuyCredits(true)}
+              onClick={() => canGenerate ? setLocation("/generate-influencer") : atCap ? setShowBuyCredits(true) : void refetchQuota()}
               className="group relative flex flex-col items-center justify-center rounded-xl border border-dashed border-[#C9A44C]/35 bg-[#C9A44C]/[0.03] hover:bg-[#C9A44C]/[0.08] hover:border-[#C9A44C]/60 transition-colors min-h-[260px] p-6 text-center"
               data-testid="button-add-influencer-tile"
-              title="Buy another influencer generation ($29)"
+              title={canGenerate ? "Use an available influencer generation" : atCap ? "Buy another influencer generation ($29)" : "Check generation balance"}
             >
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-3 border"
@@ -947,7 +939,10 @@ export default function YourInfluencers() {
                 Add Influencer
               </div>
               <div className="text-[12px] text-white/55">
-                $29 each · unlocks instantly
+                {canGenerate
+                  ? `${remaining} generation${remaining === 1 ? "" : "s"} remaining · use one`
+                  : atCap ? "$29 each · unlocks instantly"
+                  : quotaError ? "Unable to check balance · retry" : "Checking your generations…"}
               </div>
             </button>
           </div>

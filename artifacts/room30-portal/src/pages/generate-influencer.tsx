@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, Wand2, Loader2, AlertCircle, ImagePlus, X,
   CheckCircle2, Sparkles, Upload,
 } from "lucide-react";
 import { PortalLayout } from "@/components/portal-layout";
 import { PORTAL_PAGE_CLASS } from "@/components/portal-page";
-import { api, fetchApi, getAuthHeaders } from "@/lib/api";
+import { fetchApi, getAuthHeaders } from "@/lib/api";
+import { useInfluencerQuota } from "@/hooks/use-influencer-quota";
 
 const GOLD = "#C9A44C";
 
@@ -249,6 +250,7 @@ function Section({ number, title, subtitle, children }: {
 
 export default function GenerateInfluencer() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   // Form state
   const [ageRange,  setAgeRange]  = useState(AGE_OPTIONS[1].value);
@@ -269,12 +271,11 @@ export default function GenerateInfluencer() {
   }, [error]);
 
   // Quota check
-  const { data: meData } = useQuery({ queryKey: ["me"], queryFn: api.getMe });
-  const quota = (meData as any)?.influencerQuota ?? null;
+  const { data: quota, isPending: quotaLoading, isError: quotaError, refetch: refetchQuota } = useInfluencerQuota();
   const used: number = quota?.used ?? 0;
   const total: number = quota?.total ?? 1;
   const remaining = Math.max(0, total - used);
-  const canGenerate = remaining > 0;
+  const canGenerate = !!quota && !quotaLoading && !quotaError && remaining > 0;
 
   const generate = useMutation({
     mutationFn: async () => {
@@ -294,9 +295,13 @@ export default function GenerateInfluencer() {
       }) as Promise<{ job: any }>;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["influencer-quota"] });
+      queryClient.invalidateQueries({ queryKey: ["influencer-jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["me-credits-status"] });
       setSubmitted(true);
     },
     onError: (err: Error & { body?: { message?: string; error?: string } }) => {
+      queryClient.invalidateQueries({ queryKey: ["influencer-quota"] });
       console.error("[generate-influencer] failed:", err);
       setError(
         err?.body?.message || err?.body?.error || err?.message ||
@@ -381,13 +386,20 @@ export default function GenerateInfluencer() {
           )}
         </div>
 
-        {!canGenerate && (
+        {quotaLoading && <p role="status" className="mb-6 text-sm text-white/60">Checking your remaining generations…</p>}
+        {quotaError && (
+          <p role="alert" className="mb-6 text-sm text-amber-300">
+            Unable to check your generations.{" "}
+            <button onClick={() => void refetchQuota()} className="underline">Retry</button>
+          </p>
+        )}
+        {quota && !quotaLoading && !quotaError && remaining === 0 && (
           <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-[13px] text-amber-400 font-medium">No generations remaining</p>
               <p className="text-[12px] text-amber-400/70 mt-0.5">
-                You've used all your free generations.{" "}
+                You've used all your included and purchased generations.{" "}
                 <button onClick={() => setLocation("/credits")} className="underline hover:no-underline">
                   Buy more here.
                 </button>

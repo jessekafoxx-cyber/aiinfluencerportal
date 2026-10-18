@@ -1,0 +1,1 @@
+- [Influencer request access](influencer-request-access.md) — members must be able to use remaining generations before being asked to purchase more.
