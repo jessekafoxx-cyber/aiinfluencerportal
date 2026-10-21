@@ -21,6 +21,7 @@
     "dev:worker:wait": "export NODE_ENV=development && node ./scripts/wait-for-worker-bundle.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src/",
+    "test:email-delivery": "tsx --test src/lib/email-delivery.test.ts",
     "test": "node --experimental-strip-types --test src/lib/email.brand.test.ts src/lib/purchase-enrollment.brand.test.ts src/lib/brand-url.test.ts src/middlewares/requireAuth-helpers.test.ts src/routes/email-brand-guardrail.test.ts src/routes/support-brand-guardrail.test.ts && tsx --test src/lib/webinar-scheduling.test.ts src/lib/firstpromoter-owner-filter.test.ts src/lib/influencer-styling-diversity.test.ts src/lib/influencer-prompt-builders.test.ts src/lib/affiliate-me-response.test.ts src/integration/ghl-platinum-cancel.integration.test.ts src/integration/ghl-grant-retry.integration.test.ts src/integration/ghl-webhook-idempotency.integration.test.ts src/integration/influencer-jobs-quota.integration.test.ts src/integration/greg-ai-usage-heartbeat.integration.test.ts"
   },
   "dependencies": {

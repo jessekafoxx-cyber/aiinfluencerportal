@@ -36,6 +36,12 @@ let cachedAt = 0;
 const CREDENTIAL_TTL_MS = 60_000;
 
 async function getCredentials(): Promise<ResendCredentials> {
+  // Prefer the project's explicit key in both preview and production. A
+  // connector is optional when Resend is configured through Replit Secrets.
+  const apiKeyFromEnv = process.env.RESEND_API_KEY?.trim();
+  if (apiKeyFromEnv) {
+    return { apiKey: apiKeyFromEnv, fromEmail: resolveFromEmail(undefined) };
+  }
   if (cachedSettings && Date.now() - cachedAt < CREDENTIAL_TTL_MS) {
     return cachedSettings;
   }
@@ -59,6 +65,9 @@ async function getCredentials(): Promise<ResendCredentials> {
       },
     },
   );
+  if (!res.ok) {
+    throw new Error(`Resend connector lookup failed (HTTP ${res.status})`);
+  }
   const data = (await res.json()) as ConnectorResponse;
   const item = data.items?.[0];
   const apiKey = item?.settings?.api_key;

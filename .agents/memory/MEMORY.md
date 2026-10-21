@@ -1,1 +1,2 @@
 - [Influencer request access](influencer-request-access.md) — members must be able to use remaining generations before being asked to purchase more.
+- [Email recovery safety](email-recovery.md) — repairing delivery must not automatically resend the historical failed-email backlog.

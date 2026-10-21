@@ -28,9 +28,8 @@ export type { PurchasePortalKey } from "./purchase-enrollment-urls";
 // invitation and send a "training unlocked" email pointing at the right
 // portal sign-in page instead.
 //
-// Idempotency: we keep one email per orderId. The email_logs row written by
-// sendEmail carries metadata.orderId, so a duplicate webhook for the same
-// order will short-circuit and not re-send.
+// Idempotency: keep one successful email per orderId. Failed attempts must
+// remain retryable when a webhook is replayed after the sender is repaired.
 //
 // Every enrollment email now renders as Room30 AI and lands buyers on
 // https://room30.ai/members/sign-up|sign-in (Task #661). The legacy
@@ -60,6 +59,7 @@ async function alreadyEnrolledForOrder(email: string, orderId: string): Promise<
     .where(
       and(
         eq(emailLogsTable.email, email),
+        eq(emailLogsTable.status, "sent"),
         inArray(emailLogsTable.templateType, [
           "purchase_account_created",
           "purchase_account_existing",

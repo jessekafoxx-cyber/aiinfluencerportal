@@ -110,7 +110,7 @@ describe("getBrandConfig", () => {
 
 describe("resolveFromEmail — verified AI Influencer Portfolio sender", () => {
   it("default from-address is the AI Influencer Portfolio sender", () => {
-    assert.match(DEFAULT_FROM_EMAIL, /users\.room30\.ai>?\s*$/);
+    assert.match(DEFAULT_FROM_EMAIL, /team@aiinfluencerpublishing\.com>?\s*$/);
     assert.match(DEFAULT_FROM_EMAIL, /AI Influencer Portfolio/);
     assertNoLegacyBrand(DEFAULT_FROM_EMAIL, "default from-address");
   });
@@ -125,7 +125,7 @@ describe("resolveFromEmail — verified AI Influencer Portfolio sender", () => {
     delete process.env.RESEND_FROM_EMAIL;
     const resolved = resolveFromEmail(undefined, "main");
     assert.match(resolved, /AI Influencer Portfolio/);
-    assert.match(resolved, /users\.room30\.ai>?\s*$/);
+    assert.match(resolved, /team@aiinfluencerpublishing\.com>?\s*$/);
     assert.ok(!/Apex/i.test(resolved), `must not contain Apex, got: ${resolved}`);
   });
 
