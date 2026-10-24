@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "T-TYZ4kTqBmA6ESWa_kHk"
+uri = "file://.agents/outputs/dfy-pack-links.csv"
+type = "table"
+title = "Done For You Pack links"
+description = "246 links: source Drive folders and Sheets, current live Drive assets, and the links surfaced in the pack."
+logical_id = "e1135fde-d8ff-41f8-97d7-bc6cd6c34228"
+content_hash = "sha256:328cf1610290d0f8bfcbf95b73c9fcae0709a9e6d55feb5007f74a12cb2f07e2"
+size = 44251
+mtime_ms = 1792859593127
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:ace4bf70-9d8d-444b-a026-3c64ebc94831/e1135fde-d8ff-41f8-97d7-bc6cd6c34228/a3c75db3-cfed-43ef-8525-56f3ce35ba4c"
+storage_version_token = "1792859594685622"
+content_type = "text/csv"

@@ -1,0 +1,247 @@
+Section,Link type,Title,URL,Notes
+Google Drive source folders,Source folder,100 AI Influencers — current source folder,https://drive.google.com/drive/folders/1CEkA2kLGt027zdZLwZ-_Sl7ETB7rgnOh,Importer source of truth; production currently displays 27 active images.
+Google Drive source folders,Source folder,250 Scenes — current source folder,https://drive.google.com/drive/folders/1zY3ax8EGG3vdunIE9FmxGkSCLE6sQqtu,Importer source of truth; production currently displays 96 active images across 8 subfolders.
+Google Drive source folders,Source folder,B-roll pack 1,https://drive.google.com/drive/folders/17-rs-4L7DtkVKEl5e5XTmgbDMiUt9f1T,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 2,https://drive.google.com/drive/folders/12PJSdiD-iEjst_suZdVLwxwh-xVbUpKT,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 3,https://drive.google.com/drive/folders/1VCkYBk8CCHs3-DrZtAbliACMNw9JfDzF,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 4,https://drive.google.com/drive/folders/1nGtZ3hySaN_FNxCghtjE-65ENtjMmBeu,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 5,https://drive.google.com/drive/folders/1wGL5xovawKRzse_SzAehSMH9UnYt2Yap,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 6,https://drive.google.com/drive/folders/1yEMCm-oRth4D7BrObSaBCcIX7L3FD-ru,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 7,https://drive.google.com/drive/folders/1yM3OmqmxToXcGsE-OttfU_2jCUOOoFLN,Same source folder is used for packs 7 and 8; production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 8,https://drive.google.com/drive/folders/1yM3OmqmxToXcGsE-OttfU_2jCUOOoFLN,Same source folder is used for packs 7 and 8; production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 12,https://drive.google.com/drive/folders/12h2S8oNdUP6T9LQ_Q2cKKFNkWxNl74ne,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 13,https://drive.google.com/drive/folders/1C4fg9DhLUKccdRiB84b8VBNFyKCZ0ZIg,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 14,https://drive.google.com/drive/folders/14e-wpQIfoV2yfesDSzoJ7LKc2esIcbHd,Same source folder is used for packs 14 and 18; production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 15,https://drive.google.com/drive/folders/1ebjv6f_zEYUrftkgIZeXF3DT5cvj-9L0,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 16,https://drive.google.com/drive/folders/112wBwxWxlAyE20EwnkREE_wNSftknUjZ,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 17,https://drive.google.com/drive/folders/13nPjaYBOdl42LzosB3m5pEgGuLDncRZM,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 18,https://drive.google.com/drive/folders/14e-wpQIfoV2yfesDSzoJ7LKc2esIcbHd,Same source folder is used for packs 14 and 18; production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 19,https://drive.google.com/drive/folders/1Idg7wvP5qQRZdOX4OJyDqssm35dL2kf2,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 20,https://drive.google.com/drive/folders/1RDkSmTGbg7NPmltQOQcIvvaoukzy18B_,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,B-roll pack 21,https://drive.google.com/drive/folders/1guiG-kGfQ_JmDjryh2-jJzmgSOKhCzpX,Production currently has no imported B-roll records.
+Google Drive source folders,Source folder,Background music source folder 1,https://drive.google.com/drive/folders/16GuMe7NQaCUybM8eWcBFjgzYmQ5jj1DU,Refresh-from-Drive source; no active tracks currently recorded in production.
+Google Drive source folders,Source folder,Background music source folder 2,https://drive.google.com/drive/folders/1ZZx0c9LPDhScihpTDoT8UbNqnok_ZAQL,Refresh-from-Drive source; no active tracks currently recorded in production.
+Google Sheets import sources,Spreadsheet,Bridge pages catalog,https://docs.google.com/spreadsheets/d/15zlmOtniwbtvfd6i2Wcikny0D9a5M_ILBcc9PjTbmII/edit,Reads A:Z from the first tab; current production catalog has 5 rows.
+Google Sheets import sources,Spreadsheet,Funnel templates catalog,https://docs.google.com/spreadsheets/d/1xQy-sD0ef664dOi7-TFqO0mQMrkvfM8x8rDGUReriJ4/edit,Reads A:Z from the first tab; current production catalog has no imported template rows.
+Google Sheets import sources,Spreadsheet,Advertorial pages catalog,https://docs.google.com/spreadsheets/d/19dOO8XigbAKr9UFNxLA_dDIYDf3ijdY5iXT_fUsGRAw/edit,Reads A:Z from the first tab; current production catalog has 21 rows.
+Google Drive source folders,Source folder,250 Scenes subfolder — Content Creation & YouTube,https://drive.google.com/drive/folders/10IvBcRjFhlGLImXnUTeUAKZcj2YG-W5t,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Fitness & Gym,https://drive.google.com/drive/folders/1jaQu4J1dzd0zadagrEb2PhQgnyR4CiRM,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — In Car,https://drive.google.com/drive/folders/1t2uRGOnylUfEKJ-D3bBd9FOGSC8-2CTW,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Office & Desk Setup,https://drive.google.com/drive/folders/1n4CjDNBmQ1gWMSVllgWd29AQwdbmneuG,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Outdoor & Casual,https://drive.google.com/drive/folders/1Cy5RiCbgVB5Ehfi8r1p4niKOx_sJYTaH,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Podcast & Studio,https://drive.google.com/drive/folders/1nk00iNQXb3sUxglOG8NMh3EIXkky_nTO,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Selfie & Casual,https://drive.google.com/drive/folders/1jBxdSfzfmywPYPQD6nwsPRTkhd0FZiZJ,Nested folder discovered by the current Drive sync.
+Google Drive source folders,Source folder,250 Scenes subfolder — Speaking & Stage,https://drive.google.com/drive/folders/1cxhIAafb8S4uaPoBSnALqRPxj-OmvRPD,Nested folder discovered by the current Drive sync.
+Current imported Drive assets,File,100-ai-influencers: 12.png,https://drive.google.com/file/d/1Zt6YGfgKdGpOZKgyTzNU9D_jObVROo-6/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: 13.png,https://drive.google.com/file/d/1c-xLsdhVmoDwlO3CLlaLgE6qJSR-Hn7J/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: 19.png,https://drive.google.com/file/d/1ZjYklnkGDz3H7cKSO361Qe90tt3Z3---/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: 48.png,https://drive.google.com/file/d/1QpIWATSJPD7tXDltHDqNRa_qIYACUwOI/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: 49.png,https://drive.google.com/file/d/15_qntX-sLnLsg0Ob51szFBu8vWUaKeH1/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: 50.png,https://drive.google.com/file/d/1a6PN2aSFGP8346Ml3vy4X6iqXXv1u8k6/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Aaliyah Cole.png,https://drive.google.com/file/d/1chE-URZIRCOHp4-6FpCgSAJ0Ah0Oxr_2/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Amara Volkov.png,https://drive.google.com/file/d/1B5ApEAQV-ueZTpkdpl1SGcf_e8WLzTkI/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Aria Monroe.png,https://drive.google.com/file/d/1JjaxwqirLc1erMTfBUguJHl1dXwMU1R1/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Aria Okafor.png,https://drive.google.com/file/d/1Nms8-I3DJKtOw-Q6K6okOq2Q2o0ehA0y/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Atlas Brown.png,https://drive.google.com/file/d/1gxJpGuPw1FuZL7HQCB6slevBhVXckoHe/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Chloe Nash.png,https://drive.google.com/file/d/1WG6Ut01jbCuk7XB5wXMNiExLmh3T8Jji/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Clara Murphy.png,https://drive.google.com/file/d/1pWn7oHsj7U2lejR3bdhr6Lo1UdfbDgmt/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Dahlia Ali.png,https://drive.google.com/file/d/1TQlpCQCp2xU2juO64IvwSo6BfliWT2em/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Dalia Park.png,https://drive.google.com/file/d/1WbKNxMljfoH0e8NWbXFba11wOQG6loqB/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Elena Laurent.png,https://drive.google.com/file/d/1tAv9wZZFb0hR1NiWGjvDNKKCd7JNT2p8/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Elena Torres.png,https://drive.google.com/file/d/1SMXDG9dk4M-7Ag5-ctcsCimnoP75NdOj/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Ethan Afolabi.png,https://drive.google.com/file/d/1uhfYN50OPjt3cZHmNh4B0JwIESW_BB2V/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Felix Blake.png,https://drive.google.com/file/d/1NZlUPOuCnHpXzIMhH6TVWn1HN2VVWk56/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Jude Brooks.png,https://drive.google.com/file/d/15iZbYs4bMjOxErIz7t577bEViKWeEXUY/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Lana Mitchell.png,https://drive.google.com/file/d/1a4QJpZf5aDFYYOZJq7uKJbTn0hjXjHae/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Lila Santos.png,https://drive.google.com/file/d/1rvm7z6fI8st2xt5Q_p9yFp77xI42pbMC/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Naomi Patel.png,https://drive.google.com/file/d/1YuZPgHUM58e3uxKy5SKKUYG1j0GbYgUd/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Omar Foster.png,https://drive.google.com/file/d/1cEHsUok0xdtXvf0WMD5xxX8ME1PbVhU-/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Petra Grey.png,https://drive.google.com/file/d/10fiNSo5agiePyqLATByMTMsV3_TUX5re/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Sasha Hale.png,https://drive.google.com/file/d/1O3rqb4M_qN01KLDcoGuDt9d_Ch5TKZuW/view,Current active production gallery record.
+Current imported Drive assets,File,100-ai-influencers: Uma Silva.png,https://drive.google.com/file/d/1QWGbhuZ5UrZtI19Em9tYy7jyK7NHGwc4/view,Current active production gallery record.
+Current imported Drive assets,File,"250-scenes: #141 Being Productive, Authentic and Vulnerable with Ali Abdaal.jpeg",https://drive.google.com/file/d/14B9v2pRGEp3VXdUrUS_-q4jOl7MUFwoY/view,Current active production gallery record.
+Current imported Drive assets,File,"250-scenes: #141 Being Productive, Authentic and Vulnerable with Ali Abdaal.jpeg",https://drive.google.com/file/d/1osnf7N5wQ0AfcWquEEy1cDexXb4yjktq/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: #WillTveit #Broker #Realtor.jpeg,https://drive.google.com/file/d/1YR022qid1f3V1pJmp-zL63Cp0DCkRYfc/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: #WillTveit #Broker #Realtor.jpeg,https://drive.google.com/file/d/1-vxSSORQP92FtO9oXW0v7vAeW94Z4f8j/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: #work #marketingdigital #MarketingStrategy (1).jpeg,https://drive.google.com/file/d/1S1gN-_44-DnJniyXDQGzrfLRZWWu_Bbx/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: #work #marketingdigital #MarketingStrategy (1).jpeg,https://drive.google.com/file/d/1eIP0cTs2guanJ6ox5P9Y1TXUmbvdofvQ/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: (1) Instagram.jpeg,https://drive.google.com/file/d/1OJt2nhaHOWykV9XivTGeiIDx2xZcU_GH/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: (1) Instagram.jpeg,https://drive.google.com/file/d/1VbTu8gvwstjhrIZ9xew7VRDFWsn0yYJJ/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: 102K views · 1_5K reactions _ A woman doesn’t….jpeg,https://drive.google.com/file/d/1rPnqo_yzfvOoMG0PzTmxLJXEQOM3Y_MW/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Bad Vegan_ Fame_ Fraud. Fugitives.jpg,https://drive.google.com/file/d/1igUiwzOc2ikgf780hkoCGR-EQyPuH2Pf/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Car selfies just hit different 🩵✨.jpeg,https://drive.google.com/file/d/14YmKukoOV5A2I_ohrsTzHr674Z0s31Tt/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Charleston Conference Photography_ EVS — Reese Moore Photography.jpeg,https://drive.google.com/file/d/1FeAUlSlR7bgTwmb3MIsNcKqrMZm9YeTP/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Charleston Conference Photography_ FAB 2019 Day 2 — Reese Moore Photography.jpeg,https://drive.google.com/file/d/1X-LMMwjCgr7qRELU35j0Ckw1YLeHzRqo/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Comfort Guide Sengwe (CGSengwe).jpeg,https://drive.google.com/file/d/1oNO0RpWeH5mUFRI9XI9DWK6S_J8xXbYH/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Content Studio Photoshoot for Men _ Podcast Inspo _ Shot by Cieloh _ Miami FL.jpeg,https://drive.google.com/file/d/131Vjfz8D7rw4FyImJdZD367dynVtYJPI/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Done-for-you premium AI brand photos for female….jpeg,https://drive.google.com/file/d/1m5BMxSBWim6UxDw9mhMaJXSXJtA9HBH1/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: First Snow of the Season!_❄️ ❄️ ❄️ ❄️ ❄️ ❄️ ❄️….jpeg,https://drive.google.com/file/d/15n2H3SnzbHLSh75OJisB247eRD5BM7m6/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Forex signals and mentorship is what we provide here at Elite #forex #forexsignals #trading.jpeg,https://drive.google.com/file/d/1DQ7vosAZM4BSQTTdOuHL_W3oSm-Dl7u2/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Full Time Filmmaker Premium Lifetime Membership.jpeg,https://drive.google.com/file/d/1uE6zbiflqLy3PeCSVtVpve3H8qzQQfX-/view,Current active production gallery record.
+Current imported Drive assets,File,"250-scenes: Get ready pour le prochain épisode de @jetlarguee en suivant le podcast sur Instagram, YouTube, Spotify et Deezer 🎙️.jpeg",https://drive.google.com/file/d/1RODlk3tZOCjqbJRt6Fpo3sohYPwvoMLf/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Happy new week beautiful people 🥰🥰🥰🥰__Lots of pieces available for you to shop on sale this week _ __Uploads starts shortly.jpeg,https://drive.google.com/file/d/1oaSQDE3Kn54VdM7OerW_PPC1rZccttu5/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: How To Make Money From Podcasts – 7 Tips For Turning Listeners Into Profit.jpeg,https://drive.google.com/file/d/1Aj6Hjl1sE8C0vrObqwIyq63bBE56dAUX/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: How do you expect to figure out what you want vs don’t want without TRYING NEW THINGS (1).jpeg,https://drive.google.com/file/d/1eXQt_9bwGmXOsS5ud-yNT7Jsle-svuYU/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: How to Start a Podcast This Month_ 3 Simple Steps to Launch Fast.jpeg,https://drive.google.com/file/d/1lvzJmIMoW_jEWUfLFGGJoWs9r5Kj2mbw/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: I quit social media for 30 days.jpeg,https://drive.google.com/file/d/1i9fGTE9M4hdYHVZfi29e3o8RtRig8qGF/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: LLMRAN~1.JPG,https://drive.google.com/file/d/1xIZyPusHj4K2zbZJH-4eOOwkvGJh6cF9/view,Current active production gallery record.
+Current imported Drive assets,File,"250-scenes: Looks casuales, pero profesionales_ la fórmula perfecta para los outfits de estudio_ (1).jpeg",https://drive.google.com/file/d/1J-Dun3MKL7kWCxoLcQAwUAdN4DI0XM29/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: MUITOS~1.JPE,https://drive.google.com/file/d/1GZZvjqAQfimbkkYwUGLwcqSd7hJedF4E/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Maia Santos _ Podcast _ Bastidores _ Mentora _ Infoprodutora _ São Paulo _ por @thais_arosa.jpeg,https://drive.google.com/file/d/1T_s8dbgLGSeULIF4Cz4OL0u-eQ4xWiQ6/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Millie Bobby Brown Gives Inspiring Speech About Children_s Rights at UNICEF Summit.jpeg,https://drive.google.com/file/d/1VifLoJKFL5f-CNUpX2teVIS1OR2HwIH_/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Own It Podcast.jpeg,https://drive.google.com/file/d/1XZUJWaAfNgFsZP0DpB9fTtQv65sRfwCC/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: PHOTOG~1.JPG,https://drive.google.com/file/d/1frGeej4681CKZT-9IWSIMNdT9CSxkNLR/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Photos_ Naomie Harris speaks on stage as she joins BUILD for a live interview at their London studio at AOL.jpeg,https://drive.google.com/file/d/15KzZ_3kZhUVdHz6aRjk0z58Sd4kyUkTQ/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Podcast Set-up - AI generated.jpeg,https://drive.google.com/file/d/1mKZ3L3dyBKCZHkIqsbvrryyTAPGXe52J/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Podcast Studio Hire in London _ Audio & Video Recording Prices — London Podcast Studio _ The Home of Podcasting!.jpeg,https://drive.google.com/file/d/1iWMjbSsupTpZzZvNgBreO07MVjM9dLYt/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Post from Raj Shamani (1).jpeg,https://drive.google.com/file/d/1RvgFyMfgXNpPb0D0faMRi2mF0BhuZ01z/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Premium Product Catalog.jpeg,https://drive.google.com/file/d/1IX94QYZ_hLw6jCoS1mI2zWH3Esc2oPh1/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Pretty UGC doesn’t convert… 🤯 I used to spend so much time making my videos look perfect—aesthetic.jpeg,https://drive.google.com/file/d/1Kfe0qkyUycxhqph1ssgKCPP2L4BFxLsH/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: QUOTE by Traders Point Christian Church.jpeg,https://drive.google.com/file/d/1KKUvQ8rB8ckvThCL1S69Ys0rWP2bWCHH/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: REVIVAL NIGHT __ THE SEND 2026.jpeg,https://drive.google.com/file/d/1GgsNvY84zvRHJY2kGFY8T0ToeWKAlYYL/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref 10.jpeg,https://drive.google.com/file/d/1XSXPPJXxJpVlbK5hhsU4neLF-O4yFBW4/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref18.png,https://drive.google.com/file/d/1P4VBe1qr9BQxHlzN1udB0B-z1HKUh0L7/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref21.jpeg,https://drive.google.com/file/d/1L1w_FBQbLgl-rph-kXFu2VIm1OmZfM3w/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref22.jpeg,https://drive.google.com/file/d/1h-qZT_AoXACBqhBArbOdP1AYB6TJy55o/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref23.jpeg,https://drive.google.com/file/d/1hxcDTNWR30ISYmpp0Uopn9WkgOINJAZg/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref26.jpeg,https://drive.google.com/file/d/1fhSzxtBOIv1Bg6VvfyN7ig1GS_BLP7Cl/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref31.jpg,https://drive.google.com/file/d/1Y1vk_y1CQbgeDorMhAxEG9KSFd30l0wV/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref32.jpg,https://drive.google.com/file/d/1-Axq2npralPMcbeNk3PM7Cy4efLPpqnx/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref33.jpg,https://drive.google.com/file/d/1gLipGExWSZrMnEml9FKETEbkfLxpbUCg/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref37.jpg,https://drive.google.com/file/d/1YGM_O2pgTmLsba7wBc5eOBa-NDZrFBxb/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref46.jpg,https://drive.google.com/file/d/1WpL65E3S1en8FKIh9n2AAWbQc3FNPcLq/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref48.jpg,https://drive.google.com/file/d/1OlbH68VlKgr4VwA5K1xEGvyNWJgKoiv2/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref50.jpg,https://drive.google.com/file/d/16_0DxUdegCBKYGFGHLi3tbjxziFUmtrr/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref56.jpg,https://drive.google.com/file/d/1aUHII_5RV7Y_mmK7qxsM95d-8SMHCJ5e/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref59.jpg,https://drive.google.com/file/d/1Gr0Yv_voXtufgmjgYnpas9ywsd9kBInl/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref64.jpg,https://drive.google.com/file/d/1X5mDQw-VueKOY11_-t6yjeDM9PnenG5r/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref76.jpg,https://drive.google.com/file/d/1jOh_zIIdK87bZHxTKRCcOG5av1j9_kgW/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref77.jpg,https://drive.google.com/file/d/1SqWVZf7cUDH9ETl9La6Pu_nJtoqOWanj/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref80.jpg,https://drive.google.com/file/d/11iAWvGcUASHFdA98kKioOXT2UYTNUAbt/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref86.jpg,https://drive.google.com/file/d/16p9ACF0OgGmFBNx7_j6cmFde1_JunCP8/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Ref89.jpg,https://drive.google.com/file/d/1SYfOOBcJeiz8CZCWgMNX62fFha5ejVtD/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Rozetked.jpeg,https://drive.google.com/file/d/1sE0KILfVulFWeEt-4vrkKOSZ6RDAH_bX/view,Current active production gallery record.
+Current imported Drive assets,File,"250-scenes: SCP talk to Nasim Koerting, the Head of Design at….jpeg",https://drive.google.com/file/d/1wt-jA2gqKXyqIsvQ_0aHwWrVrJc0JT8n/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: SEMPAL~1.JPG,https://drive.google.com/file/d/1PsTUHWQpoyioCKr-7tq4HZU11NulCjLk/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Screenshot 2026-05-12 at 4.09.13 AM.png,https://drive.google.com/file/d/1CX0_gTB-JMNkRitn7myv06TW7VHNvvxD/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Screenshot 2026-05-12 at 4.09.13 AM.png,https://drive.google.com/file/d/1F2HH2kZa53ZzORjYEPxQl8CNsuowfGh1/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Studio d_enregistrement de Balado _  Montreal Podcast Studio.jpeg,https://drive.google.com/file/d/1MPC_KOHrCjEHPTb2mlpshsfLROAZBn4I/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: The 3-Month Mastermind — PETER CRONE.jpeg,https://drive.google.com/file/d/13F5yClHE1w7_QYGb6HjdmV-hkAhwxZzZ/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Todos os direitos da autoria e imagem são reservados aos responsáveis_.jpeg,https://drive.google.com/file/d/1doZbigc2ocetAGDbkU44suXkpiN4xBeK/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: VISION CONF _22.jpeg,https://drive.google.com/file/d/1m0OUXgjcKm2ylnP8G8qg4euHbhYj7E3P/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: Who wants to see the edit_Joseph Don.jpeg,https://drive.google.com/file/d/1mAYtXmnxTPd1LzDYHYjpMZmANNId5uyl/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: You MUST define your audience if you want your content to succeed 📲📈.jpeg,https://drive.google.com/file/d/1BXAxWSVw06jGtNr2MaQI1MMazqkjtpOw/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: YouTube studio.jpeg,https://drive.google.com/file/d/1ZftKxqAtWCfNkBiftyvfMlLelf5HOHet/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (17).jpeg,https://drive.google.com/file/d/1e4EGmWvBqRNeO2OC1_IcI8YJVMOu4fx9/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (17).jpeg,https://drive.google.com/file/d/1oVI7uKZnHEE5QYZ1GC_sqZ5qa-DT0rwr/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (18).jpeg,https://drive.google.com/file/d/1LiBG7NS2oArCeOpP96TtcPbspzvWC_4b/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (18).jpeg,https://drive.google.com/file/d/1ZBoDXpBEkmKcNZ1qgaCOzzzHNWQg9pNt/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (24).jpeg,https://drive.google.com/file/d/1MCRjpLpT6bPXKQTabGwIMQvtXagvkwZ8/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (24).jpeg,https://drive.google.com/file/d/11fSFpB4nrwjIoU4MX63dtzz2KtEzcG73/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (31).jpeg,https://drive.google.com/file/d/1iQ7bkQpTmnFrVLAz757DJtSScf8Ti6_m/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (37).jpeg,https://drive.google.com/file/d/1fCnIMywHrFsCO3il0Qvqgi96BWE81AR_/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (40).jpeg,https://drive.google.com/file/d/1RZ11taAFt7IcNQNxqlKkUyUF95FJy_vK/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (41).jpeg,https://drive.google.com/file/d/1z_31Yw73I2emIzFPseIitFZdYvd3fgfV/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (42).jpeg,https://drive.google.com/file/d/1a3jdL8CFC01RzSKrLv__j4kspqQlAezd/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (43).jpeg,https://drive.google.com/file/d/1Te6XsXshBHjD3trko_Ug0DEwZ_51YP2o/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (45).jpeg,https://drive.google.com/file/d/1W8N2EVqCFVkd7RYlG945DxD7MfgrC0mh/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (5).jpeg,https://drive.google.com/file/d/16z9b9TYi4UynzQWsH14mX1rjmpAqUakb/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: _ (5).jpeg,https://drive.google.com/file/d/10J7BKp2NRSMuIdNew3hD1-asScuiyOIq/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260511_180735_1a3181b7-ce44-401c-8d7e-a91b15a27241.png,https://drive.google.com/file/d/1yi5iTaKOKPIIkYNrCYFvZ-n4bFNNjp9H/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260511_195132_d021feb4-21bd-4dc8-8ad7-9b2cf642a974.png,https://drive.google.com/file/d/1Rbe-1TAOX0R5d8rEud9bqUNRn6dgv_Cf/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260511_195209_a232e6f1-9b5c-44d4-987f-ca4f512f6828.png,https://drive.google.com/file/d/1RaP1wZUIEUI6jTCMtjOLl-yu8QvDrxUh/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260513_073025_2b60ec7b-e123-4916-bfa8-f0fed4a1fc4c.png,https://drive.google.com/file/d/18fnxDbIl-Gjxyy83oj3VunlJsxiUn1ZD/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260513_081450_46c24a24-2b7a-4db7-841b-826015db17aa.png,https://drive.google.com/file/d/1wxdfXrZ51ojlcMt9FUZXVca6nMyRMGaW/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260513_095154_7d63871a-cba8-42d0-a274-81fc078ed495 (1).png,https://drive.google.com/file/d/1TsObRA6758Zy6V4u6KbWdlCy3G5rdPjd/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: hf_20260513_095154_7d63871a-cba8-42d0-a274-81fc078ed495 (1).png,https://drive.google.com/file/d/1diijUL3OwwJTqkbfb9xdQ_ikKw5udfSP/view,Current active production gallery record.
+Current imported Drive assets,File,250-scenes: home office rituals that help me stay focused….jpeg,https://drive.google.com/file/d/1T8Sy_5U0zyJ5ASnKcm8ftsWBVqKitYhl/view,Current active production gallery record.
+Bridge page links,Preview,Bonus Template 1,https://app.gohighlevel.com/v2/preview/DGLWHXLY1IijDlTJC2kZ,
+Bridge page links,Install/use template,Bonus Template 1,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a034e07d1b8b94b899a018a,
+Bridge page links,Preview image,Bonus Template 1,https://lh3.googleusercontent.com/d/1WpR_oHjgXOW-qNrc6YwFu8AidhtipuMJ=s2048,
+Bridge page links,Preview,Bonus Template 2,https://app.gohighlevel.com/v2/preview/ShidiQFS6WWCDfXPtmrg,
+Bridge page links,Install/use template,Bonus Template 2,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a034aa78c9f2b23cb24b2d6,
+Bridge page links,Preview image,Bonus Template 2,https://lh3.googleusercontent.com/d/1xUZxuWHhXevOeA7PvnkPFljWoj3Mvtvr=s2048,
+Bridge page links,Preview,Bonus Template 3,https://app.gohighlevel.com/v2/preview/fqpor8nEaCNGsRZetmSF,
+Bridge page links,Install/use template,Bonus Template 3,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a03667e09b7380096e9a894,
+Bridge page links,Preview image,Bonus Template 3,https://lh3.googleusercontent.com/d/1Y-IqaMukzgGkY4orazLG1iNbNLEq898m=s2048,
+Bridge page links,Preview,Bonus Template 4,https://app.gohighlevel.com/v2/preview/E4m4h36FAzQs8zjPqEJ3?notrack=true,
+Bridge page links,Install/use template,Bonus Template 4,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a0368f5fb11596126fe4a5a,
+Bridge page links,Preview image,Bonus Template 4,https://lh3.googleusercontent.com/d/1zwZggmFQaXji8FdsYWWRqjecoyY89Y8L=s2048,
+Bridge page links,Preview,Bonus Template 5,https://app.gohighlevel.com/v2/preview/ysaBX44Czk984ddh7QU5,
+Bridge page links,Install/use template,Bonus Template 5,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a036ff40829248098cadf32,
+Bridge page links,Preview image,Bonus Template 5,https://lh3.googleusercontent.com/d/1fUbBm1gZ_UAu8Aj9TALAXIEvSzBp566s=s2048,
+Advertorial page links,Preview,Template 1,https://app.gohighlevel.com/v2/preview/qcUtXvGqY8106sdL5ttM,
+Advertorial page links,Install/use template,Template 1,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697102a65ec5b106fc1e5383,
+Advertorial page links,Preview,Template 2,https://app.gohighlevel.com/v2/preview/NX2M5jJXF7DgYgiWssHw,
+Advertorial page links,Install/use template,Template 2,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697108345ef16f2c0410655e,
+Advertorial page links,Preview,Template 3,https://app.gohighlevel.com/v2/preview/VYzrmsKMu0D2BJa2EgEX,
+Advertorial page links,Install/use template,Template 3,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710773683d80603b9190c9,
+Advertorial page links,Preview,Template 4,https://app.gohighlevel.com/v2/preview/EhloE5Adiy2Ekl1HHAn7,
+Advertorial page links,Install/use template,Template 4,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697107a6622438e435578639,
+Advertorial page links,Preview,Template 5,https://app.gohighlevel.com/v2/preview/NJHAg19aoRygW7RdfOYF,
+Advertorial page links,Install/use template,Template 5,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697107dfacd87366dc935e1d,
+Advertorial page links,Preview,Template 6,https://app.gohighlevel.com/v2/preview/50pgAwBUijIxKeZShCbb,
+Advertorial page links,Install/use template,Template 6,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710895d70f7e7be17f0c34,
+Advertorial page links,Preview,Template 7,https://app.gohighlevel.com/v2/preview/BGJUUS8XQpjfYhuUFMuu,
+Advertorial page links,Install/use template,Template 7,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697109919a70d38324a4c23e,
+Advertorial page links,Preview,Template 8,https://app.gohighlevel.com/v2/preview/kuXekyqvd4NsPEOgBwgE,
+Advertorial page links,Install/use template,Template 8,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697109bb86e3d381e5d43d4e,
+Advertorial page links,Preview,Template 9,https://app.gohighlevel.com/v2/preview/xh1XXThiKLoiEVDqzkB5,
+Advertorial page links,Install/use template,Template 9,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=697109e81cdc84233fdc0705,
+Advertorial page links,Preview,Template 10,https://app.gohighlevel.com/v2/preview/YdN7HaZyLsogy2GfIfoY,
+Advertorial page links,Install/use template,Template 10,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710a120e053315cb0d9ff3,
+Advertorial page links,Preview,Template 11,https://app.gohighlevel.com/v2/preview/ggqENdHz7IXxGMxjzxxf,
+Advertorial page links,Install/use template,Template 11,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710ba252c5803d5767dd3e,
+Advertorial page links,Preview,Template 12,https://app.gohighlevel.com/v2/preview/xot3gK3iqdP5wy0R45hP,
+Advertorial page links,Install/use template,Template 12,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710be1c171ffec842fb8d4,
+Advertorial page links,Preview,Template 13,https://app.gohighlevel.com/v2/preview/3SvnphDj22J3q7PX5IgO,
+Advertorial page links,Install/use template,Template 13,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69f1a89b543206f99f33b6fa,
+Advertorial page links,Preview,Template 14,https://app.gohighlevel.com/v2/preview/th47Z35v8crQWbgeSdgI,
+Advertorial page links,Install/use template,Template 14,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710c0def706616fe115d03,
+Advertorial page links,Preview,Template 15,https://app.gohighlevel.com/v2/preview/w4sQ8winvncMranb1iE8,
+Advertorial page links,Install/use template,Template 15,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710c3c640dabf1dec01eb2,
+Advertorial page links,Preview,Template 16,https://app.gohighlevel.com/v2/preview/xFIGoL3X0WmqB6n8EGqe,
+Advertorial page links,Install/use template,Template 16,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710c661693f42ea47ba85f,
+Advertorial page links,Preview,Template 17,https://app.gohighlevel.com/v2/preview/ggI8B2CjrFr2Igq9SQhL,
+Advertorial page links,Install/use template,Template 17,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710cf4088be3133d9efa48,
+Advertorial page links,Preview,Template 18,https://app.gohighlevel.com/v2/preview/0lcbpw6efn62FTBnnUjQ,
+Advertorial page links,Install/use template,Template 18,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710d25d133f8387caf5cfc,
+Advertorial page links,Preview,Template 19,https://app.gohighlevel.com/v2/preview/CgBUf53KjREv1wDrHkKj,
+Advertorial page links,Install/use template,Template 19,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710d4dd70f7e22a67f14ce,
+Advertorial page links,Preview,Template 20,https://app.gohighlevel.com/v2/preview/Wa3u1AGpunMDGBRuSOws,
+Advertorial page links,Install/use template,Template 20,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710d9c3b0f71a6d51ca84b,
+Advertorial page links,Preview,Template 21,https://app.gohighlevel.com/v2/preview/PzQgCvCrC8BkX66yCLG6,
+Advertorial page links,Install/use template,Template 21,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69710dc978c0ca866867adb7,
+Hard-coded Canva template links,Canva template,DFY Canva template 1,https://canva.link/d1c2dvq4unbgtp8,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 2,https://canva.link/c0o40dc4gljcuxo,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 3,https://canva.link/rsweytw3wgoukfy,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 4,https://canva.link/5pdtl20n123yc9h,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 5,https://canva.link/diovy7ggwmb6jgp,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 6,https://canva.link/x0zwawuect8tbsz,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 7,https://canva.link/0mgeiq1c0m8unnc,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 8,https://canva.link/pp3et1lstbhx0xp,Link appears directly in the portal UI code.
+Hard-coded Canva template links,Canva template,DFY Canva template 9,https://canva.link/7iozmgssg732jpw,Link appears directly in the portal UI code.
+B-roll Canva links,Canva template,B-roll pack 9,https://www.canva.com/design/DAGuFBS6ZGI/tSE_VZuakfOCtAVqlb-Y6A/view?utm_content=DAGuFBS6ZGI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview,Packs 9–11 link to Canva rather than a Drive import folder.
+B-roll Canva links,Canva template,B-roll pack 10,https://www.canva.com/design/DAGuFBKx8_Y/LZP_KdE_SsDbyfKNtDlLCQ/view?utm_content=DAGuFBKx8_Y&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview,Packs 9–11 link to Canva rather than a Drive import folder.
+B-roll Canva links,Canva template,B-roll pack 11,https://www.canva.com/design/DAGuFKWmkh8/55WEPQg3HMaiCrmpQ0sfUw/view?utm_content=DAGuFKWmkh8&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview,Packs 9–11 link to Canva rather than a Drive import folder.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 1,https://app.gohighlevel.com/v2/preview/nMPaAt4BmkKpWysjyPFx,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 1,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6a05826f89673005d6f54326,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 2,https://app.gohighlevel.com/v2/preview/g205IFvwYfG177aAVOt6,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 2,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6727aacfdbe65ce4bdda7b65,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 3,https://app.gohighlevel.com/v2/preview/jyqLm50cw6Nrv4vLGQOg,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 3,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=6784e1ba53d53f215c9b905c,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 4,https://app.gohighlevel.com/v2/preview/FNYRE9NPUDGJXjKj2gNR,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 4,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dbbceab82d8fa8ab7c2d6a,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 5,https://app.gohighlevel.com/v2/preview/Lr8fwWraMM2kUCshUxXw,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 5,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68149a58443a572c275b048d,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 6,https://app.gohighlevel.com/v2/preview/I3wVfD378EvN1waE8cba,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 6,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dc97c42881c8212031d606,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 7,https://app.gohighlevel.com/v2/preview/EnP5lKzrPIAk3JziSenc,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 7,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=68149e2a092bc2ec0c394f27,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 8,https://app.gohighlevel.com/v2/preview/wRUDCvqaThuySr8dMd8x,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 8,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dccfb5b54b44b849da2c9e,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 9,https://app.gohighlevel.com/v2/preview/qRn7yoFHh0xCiYjvRuGl,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 9,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=69dcfb2f3ed1419cf4efc50c,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Preview,Funnel template 10,https://app.gohighlevel.com/v2/preview/BV7cpFlRT24JPM5txOkB,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Install/use template,Funnel template 10,https://affiliates.gohighlevel.com/?fp_ref=gcooke&funnel_share=682c16d16ef4e660f635dab6,Rendered from a hard-coded array in the portal.
+Hard-coded HighLevel funnel templates,Provider link,HighLevel referral link,https://www.gohighlevel.com/?fp_ref=subtasks,Displayed as a general GoHighLevel link.
