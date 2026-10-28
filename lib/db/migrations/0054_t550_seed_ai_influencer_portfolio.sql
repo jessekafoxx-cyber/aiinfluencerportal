@@ -41,7 +41,7 @@ INSERT INTO prebuilt_brains (
   is_active
 ) VALUES (
   'ai-influencer-portfolio',
-  'AI Influencer Portfolio',
+  'AI Influencer Publishing',
   'Done-for-you faceless AI income system',
   'Promote our flagship done-for-you offer. We build the AI influencer, the digital product, the sales page, the email automations and the backend. Your job is to plug into a system that''s already producing $57K+ days.',
   'Burnt-out employees, side-hustle consumers, financially pressured parents, sceptical ''burned before'' buyers, and quietly ambitious professionals who want online income without building anything from scratch.',
@@ -49,10 +49,10 @@ INSERT INTO prebuilt_brains (
   NULL,
   false,
   jsonb_build_object(
-    'name', 'AI Influencer Portfolio',
-    'companyName', 'AI Influencer Portfolio',
+    'name', 'AI Influencer Publishing',
+    'companyName', 'AI Influencer Publishing',
     'whoDoYouHelp', 'Everyday people who want to build real online income without learning tech, building products, creating funnels, doing customer service, or putting their face on camera. Specifically: burnt-out employees who feel meant for more, side-hustle consumers stuck in research mode, financially pressured parents who need breathing room, sceptical buyers who have been burned before, and quietly ambitious professionals who feel under-expressed at work.',
-    'howDoYouHelpThem', 'We build a complete done-for-you AI Influencer Portfolio inside 24 hours. That includes a custom faceless AI influencer, a fully built digital product, a high-converting sales page, email automations, the content system, and the full backend. The customer just promotes faceless AI-generated content (around 15 minutes a day). When sales come in they earn $100+ per front-end sale and $1,000-$10,000 per backend sale that we close for them. They keep 100% of profits while we handle delivery, customer service and high-ticket sales.',
+    'howDoYouHelpThem', 'We build a complete done-for-you AI Influencer Publishing business inside 24 hours. That includes a custom faceless AI influencer, a fully built digital product, a high-converting sales page, email automations, the content system, and the full backend. The customer just promotes faceless AI-generated content (around 15 minutes a day). When sales come in they earn $100+ per front-end sale and $1,000-$10,000 per backend sale that we close for them. They keep 100% of profits while we handle delivery, customer service and high-ticket sales.',
     'keyAchievements', 'Currently generating $57,000+ per day with this exact model. Over $700,000 per month. Helped 32,000+ people get started. Featured in Forbes, Entrepreneur, The Independent and the Daily Express. Spoken on stages globally. Our founder''s prior track record: built a 6-figure eCommerce brand from £80, scaled a Shopify agency to 3,000+ clients and 42 staff before exiting in 2021, served as CMO across 8- and 9-figure companies, then scaled a one-person digital product business to $724K/month in under 188 days.'
   ),
   E'OFFER: AI Influencer Portfolio (DFY)\n\nWhat it is (one paragraph):\nOur done-for-you AI Influencer Portfolio is a fully built online\nbusiness delivered in 24 hours. We hand the customer a custom faceless AI\ninfluencer in a niche with proven demand, a digital product ready to sell, a\nhigh-converting sales page, full email automations, a content system, and the\nentire backend. The customer does NOT build, learn tech, write copy, do\ncustomer service, or appear on camera. They post around 3-5 short faceless AI\nvideos per day (under 20 minutes of work) and we handle product delivery,\nsupport and all backend sales. They earn ~$100+ per front-end sale and\n$1,000-$10,000 per backend sale that we close. Realistic scale per AI\ninfluencer: $1K-$3K per day in profit. Customers can run multiple AI\ninfluencers as a portfolio.\n\nProof numbers (use only these, never invent new ones):\n- $57,000+ per day current revenue with this exact model\n- $700,000+ per month run rate, $394K net profit\n- 32,000+ people have started building with this system\n- Featured in Forbes, Entrepreneur, The Independent, Daily Express\n- Our founder has spoken on stages worldwide teaching this model\n\nOur founder''s authority (use to defuse "is this legit?"):\n- Built a 6-figure Shopify brand at age 15 starting with 80 GBP\n- Scaled a Shopify web design agency to 3,000+ clients and 42 staff\n- Built one of the first Fiverr accounts to clear $1M+ revenue\n- Exited the agency in 2021, moved to Dubai\n- CMO across 8 and 9 figure companies in eCommerce, finance, real estate\n- Scaled a one-person digital product business to $724K/month in under 188 days\n- Father of a young son - uses this model specifically because it gives time back\n\nWhat we are NOT:\n- Not a course, not a side hustle\n- Not dropshipping, affiliate marketing, or a faceless page model where they\n  still build everything\n- Not "learn this skill and one day you''ll succeed"\n- Not a personal brand requiring them on camera\n- Not "make money online" hype with no infrastructure\n\nAudience: burnt-out employees, side-hustle consumers, financially pressured\nparents, sceptical ''burned before'' buyers, quietly ambitious professionals\nwho want online income without building anything from scratch.\n\nTone: direct, confident, numbers-heavy. No hype words ("game-changer",\n"revolutionary", "secret"). No fake urgency. Lead with the proof, then the\nproblem, then the solution, then the simple next action.',
@@ -60,3 +60,13 @@ INSERT INTO prebuilt_brains (
   0,
   true
 ) ON CONFLICT (id) DO NOTHING;
+
+-- Keep the seeded offer copy in sync with the current product name.
+UPDATE prebuilt_brains
+SET brain_data = jsonb_set(
+      brain_data,
+      '{howDoYouHelpThem}',
+      to_jsonb(replace(brain_data->>'howDoYouHelpThem', 'AI Influencer Portfolio', 'AI Influencer Publishing'))
+    ),
+    generated_brain = replace(generated_brain, 'AI Influencer Portfolio', 'AI Influencer Publishing')
+WHERE id = 'ai-influencer-portfolio';

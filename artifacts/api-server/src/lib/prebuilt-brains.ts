@@ -105,6 +105,8 @@ function brainToInsert(b: PrebuiltBrain) {
 }
 
 const LEGACY_BRAND_MARKERS = ["greg cooke", "greg's", "room30", "room 30"];
+const LEGACY_PRODUCT_NAME = "AI Influencer Portfolio";
+const CURRENT_PRODUCT_NAME = "AI Influencer Publishing";
 export async function refreshPrebuiltBrainsCache(): Promise<void> {
   try {
     for (const seed of SEED_BRAINS) {
@@ -224,7 +226,28 @@ async function refreshLegacyBrandedSeedRows(): Promise<void> {
         .select()
         .from(prebuiltBrainsTable)
         .where(eq(prebuiltBrainsTable.id, seed.id));
-      if (!row || !hasLegacyBranding(row)) continue;
+      if (!row) continue;
+
+      // Rename the canonical offer in place while preserving admin-authored
+      // copy and edits to the pre-built brain.
+      if (seed.id === "ai-influencer-portfolio" && hasLegacyProductName(row)) {
+        await db
+          .update(prebuiltBrainsTable)
+          .set({
+            name: replaceLegacyProductName(row.name),
+            tagline: replaceLegacyProductName(row.tagline),
+            shortDescription: replaceLegacyProductName(row.shortDescription),
+            audience: replaceLegacyProductName(row.audience),
+            highlights: replaceLegacyProductName(row.highlights) as string[],
+            brainData: replaceLegacyProductName(row.brainData) as PrebuiltBrain["brainData"],
+            generatedBrain: replaceLegacyProductName(row.generatedBrain),
+          })
+          .where(eq(prebuiltBrainsTable.id, seed.id));
+        logger.info({ id: seed.id }, "prebuilt-brains: renamed legacy product label");
+        continue;
+      }
+
+      if (!hasLegacyBranding(row)) continue;
       const next = brainToInsert(seed);
       await db
         .update(prebuiltBrainsTable)
@@ -246,4 +269,34 @@ async function refreshLegacyBrandedSeedRows(): Promise<void> {
       );
     }
   }
+}
+
+function hasLegacyProductName(row: any): boolean {
+  const haystack = [
+    row?.name,
+    row?.tagline,
+    row?.shortDescription,
+    row?.audience,
+    row?.generatedBrain,
+    JSON.stringify(row?.highlights ?? []),
+    JSON.stringify(row?.brainData ?? {}),
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return haystack.includes(LEGACY_PRODUCT_NAME);
+}
+
+function replaceLegacyProductName(value: any): any {
+  if (typeof value === "string") {
+    return value.replaceAll(LEGACY_PRODUCT_NAME, CURRENT_PRODUCT_NAME);
+  }
+  if (Array.isArray(value)) {
+    return value.map(replaceLegacyProductName);
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, replaceLegacyProductName(entry)]),
+    );
+  }
+  return value;
 }

@@ -1,4 +1,4 @@
-// Canonical seed payload for the "AI Influencer Portfolio" pre-built brain.
+// Canonical seed payload for the "AI Influencer Publishing" pre-built brain.
 //
 // Shared between:
 //   - the API server's prebuilt_brains cache loader (boot-time
@@ -35,11 +35,11 @@ export interface PrebuiltBrainSeed {
 
 // The plain-prose offer brief used as the OFFER block in every DFY-script
 // prompt and as the `generated_brain` document for the AI Influencer
-// Portfolio pre-built brain. Same string in both places by design.
-export const AI_INFLUENCER_PORTFOLIO_OFFER_BRIEF = `OFFER: AI Influencer Portfolio (DFY)
+// Publishing pre-built brain. Same string in both places by design.
+export const AI_INFLUENCER_PORTFOLIO_OFFER_BRIEF = `OFFER: AI Influencer Publishing (DFY)
 
 What it is (one paragraph):
-Our done-for-you AI Influencer Portfolio is a fully built online
+Our done-for-you AI Influencer Publishing system is a fully built online
 business delivered in 24 hours. We hand the customer a custom faceless AI
 influencer in a niche with proven demand, a digital product ready to sell, a
 high-converting sales page, full email automations, a content system, and the
@@ -85,7 +85,7 @@ problem, then the solution, then the simple next action.`;
 
 export const AI_INFLUENCER_PORTFOLIO_SEED: PrebuiltBrainSeed = {
   id: "ai-influencer-portfolio",
-  name: "AI Influencer Portfolio",
+  name: "AI Influencer Publishing",
   tagline: "Done-for-you faceless AI income system",
   shortDescription:
     "Promote our flagship done-for-you offer. We build the AI influencer, the digital product, the sales page, the email automations and the backend. Your job is to plug into a system that's already producing $57K+ days.",
@@ -101,12 +101,12 @@ export const AI_INFLUENCER_PORTFOLIO_SEED: PrebuiltBrainSeed = {
   badge: null,
   comingSoon: false,
   brainData: {
-    name: "AI Influencer Portfolio",
-    companyName: "AI Influencer Portfolio",
+    name: "AI Influencer Publishing",
+    companyName: "AI Influencer Publishing",
     whoDoYouHelp:
       "Everyday people who want to build real online income without learning tech, building products, creating funnels, doing customer service, or putting their face on camera. Specifically: burnt-out employees who feel meant for more, side-hustle consumers stuck in research mode, financially pressured parents who need breathing room, sceptical buyers who have been burned before, and quietly ambitious professionals who feel under-expressed at work.",
     howDoYouHelpThem:
-      "We build a complete done-for-you AI Influencer Portfolio inside 24 hours. That includes a custom faceless AI influencer, a fully built digital product, a high-converting sales page, email automations, the content system, and the full backend. The customer just promotes faceless AI-generated content (around 15 minutes a day). When sales come in they earn $100+ per front-end sale and $1,000-$10,000 per backend sale that we close for them. They keep 100% of profits while we handle delivery, customer service and high-ticket sales.",
+      "We build a complete done-for-you AI Influencer Publishing business inside 24 hours. That includes a custom faceless AI influencer, a fully built digital product, a high-converting sales page, email automations, the content system, and the full backend. The customer just promotes faceless AI-generated content (around 15 minutes a day). When sales come in they earn $100+ per front-end sale and $1,000-$10,000 per backend sale that we close for them. They keep 100% of profits while we handle delivery, customer service and high-ticket sales.",
     keyAchievements:
       "Currently generating $57,000+ per day with this exact model. Over $700,000 per month. Helped 32,000+ people get started. Featured in Forbes, Entrepreneur, The Independent and the Daily Express. Spoken on stages globally. Our founder's prior track record: built a 6-figure eCommerce brand from £80, scaled a Shopify agency to 3,000+ clients and 42 staff before exiting in 2021, served as CMO across 8- and 9-figure companies, then scaled a one-person digital product business to $724K/month in under 188 days.",
   },

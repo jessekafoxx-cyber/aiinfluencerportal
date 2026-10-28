@@ -1,4 +1,4 @@
-// AI Influencer Portfolio Support Bot knowledge base. Transcribed verbatim from the
+// AI Influencer Publishing Support Bot knowledge base. Transcribed verbatim from the
 // product spec (attached_assets/room30_support_bot_full_prompt_*.md).
 // Bundled as TS modules so both dev and prod run entirely from the
 // esbuild bundle with no filesystem reads.
@@ -8,7 +8,7 @@ import { getBrandBaseUrl } from "../lib/brand-url";
 export type KnowledgeSection = { name: string; content: string };
 
 const PORTAL_URL = `${getBrandBaseUrl()}/members`;
-const PRODUCTS = `# AI Influencer Portfolio Products and Pricing
+const PRODUCTS = `# AI Influencer Publishing Products and Pricing
 
 ## $27 AI Influencer Masterclass (Main Offer)
 One-time payment. Lifetime access. 180-day money-back guarantee.
@@ -143,7 +143,7 @@ const MASTERCLASS = `# AI Influencer Masterclass Structure
 Portal: ${PORTAL_URL}
 
 ## Phase 1: Intro and Strategy (5 lessons)
-Introduction to the AI influencer business model and the AI Influencer Portfolio system.
+Introduction to the AI influencer business model and the AI Influencer Publishing system.
 
 ## Phase 2: Select Your Offer (5 lessons)
 How to pick a product from our portfolio and set up your tracked link.
@@ -181,7 +181,7 @@ Where you generate and manage your AI influencer. You get 11 generations (1 main
 Your personal AI knowledge base inside the portal. Fill in details about your niche, offer, audience, tone. The AI tools use this info to create better content.
 
 Two options:
-- "AI Influencer Portfolio Brain" = pre-built brain for promoting our main offer. Uses our own offer details.
+- "AI Influencer Publishing Brain" = pre-built brain for promoting our main offer. Uses our own offer details.
 - "My Own Brain" = for your own niche, brand, or offer. Fill in your own details.
 
 If it shows "insufficient data": add details to About You, Your Business, and Online Presence sections (name, what you do, who you help, what you promote, content type), then regenerate.
@@ -249,8 +249,8 @@ A: GHL is recommended if you want to use the funnel/template side. Some DFY temp
 Q: What is Your Brain in the portal?
 A: Your personal AI knowledge base. Fill in details about your niche, offer, audience, tone, and what you want the AI to create. The tools use that info for better content.
 
-Q: What's the difference between My Own Brain and AI Influencer Portfolio Brain?
-A: Portfolio Brain is pre-built for promoting our main offer using our own details. My Own Brain is for your own niche/brand/offer. Use Portfolio Brain to promote our offers, My Own Brain for your own stuff.
+Q: What's the difference between My Own Brain and AI Influencer Publishing Brain?
+A: AI Influencer Publishing Brain is pre-built for promoting our main offer using our offer details. My Own Brain is for your own niche/brand/offer. Use the pre-built brain to promote our offer, and My Own Brain for your own stuff.
 
 Q: The Brain shows insufficient data.
 A: Add details to About You, Your Business, and Online Presence sections. Include your name, what you do, who you help, what you promote, and content type. Then regenerate.
@@ -289,7 +289,7 @@ Q: The Masterclass video shows Your Portfolio but I don't see that.
 A: Our Portfolio is a separate paid upgrade ($297). We'll look at the training to make this clearer.
 
 Q: Why is the IG Follower Hijack video showing a different portal?
-A: That's a demo example in the training, showing how a portal can be built. Your actual dashboard is the AI Influencer Portfolio portal and will look different. The video teaches the process, not showing your current portal.
+A: That's a demo example in the training, showing how a portal can be built. Your actual dashboard is the AI Influencer Publishing portal and will look different. The video teaches the process, not showing your current portal.
 
 Q: The A-List section is missing.
 A: That's from a different portal shown as a demo in the training. The A-List section is not part of the live members portal.

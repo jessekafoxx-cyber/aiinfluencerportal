@@ -38,12 +38,12 @@ const CHAT_LINE =
 export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
   {
     slug: "welcome-to-ai-influencer-portfolio",
-    title: "Welcome to AI Influencer Portfolio",
+    title: "Welcome to AI Influencer Publishing",
     category: "getting-started",
-    summary: "What AI Influencer Portfolio is and how the portal is laid out.",
+    summary: "What AI Influencer Publishing is and how the portal is laid out.",
     sortOrder: 1,
-    content: `<h2>Welcome to AI Influencer Portfolio</h2>
-<p>AI Influencer Portfolio is the operating system for running an AI-powered influencer business. It pairs a full masterclass with the AI tools, templates and Done For You assets you need to ship offers, run ads and grow a portfolio of digital products.</p>
+    content: `<h2>Welcome to AI Influencer Publishing</h2>
+<p>AI Influencer Publishing is the operating system for running an AI-powered influencer business. It pairs a full masterclass with the AI tools, templates and Done For You assets you need to ship offers, run ads and grow a portfolio of digital products.</p>
 <h3>Where to start</h3>
 <ol>
 <li><strong>Dashboard</strong> - your home base. Shows progress, latest drops and quick links to every section.</li>
@@ -58,11 +58,11 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
   },
   {
     slug: "how-ai-influencer-portfolio-works",
-    title: "How the AI Influencer Portfolio System Works",
+    title: "How the AI Influencer Publishing System Works",
     category: "getting-started",
     summary: "The 4 layers of the system - Brain, Build, Influencer, Distribution.",
     sortOrder: 2,
-    content: `<h2>The AI Influencer Portfolio System</h2>
+    content: `<h2>The AI Influencer Publishing System</h2>
 <p>The system has four layers. Get them in this order and everything downstream gets faster:</p>
 <h3>1. Your Brain</h3>
 <p>One AI knowledge base for your niche, voice, offers and audience. Every AI tool in the portal pulls from it so you stop re-typing context.</p>
@@ -103,7 +103,7 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
     category: "course-help",
     summary: "Every lesson tab explained and the order to follow.",
     sortOrder: 11,
-    content: `<h2>The AI Influencer Portfolio Masterclass</h2>
+    content: `<h2>The AI Influencer Publishing Masterclass</h2>
 <p>The masterclass is the spine of the portal. Work through it in order - every phase builds on the last.</p>
 <h3>Lesson tabs</h3>
 <ul>
@@ -246,7 +246,7 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
 <li>A members-only custom funnel for one of our portfolio products you can promote</li>
 </ul>
 <h3>Bonuses</h3>
-<p>Our top 20 performing ads from our own ad account every month, with the full scripts and assets, plus a one-time Platinum Founder Code that unlocks free access to every future AI Influencer Portfolio main product.</p>
+<p>Our top 20 performing ads from our own ad account every month, with the full scripts and assets, plus a one-time Platinum Founder Code that unlocks free access to every future AI Influencer Publishing main product.</p>
 <h3>Countdown</h3>
 <p>Open Platinum Club in the sidebar to see the live countdown to the next drop and the full deliverables list.</p>
 <p>${CHAT_LINE}</p>`,
@@ -255,10 +255,10 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
     slug: "your-portfolio-affiliate",
     title: "Your Portfolio and Affiliate Promotion",
     category: "course-help",
-    summary: "Promoting AI Influencer Portfolio products and where your affiliate links live.",
+    summary: "Promoting AI Influencer Publishing products and where your affiliate links live.",
     sortOrder: 20,
     content: `<h2>Your Portfolio</h2>
-<p>Your Portfolio appears in the sidebar once your first paid order lands. It is your affiliate hub for every AI Influencer Portfolio product you can promote.</p>
+<p>Your Portfolio appears in the sidebar once your first paid order lands. It is your affiliate hub for every AI Influencer Publishing product you can promote.</p>
 <h3>What you get</h3>
 <ul>
 <li>A unique affiliate link for each product</li>
@@ -294,7 +294,7 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
     summary: "What Plugs is and how to use the recommended stack.",
     sortOrder: 22,
     content: `<h2>Plugs</h2>
-<p>Plugs is the curated stack of third-party tools the AI Influencer Portfolio team actually uses. Each entry has a short reason it is on the list and a direct link.</p>
+<p>Plugs is the curated stack of third-party tools the AI Influencer Publishing team actually uses. Each entry has a short reason it is on the list and a direct link.</p>
 <h3>Categories</h3>
 <ul>
 <li>AI - language models, voice, image and video tools</li>
@@ -393,11 +393,11 @@ export const ROOM30_SUPPORT_ARTICLES: SeedArticle[] = [
     slug: "billing-charges",
     title: "Understanding Your Charges",
     category: "billing",
-    summary: "How charges from AI Influencer Portfolio appear and what each one is for.",
+    summary: "How AI Influencer Publishing charges appear and what each one is for.",
     sortOrder: 70,
     content: `<h2>Understanding Your Charges</h2>
 <h3>How charges show up</h3>
-<p>Charges appear on your statement from <strong>AI Influencer Portfolio</strong> or <strong>Whop</strong>. Multiple items in one purchase usually appear as separate line items.</p>
+<p>Charges appear under the merchant name shown at checkout or on your Whop receipt. Multiple items in one purchase usually appear as separate line items.</p>
 <h3>One-time vs recurring</h3>
 <p>The masterclass and the Done For You Pack are one-time payments. The only recurring charge in the system is <strong>Platinum Club</strong> at its monthly price - and only if you opted in.</p>
 <h3>Common one-time items</h3>
